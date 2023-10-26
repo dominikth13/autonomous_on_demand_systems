@@ -1,4 +1,7 @@
-from bipartite_graph import BipartiteGraph
+import copy
+import random
+from model_builder import solve_as_bipartite_matching_problem
+from action import Action, DriverActionPair
 from driver import Driver
 from route import *
 from order import Order
@@ -9,13 +12,11 @@ from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 
 
 # The so called 'Algorithm 1'
-def generate_routes(
-    orders: list[Order], station_network: FastestStationConnectionNetwork
-) -> dict[Order, list[Route]]:
+def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
     routes_per_order = {order: [] for order in orders}
     for order in orders:
-        default_route = regular_route(order.start, order.end)
-        routes_per_order[order].append(regular_route)
+        default_route = regular_route(order)
+        routes_per_order[order].append(default_route)
         start = order.start
         end = order.end
 
@@ -42,6 +43,7 @@ def generate_routes(
                         if price < default_route.price:
                             routes_per_order[order].append(
                                 Route(
+                                    order,
                                     start,
                                     end,
                                     stations,
@@ -55,14 +57,66 @@ def generate_routes(
                             )
     return routes_per_order
 
-# TODO build class for return value
-def generate_route_driver_pairs(routes: dict[Order, list[Route]], drivers: list[Driver]) -> tuple:
-    pass
 
-def solve_bipartite_matching_problem(graph: BipartiteGraph):
-    # Create the model
-    model = LpProblem(name="bipartite-matching-problem", sense=LpMaximize)
-    # Define the decision variables
-    # TODO add names
-    x = {driver: {route: LpVariable(name=f"x[{driver},{route}]", lowBound=0) for route in graph.adjacency_matrix[driver]} for driver in graph.adjacency_matrix.keys}
-    # TODO see https://realpython.com/linear-programming-python/
+# TODO build class for return value
+def generate_driver_action_pairs(
+    order_routes_dict: dict[Order, list[Route]], drivers: list[Driver]
+) -> list[DriverActionPair]:
+    driver_to_orders_to_routes_dict = {driver: {} for driver in drivers}
+    driver_to_idling_dict = {driver: None for driver in drivers}
+    # 1. Generate DriverActionPair for each pair that is valid (distance), add DriverIdlingPair for each driver
+    for driver in drivers:
+        driver_to_idling_dict[driver] = DriverActionPair(driver, Action(None), 0)
+        if driver.is_occupied():
+            # If driver is occupied he cannot take any new order
+            continue
+
+        for order in order_routes_dict:
+            if (
+                order.start.distance_to(driver.current_position)
+                > PICK_UP_DISTANCE_THRESHOLD
+            ):
+                # If driver is currently to far away for this order he ignores it
+                continue
+            driver_to_orders_to_routes_dict[driver][order] = []
+            for route in order_routes_dict[order]:
+                driver_to_orders_to_routes_dict[driver][order].append(
+                    DriverActionPair(driver, Action(route), 0)
+                )
+
+    # 2. For each DriverActionPair: calculate edge weight based on value state function
+    # TODO implement real value computation, for now consistent shuffle
+    shuffled_dict = {
+        driver: {
+            order: random.Random(driver.id).sample(
+                order_routes_dict[order], len(order_routes_dict[order])
+            )
+            for order in driver_to_orders_to_routes_dict[driver]
+        }
+        for driver in drivers
+    }
+    for driver in driver_to_orders_to_routes_dict:
+        driver_to_idling_dict[driver].weight = random.Random(driver.id).random() * 10
+
+        for order in driver_to_orders_to_routes_dict[driver]:
+            routes = shuffled_dict[driver][order]
+            for pair in driver_to_orders_to_routes_dict[driver][order]:
+                pair.weight = routes.index(pair.action.route)
+
+    # 3. Filter out all DriverRoutePairs which are not the one with highest edge value for each order and each driver
+    driver_action_pairs = []
+    for driver in driver_to_orders_to_routes_dict:
+        driver_action_pairs.append(driver_to_idling_dict[driver])
+        for order in driver_to_orders_to_routes_dict[driver]:
+            best_action_route = sorted(
+                driver_to_orders_to_routes_dict[driver][order],
+                key=lambda x: x.weight,
+                reverse=True,
+            )[0]
+            driver_action_pairs.append(best_action_route)
+
+    return driver_action_pairs
+
+
+def solve_optimization_problem(driver_action_pairs: list[DriverActionPair]):
+    return solve_as_bipartite_matching_problem(driver_action_pairs)

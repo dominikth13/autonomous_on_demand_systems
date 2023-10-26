@@ -10,4 +10,4 @@ class Location:
         self.lon = lon
     
     def distance_to(self, other: Location) -> float:
-        return sum(abs(self.lat - other.lat), abs(self.lon - other.lon))
+        return abs(self.lat - other.lat) + abs(self.lon - other.lon)

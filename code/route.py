@@ -5,10 +5,10 @@ from program_params import *
 
 FASTEST_STATION_NETWORK = FastestStationConnectionNetwork(STATIONS)
 
-
 class Route:
     def __init__(
         self,
+        order: Order,
         origin: Location,
         destination: Location,
         stations: list[Station],
@@ -19,6 +19,7 @@ class Route:
         total_time: float,
         price: float,
     ) -> None:
+        self.order = order
         self.origin = origin
         self.destination = destination
         self.stations = stations
@@ -30,7 +31,7 @@ class Route:
         self.price = price
 
 
-def regular_route(origin: Location, destination: Location) -> Route:
-    vehicle_time = origin.distance_to(destination) * VEHICLE_SPEED
+def regular_route(order: Order) -> Route:
+    vehicle_time = order.start.distance_to(order.end) * VEHICLE_SPEED
     # TODO calculate time and price for regular routes
-    return Route(origin, destination, [], vehicle_time, 0, 0, 0, vehicle_time, 5)
+    return Route(order, order.start, order.end, [], vehicle_time, 0, 0, 0, vehicle_time, 5)
