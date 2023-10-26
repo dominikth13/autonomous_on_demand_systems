@@ -38,6 +38,18 @@ def test():
     order_routes_dict = generate_routes(orders)
     driver_action_pairs = generate_driver_action_pairs(order_routes_dict, drivers)
     result_pairs = solve_optimization_problem(driver_action_pairs)
-    print(result_pairs)
+    driver_r = list(map(lambda x: x[0], result_pairs))
+    if len(driver_r) != len(set(driver_r)):
+        print("Double drivers")
+        exit(1)
+    action_r = list(map(lambda x: x[1], result_pairs))
+    order_r = list(map(lambda x: x.route.order, list(filter(lambda x: x.is_route(), action_r))))
+    if len(order_r) != len(set(order_r)):
+        print("Double orders")
+        exit(1)
+    print("Optimization result optimal and valid for original problem")
+    
+
+    #print(list(map(lambda x: str(x), result_pairs)))
 
 test()

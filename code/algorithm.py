@@ -1,6 +1,6 @@
 import copy
 import random
-from model_builder import solve_as_bipartite_matching_problem
+from model_builder import or_tools_min_cost_flow, solve_as_bipartite_matching_problem, solve_as_min_cost_flow_problem
 from action import Action, DriverActionPair
 from driver import Driver
 from route import *
@@ -64,9 +64,13 @@ def generate_driver_action_pairs(
 ) -> list[DriverActionPair]:
     driver_to_orders_to_routes_dict = {driver: {} for driver in drivers}
     driver_to_idling_dict = {driver: None for driver in drivers}
+
+    # Central idling action
+    idling = Action(None)
+
     # 1. Generate DriverActionPair for each pair that is valid (distance), add DriverIdlingPair for each driver
     for driver in drivers:
-        driver_to_idling_dict[driver] = DriverActionPair(driver, Action(None), 0)
+        driver_to_idling_dict[driver] = DriverActionPair(driver, idling, 0)
         if driver.is_occupied():
             # If driver is occupied he cannot take any new order
             continue
@@ -119,4 +123,6 @@ def generate_driver_action_pairs(
 
 
 def solve_optimization_problem(driver_action_pairs: list[DriverActionPair]):
-    return solve_as_bipartite_matching_problem(driver_action_pairs)
+    #return solve_as_bipartite_matching_problem(driver_action_pairs)
+    #solve_as_min_cost_flow_problem(driver_action_pairs)
+    return or_tools_min_cost_flow(driver_action_pairs)

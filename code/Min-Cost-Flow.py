@@ -22,7 +22,7 @@ G.add_nodes_from(nodes)
 
 # 100 zufällige Kanten zu G hinzufügen
 edges_added = set()  # Zum Nachverfolgen der bereits hinzugefügten Kanten
-while len(edges_added) < 10000:
+while len(edges_added) < 4000:
     start = random.choice(nodes)
     end = random.choice(nodes)
     while start == end or (start, end) in edges_added:
@@ -39,6 +39,7 @@ print(path)
 # Ermitteln des Min-Cost-Flow
 flow = nx.min_cost_flow(G)
 
+G.get_edge_data()
 #time!
 end_time = time.time()
 elapsed_time = end_time - start_time

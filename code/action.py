@@ -16,9 +16,15 @@ class Action:
     
     def is_route(self) -> bool:
         return not self.idling
+    
+    def __str__(self):
+        return f"{f'Route {self.route.id}' if self.is_route() else 'Idling'}"
 
 class DriverActionPair:
     def __init__(self, driver: Driver, action: Action, weight: float) -> None:
         self.driver = driver
         self.action = action
         self.weight = weight
+
+    def __str__(self):
+        return f"[Driver {self.driver.id} - Action: {self.action} - State-Action-Value {self.weight}]"

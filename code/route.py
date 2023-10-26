@@ -4,6 +4,7 @@ from station import *
 from program_params import *
 
 FASTEST_STATION_NETWORK = FastestStationConnectionNetwork(STATIONS)
+ID_PROVIDER = IdProvider()
 
 class Route:
     def __init__(
@@ -19,6 +20,7 @@ class Route:
         total_time: float,
         price: float,
     ) -> None:
+        self.id = ID_PROVIDER.get_id()
         self.order = order
         self.origin = origin
         self.destination = destination
