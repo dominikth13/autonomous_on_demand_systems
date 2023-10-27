@@ -19,3 +19,7 @@ WALKING_SPEED = 1
 
 # Pick-up distance threshold (how far away driver consider new orders)
 PICK_UP_DISTANCE_THRESHOLD = 10000
+
+LEARNING_RATE = 0.00001
+
+DISCOUNT_RATE = 0.98

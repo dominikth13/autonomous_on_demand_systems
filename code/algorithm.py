@@ -90,22 +90,25 @@ def generate_driver_action_pairs(
 
     # 2. For each DriverActionPair: calculate edge weight based on value state function
     # TODO implement real value computation, for now consistent shuffle
-    shuffled_dict = {
-        driver: {
-            order: random.Random(driver.id).sample(
-                order_routes_dict[order], len(order_routes_dict[order])
-            )
-            for order in driver_to_orders_to_routes_dict[driver]
-        }
-        for driver in drivers
-    }
-    for driver in driver_to_orders_to_routes_dict:
-        driver_to_idling_dict[driver].weight = random.Random(driver.id).random() * 10
+    # shuffled_dict = {
+    #     driver: {
+    #         order: random.Random(driver.id).sample(
+    #             order_routes_dict[order], len(order_routes_dict[order])
+    #         )
+    #         for order in driver_to_orders_to_routes_dict[driver]
+    #     }
+    #     for driver in drivers
+    # }
+    # for driver in driver_to_orders_to_routes_dict:
+    #     driver_to_idling_dict[driver].weight = random.Random(driver.id).random() * 10
 
-        for order in driver_to_orders_to_routes_dict[driver]:
-            routes = shuffled_dict[driver][order]
-            for pair in driver_to_orders_to_routes_dict[driver][order]:
-                pair.weight = routes.index(pair.action.route)
+    #     for order in driver_to_orders_to_routes_dict[driver]:
+    #         routes = shuffled_dict[driver][order]
+    #         for pair in driver_to_orders_to_routes_dict[driver][order]:
+    #             pair.weight = routes.index(pair.action.route)
+    for driver in driver_to_orders_to_routes_dict:
+        # Implement calculation of weights  (price + value state after this option)
+        pass
 
     # 3. Filter out all DriverRoutePairs which are not the one with highest edge value for each order and each driver
     driver_action_pairs = []
