@@ -150,7 +150,7 @@ import numpy as np
 from ortools.graph.python import min_cost_flow
 
 
-def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]):
+def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[tuple[Driver, Action]]:
     start_time = time.time()
     smcf = min_cost_flow.SimpleMinCostFlow()
     edge_sum = 0
@@ -278,12 +278,6 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]):
     print(
         f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds"
     )
-
-    # [(Driver, Action)
-    result_pairs = []
     solution_flows = smcf.flows(all_arcs)
-    for pair in driver_action_pairs:
-        if solution_flows[pair_to_index[pair]] == 1:
-            result_pairs.append((pair.driver, pair.action))
     
-    return result_pairs
+    return list(filter(lambda pair: solution_flows[pair_to_index[pair]] == 1, driver_action_pairs))

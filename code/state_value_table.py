@@ -1,5 +1,5 @@
 from __future__ import annotations
-from program_params import DISCOUNT_RATE, LEARNING_RATE
+from program_params import *
 from location import Location
 
 
@@ -8,8 +8,28 @@ class Time:
         self.hour = hour
         self.minute = minute
 
+    def of_total_minutes(minutes: int) -> Time:
+        return Time(minutes // 60, minutes % 60)
+
     def distance_to(self, other: Time) -> int:
         return abs(60 * (self.hour - other.hour)) + abs(self.minute - other.minute)
+
+    def distance_to_in_seconds(self, other: Time) -> int:
+        return self.distance_to(other) * 60
+
+    def add_minutes(self, minutes: int) -> None:
+        if self.minute + minutes > 59:
+            minutes_to_next_hour = 60 - self.minute
+            self.minute = 0
+            minutes -= minutes_to_next_hour
+
+            while minutes > 59:
+                self.hour += 1
+                if self.hour == 24:
+                    self.hour = 0
+                minutes -= 60
+
+        self.minute += minutes
 
     def is_before(self, other: Time) -> bool:
         return self.hour <= other.hour or (
@@ -21,19 +41,39 @@ class Time:
             self.hour == other.hour and self.minute >= other.minute
         )
 
+    def to_total_minutes(self):
+        return self.hour * 60 + self.minute
 
+
+# Intervals work inclusive -> 12:33:22 part of 12:33
 class GridInterval:
     def __init__(self, start: Time, end: Time) -> None:
         self.start = start
         self.end = end
+        self.next_interval = None
+
+    def set_next_interval(self, next_interval: GridInterval) -> None:
+        self.next_interval = next_interval
 
 
 class TimeSeries:
     def __init__(self, start: Time, end: Time, intervalLength: int) -> None:
-        self.intervals = [
-            GridInterval(start, start + intervalLength - 1)
-            for start in range(start, end, intervalLength)
-        ]
+        self.intervals: list[GridInterval] = []
+        last_interval = None
+
+        # Build an single linked array list
+        for start in range(
+            start.to_total_minutes(), end.to_total_minutes(), intervalLength
+        ):
+            interval = GridInterval(
+                Time.of_total_minutes(start),
+                Time.of_total_minutes(start + intervalLength - 1),
+            )
+            self.intervals.append(interval)
+
+            if last_interval != None:
+                last_interval.set_next_interval(interval)
+            last_interval = interval
 
     def find_interval(self, time: Time) -> GridInterval:
         low = 0
@@ -184,26 +224,55 @@ class StateValueTable:
         self.grid = grid
         self.time_series = time_series
 
-    def adjst_state_value(
+    def adjust_state_value(
         self,
-        time: Time,
-        location: Location,
-        n_time: Time,
-        n_location: Location,
+        current_time: Time,
+        current_interval: GridInterval,
+        current_location: Location,
+        current_zone: Zone,
+        next_time: Time,
+        next_interval: GridInterval,
+        next_location: Location,
+        next_zone: Zone,
         reward: float,
     ) -> None:
-        # 1. find current state
-        c_zone = self.grid.find_zone(location)
-        c_interval = self.time_series.find_interval(time)
+        if current_zone and current_location:
+            raise Exception("Only current zone or location is allowed")
+        if not current_zone and not current_location:
+            raise Exception("No current zone or location was specified")
 
-        # 2. find next state
-        n_zone = self.grid.find_zone(n_location)
-        n_interval = self.time_series.find_interval(n_time)
+        if current_time and current_interval:
+            raise Exception("Only current time or interval is allowed")
+        if not current_time and not current_interval:
+            raise Exception("No current time or interval was specified")
 
-        self.value_grid[c_interval][c_zone] = self.value_grid[c_interval][
-            c_zone
+        if next_location and next_zone:
+            raise Exception("Only next zone or location is allowed")
+        if not next_location and not next_zone:
+            raise Exception("No next zone or location was specified")
+
+        if next_interval and next_time:
+            raise Exception("Only next time or interval is allowed")
+        if not next_interval and not next_time:
+            raise Exception("No next time or interval was specified")
+
+        if current_zone == None:
+            current_zone = self.grid.find_zone(current_location)
+        if current_interval == None:
+            current_interval = self.time_series.find_interval(current_time)
+        if next_zone == None:
+            next_zone = self.grid.find_zone(next_location)
+        if next_interval == None:
+            next_interval = self.time_series.find_interval(next_time)
+
+        self.value_grid[current_interval][current_zone] = self.value_grid[current_interval][
+            current_interval
         ] + LEARNING_RATE * (
             reward
-            + DISCOUNT_RATE * self.value_grid[n_interval][n_zone]
-            - self.value_grid[c_interval][c_zone]
+            + DISCOUNT_FACTOR(current_interval.start, next_interval.start)
+            * self.value_grid[next_interval][next_zone]
+            - self.value_grid[next_interval][next_zone]
         )
+
+    def get_state_value(self, zone: Zone, interval: GridInterval) -> float:
+        return self.value_grid[interval][zone]

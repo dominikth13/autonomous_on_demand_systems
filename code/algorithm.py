@@ -1,6 +1,9 @@
-import copy
-import random
-from model_builder import or_tools_min_cost_flow, solve_as_bipartite_matching_problem, solve_as_min_cost_flow_problem
+from program_fixtures import *
+from model_builder import (
+    or_tools_min_cost_flow,
+    solve_as_bipartite_matching_problem,
+    solve_as_min_cost_flow_problem,
+)
 from action import Action, DriverActionPair
 from driver import Driver
 from route import *
@@ -40,6 +43,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                     if total_time < default_route.total_time + L2:
                         # TODO include price calculation
                         price = 4
+                        vehicle_price = 2
                         if price < default_route.price:
                             routes_per_order[order].append(
                                 Route(
@@ -52,6 +56,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                                     walking_time,
                                     other_time,
                                     total_time,
+                                    vehicle_price,
                                     price,
                                 )
                             )
@@ -60,16 +65,18 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
 
 # TODO build class for return value
 def generate_driver_action_pairs(
-    order_routes_dict: dict[Order, list[Route]], drivers: list[Driver]
+    order_routes_dict: dict[Order, list[Route]]
 ) -> list[DriverActionPair]:
-    driver_to_orders_to_routes_dict = {driver: {} for driver in drivers}
-    driver_to_idling_dict = {driver: None for driver in drivers}
+    driver_to_orders_to_routes_dict: dict[
+        Driver, dict[Order, list[DriverActionPair]]
+    ] = {driver: {} for driver in DRIVERS}
+    driver_to_idling_dict = {driver: None for driver in DRIVERS}
 
     # Central idling action
     idling = Action(None)
 
     # 1. Generate DriverActionPair for each pair that is valid (distance), add DriverIdlingPair for each driver
-    for driver in drivers:
+    for driver in DRIVERS:
         driver_to_idling_dict[driver] = DriverActionPair(driver, idling, 0)
         if driver.is_occupied():
             # If driver is occupied he cannot take any new order
@@ -88,44 +95,42 @@ def generate_driver_action_pairs(
                     DriverActionPair(driver, Action(route), 0)
                 )
 
-    # 2. For each DriverActionPair: calculate edge weight based on value state function
-    # TODO implement real value computation, for now consistent shuffle
-    # shuffled_dict = {
-    #     driver: {
-    #         order: random.Random(driver.id).sample(
-    #             order_routes_dict[order], len(order_routes_dict[order])
-    #         )
-    #         for order in driver_to_orders_to_routes_dict[driver]
-    #     }
-    #     for driver in drivers
-    # }
-    # for driver in driver_to_orders_to_routes_dict:
-    #     driver_to_idling_dict[driver].weight = random.Random(driver.id).random() * 10
-
-    #     for order in driver_to_orders_to_routes_dict[driver]:
-    #         routes = shuffled_dict[driver][order]
-    #         for pair in driver_to_orders_to_routes_dict[driver][order]:
-    #             pair.weight = routes.index(pair.action.route)
+    # 2. For each DriverActionPair: calculate edge weight based on reward and state value function
     for driver in driver_to_orders_to_routes_dict:
-        # Implement calculation of weights  (price + value state after this option)
-        pass
+        for order in driver_to_orders_to_routes_dict[driver]:
+            for pair in driver_to_orders_to_routes_dict[driver][order]:
+                arrival_interval = STATE_VALUE_TABLE.time_series.find_interval(
+                    STATE.current_interval.start.add_minutes(
+                        pair.get_total_vehicle_travel_time_in_seconds() // 60
+                    )
+                )
+                # weight = revenue for driver + state value after this option
+                weight = (
+                    pair.action.route.vehicle_price
+                    + DISCOUNT_FACTOR(
+                        STATE.current_interval.start, arrival_interval.start
+                    )
+                    * STATE_VALUE_TABLE.get_state_value(pair.action.route.vehicle_destination_zone, arrival_interval)
+                )
+                pair.weight = weight
 
     # 3. Filter out all DriverRoutePairs which are not the one with highest edge value for each order and each driver
     driver_action_pairs = []
     for driver in driver_to_orders_to_routes_dict:
         driver_action_pairs.append(driver_to_idling_dict[driver])
         for order in driver_to_orders_to_routes_dict[driver]:
-            best_action_route = sorted(
-                driver_to_orders_to_routes_dict[driver][order],
-                key=lambda x: x.weight,
-                reverse=True,
-            )[0]
+            best_action_route = driver_to_orders_to_routes_dict[driver][order][0]
+            for pair in driver_to_orders_to_routes_dict[driver][order]:
+                if pair.weight > best_action_route.weight:
+                    best_action_route = pair
             driver_action_pairs.append(best_action_route)
 
     return driver_action_pairs
 
 
-def solve_optimization_problem(driver_action_pairs: list[DriverActionPair]):
-    #return solve_as_bipartite_matching_problem(driver_action_pairs)
-    #solve_as_min_cost_flow_problem(driver_action_pairs)
+def solve_optimization_problem(
+    driver_action_pairs: list[DriverActionPair],
+) -> list[DriverActionPair]:
+    # return solve_as_bipartite_matching_problem(driver_action_pairs)
+    # solve_as_min_cost_flow_problem(driver_action_pairs)
     return or_tools_min_cost_flow(driver_action_pairs)
