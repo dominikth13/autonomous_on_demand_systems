@@ -1,11 +1,12 @@
 import time
 from action import Action, DriverActionPair
+from station import Station
 from driver import Driver
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 
 import networkx as nx
 
-
+# Not used because of computation complexity
 def build_bipartite_matching_problem(
     driver_action_pairs: list[DriverActionPair],
 ) -> tuple[LpProblem, dict[LpVariable, tuple[Driver, Action]]]:
@@ -58,7 +59,7 @@ def build_bipartite_matching_problem(
 
     return (model, var_pair_dict)
 
-
+# Not used because of computation complexity
 # This method solves the optimization problem of DriverActionPairs as a bipartite matching problem
 # This counts as a combinatorial problem which is NP hard
 def solve_as_bipartite_matching_problem(
@@ -84,7 +85,7 @@ def solve_as_bipartite_matching_problem(
 
     return result_pairs
 
-
+# Not used anymore because of runtime inefficiencies
 def solve_as_min_cost_flow_problem(
     driver_action_pairs: list[DriverActionPair],
 ) -> list[DriverActionPair]:
@@ -149,7 +150,7 @@ def solve_as_min_cost_flow_problem(
 import numpy as np
 from ortools.graph.python import min_cost_flow
 
-
+# Solve the bipartite matching problem as a min-cost-flow problem to use the efficient C++ solver
 def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[tuple[Driver, Action]]:
     start_time = time.time()
     smcf = min_cost_flow.SimpleMinCostFlow()
@@ -281,3 +282,60 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
     solution_flows = smcf.flows(all_arcs)
     
     return list(filter(lambda pair: solution_flows[pair_to_index[pair]] == 1, driver_action_pairs))
+
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import floyd_warshall
+
+# Use the Floyd-Warshall algorithm to solve the all-pair shortest path problem
+# Input undirected edges as tuples [station1, weight, station2]
+def solve_all_pair_shortest_path_problem(connections: list[tuple[Station, float, Station]]) -> dict[int, dict[int, tuple[list[Station], float]]]:
+    # Build a dict containing all stations mapped by their id
+    station_id_dict = {}
+    for connection in connections:
+        station1 = connection[0]
+        station2 = connection[2]
+
+        if station1.id not in station_id_dict:
+            station_id_dict[station1.id] = station1
+        if station2.id not in station_id_dict:
+            station_id_dict[station2.id] = station2
+    
+    # Create Mapper from station id -> index and other direction in graph matrix 
+    sorted_station_ids = sorted(station_id_dict.keys())
+    index_to_id_dict = {i: sorted_station_ids[i] for i in range(len(sorted_station_ids))}
+    id_to_index_dict = {sorted_station_ids[i]: i for i in range(len(sorted_station_ids))}
+
+    graph = [[0 for i in range(len(sorted_station_ids))] for j in range(len(sorted_station_ids))]
+
+    # Fill connections in graph
+    for connection in connections:
+        graph[id_to_index_dict[connection[0].id]][id_to_index_dict[connection[2].id]] = connection[1]
+    
+    # Convert graph to network
+    graph = csr_matrix(graph)
+
+    # Solve the problem
+    dist_matrix, predecessors = floyd_warshall(csgraph=graph, directed=False, return_predecessors=True)
+
+    result_dict = {id: {id2: None for id2 in sorted_station_ids} for id in sorted_station_ids}
+    print(type(dist_matrix))
+    for idx1 in range(len(dist_matrix)):
+        for idx2 in range(len(dist_matrix)):
+            idx = predecessors[idx1][idx2]
+            station1 = station_id_dict[index_to_id_dict[idx1]]
+            station2 = station_id_dict[index_to_id_dict[idx2]]
+
+            if idx == -9999:
+                del result_dict[station1.id][station2.id]
+                continue
+            
+            stations = [station1]
+            while idx != idx1:
+                stations.append(station_id_dict[index_to_id_dict[idx]])
+                idx = predecessors[idx1][idx]
+            stations.append(station2)
+            
+
+            result_dict[station1.id][station2.id] = (stations, dist_matrix[idx1][idx2])
+    
+    return result_dict

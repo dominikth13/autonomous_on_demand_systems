@@ -1,5 +1,5 @@
+from location import Location
 from utils import IdProvider
-from state import Location
 
 ID_PROVIDER = IdProvider()
 

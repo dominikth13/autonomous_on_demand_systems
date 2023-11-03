@@ -4,15 +4,16 @@ from algorithm import (
     generate_routes,
     solve_optimization_problem,
 )
+from location import Location
+from station import Station
 from program_fixtures import *
 from state_value_table import Grid, Time, TimeSeries
-from state import State
 from order import Order
-from location import Location
 from driver import Driver
+from model_builder import solve_all_pair_shortest_path_problem
 
 
-def test():
+def test_q_learning_step():
     drivers = [
         Driver(
             Location(
@@ -52,8 +53,21 @@ def test():
         exit(1)
     print("Optimization result optimal and valid for original problem")
 
+def test_shortest_path_solver():
+    connections = []
+    stations = [Station(Location(1,1)) for i in range(20)]
+    for station1 in stations:
+        for station2 in stations:
+            if station1 == station2:
+                continue
+            connections.append((station1, random.Random(station1.id*station2.id).randint(0, 10000), station2))
+    
+    result_dict = solve_all_pair_shortest_path_problem(connections)
+    print(result_dict)
+
 
 def q_learning():
+    initialize()
 
     while STATE.current_interval.next_interval != None:
         # Collect new orders
@@ -85,4 +99,4 @@ def q_learning():
         # Increment to next interval
         STATE.increment_time_interval()
 
-test()
+test_shortest_path_solver()
