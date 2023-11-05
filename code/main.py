@@ -4,9 +4,9 @@ from algorithm import (
     generate_routes,
     solve_optimization_problem,
 )
+from state import STATE
 from location import Location
 from station import Station
-from program_fixtures import *
 from state_value_table import Grid, Time, TimeSeries
 from order import Order
 from driver import Driver
@@ -67,8 +67,6 @@ def test_shortest_path_solver():
 
 
 def q_learning():
-    initialize()
-
     while STATE.current_interval.next_interval != None:
         # Collect new orders
         orders = [

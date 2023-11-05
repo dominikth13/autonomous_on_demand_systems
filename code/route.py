@@ -1,4 +1,4 @@
-from program_fixtures import STATE_VALUE_TABLE
+from state_value_table import STATE_VALUE_TABLE
 from location import Location
 from order import Order
 from station import *

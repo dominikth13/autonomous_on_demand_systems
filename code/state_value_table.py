@@ -1,7 +1,9 @@
 from __future__ import annotations
+from utils import IdProvider
 from program_params import *
 from location import Location
 
+ID_PROVIDER = IdProvider()
 
 class Time:
     def __init__(self, hour: int, minute: int) -> None:
@@ -107,6 +109,7 @@ class TimeSeries:
 # Initial setup with some api (google maps)
 class Zone:
     def __init__(self, name: str) -> None:
+        self.id = ID_PROVIDER.get_id()
         self.name = name
 
 
@@ -265,9 +268,9 @@ class StateValueTable:
         if next_interval == None:
             next_interval = self.time_series.find_interval(next_time)
 
-        self.value_grid[current_interval][current_zone] = self.value_grid[current_interval][
+        self.value_grid[current_interval][current_zone] = self.value_grid[
             current_interval
-        ] + LEARNING_RATE * (
+        ][current_interval] + LEARNING_RATE * (
             reward
             + DISCOUNT_FACTOR(current_interval.start, next_interval.start)
             * self.value_grid[next_interval][next_zone]
@@ -276,3 +279,8 @@ class StateValueTable:
 
     def get_state_value(self, zone: Zone, interval: GridInterval) -> float:
         return self.value_grid[interval][zone]
+
+
+STATE_VALUE_TABLE: StateValueTable = StateValueTable(
+    Grid([Zone("Zone_1"),Zone("Zone_2"),Zone("Zone_3"),Zone("Zone_4")], 0, 0, 10, 10, 1), TimeSeries(Time(3, 0), Time(12, 0), 1)
+)

@@ -1,8 +1,8 @@
 from action import Action, DriverActionPair
-from program_fixtures import *
+from state_value_table import STATE_VALUE_TABLE
 from order import Order
 from program_params import *
-from driver import Driver
+from driver import DRIVERS, Driver
 from location import *
 from time_interval import *
 
@@ -76,6 +76,8 @@ class State:
     
     def increment_time_interval(self) -> None:
         self.current_interval = self.current_interval.next_interval
+
+STATE: State = State()
         
                 
 
