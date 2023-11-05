@@ -44,4 +44,6 @@ class Route:
 def regular_route(order: Order) -> Route:
     vehicle_time = order.start.distance_to(order.end) * VEHICLE_SPEED
     # TODO calculate time and price for regular routes
+    #hier wird es ge'ndert
+    #gugug
     return Route(order, order.start, order.end, [], vehicle_time, 0, 0, 0, vehicle_time, 5, 5)
