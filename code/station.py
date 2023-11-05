@@ -1,4 +1,3 @@
-import random
 from location import Location
 from utils import IdProvider
 
@@ -11,13 +10,16 @@ class Station:
 
 # Apply shortest path algorithm to station network
 class FastestStationConnectionNetwork:
-    def __init__(self, stations: list[Station]) -> None:
-        self.stations = sorted(stations, key=lambda x: x.id)
-        self.connection_network = {stations[i]: {stations[j]: ([], random.Random(i+j).random() * 20) for j in range(i+1, len(stations))} for i in range(len(stations))}
+    def __init__(self, connections: list[tuple[Station, float, Station]]) -> None:
+        from model_builder import solve_all_pair_shortest_path_problem
+
+        self.connection_network = solve_all_pair_shortest_path_problem(connections)
 
     # Returns: tuple[List of stations, transit time]
     def get_fastest_connection(self, start: Station, end: Station) -> tuple[list[Station], float]:
-        if start.id <= end.id:
-            return self.connection_network[start][end]
-        else:
-            return self.connection_network[end][start]
+        return self.connection_network[start.id][end.id]
+
+# TODO add stations and connections
+_stations = []
+_connections = []
+FASTEST_STATION_CONNECTION_NETWORK: FastestStationConnectionNetwork = FastestStationConnectionNetwork(_connections)

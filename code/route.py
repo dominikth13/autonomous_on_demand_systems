@@ -4,7 +4,6 @@ from order import Order
 from station import *
 from program_params import *
 
-FASTEST_STATION_NETWORK = FastestStationConnectionNetwork(STATIONS)
 ID_PROVIDER = IdProvider()
 
 class Route:

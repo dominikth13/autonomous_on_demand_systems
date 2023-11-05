@@ -9,7 +9,6 @@ from action import Action, DriverActionPair
 from driver import DRIVERS, Driver
 from route import *
 from order import Order
-from station import FastestStationConnectionNetwork
 from program_params import *
 
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
@@ -29,7 +28,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                 for destination in STATIONS:
                     if origin == destination:
                         continue
-                    connection = FASTEST_STATION_NETWORK.get_fastest_connection(
+                    connection = FASTEST_STATION_CONNECTION_NETWORK.get_fastest_connection(
                         origin, destination
                     )
                     # Distance
