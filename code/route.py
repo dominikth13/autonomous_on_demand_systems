@@ -6,6 +6,7 @@ from program_params import *
 
 ID_PROVIDER = IdProvider()
 
+# Class route contains data model of route object
 class Route:
     def __init__(
         self,
