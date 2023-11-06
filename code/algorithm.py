@@ -32,8 +32,8 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                         origin, destination
                     )
                     # Distance
-                    vehicle_time = start.distance_to(origin.position) * VEHICLE_SPEED
-                    walking_time = destination.position.distance_to(end) * WALKING_SPEED
+                    vehicle_time = start.distance_to(origin.position) / VEHICLE_SPEED
+                    walking_time = destination.position.distance_to(end) / WALKING_SPEED
                     transit_time = connection[1]
                     stations = connection[0]
                     # TODO include entry, exit and waiting time
@@ -42,8 +42,14 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
 
                     if total_time < default_route.total_time + L2:
                         # TODO include price calculation
-                        price = 4
-                        vehicle_price = 2
+                        if transit_time > 0:
+                            opnv_ticket = 2
+                        else:
+                            opnv_ticket = 0
+
+                        
+                        vehicle_price = start.distance_to(origin.position)*1.5 
+                        price = vehicle_price + opnv_ticket
                         if price < default_route.price:
                             routes_per_order[order].append(
                                 Route(
