@@ -41,13 +41,13 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                     total_time = vehicle_time + walking_time + transit_time + other_time
 
                     if total_time < default_route.total_time + L2:
-                        # TODO include price calculation
+                        # if the route contains transit ticket for public transport needs to be added to overall price
                         if transit_time > 0:
                             opnv_ticket = 2
                         else:
                             opnv_ticket = 0
 
-                        
+                        #1.5 euro for each km with the vehicle 
                         vehicle_price = start.distance_to(origin.position)*1.5 
                         price = vehicle_price + opnv_ticket
                         if price < default_route.price:

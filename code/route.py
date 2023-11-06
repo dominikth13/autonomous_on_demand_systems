@@ -45,7 +45,5 @@ def regular_route(order: Order) -> Route:
     distance_in_m = order.start.distance_to(order.end) * 1000
     vehicle_time = distance_in_m/ VEHICLE_SPEED
     price = (distance_in_m/1000)*1.5
-    # TODO calculate time and price for regular routes
-    #hier wird es ge'ndert
-    #gugug
+    #1.5 euro for each km with the vehicle 
     return Route(order, order.start, order.end, [], vehicle_time, 0, 0, 0, vehicle_time, 5, price)
