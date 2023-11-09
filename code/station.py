@@ -15,6 +15,13 @@ class FastestStationConnectionNetwork:
 
         self.connection_network = solve_all_pair_shortest_path_problem(connections)
 
+        station_set = set()
+        for connection in self.connection_network:
+            station_set.add(connection[0])
+            station_set.add(connection[2])
+
+        self.stations = sorted(station_set, lambda x: x.id)
+
     # Returns: tuple[List of stations, transit time]
     def get_fastest_connection(self, start: Station, end: Station) -> tuple[list[Station], float]:
         return self.connection_network[start.id][end.id]

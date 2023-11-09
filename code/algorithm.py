@@ -24,8 +24,8 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
         end = order.end
 
         if default_route.total_time > L1:
-            for origin in STATIONS:
-                for destination in STATIONS:
+            for origin in FASTEST_STATION_CONNECTION_NETWORK.stations:
+                for destination in FASTEST_STATION_CONNECTION_NETWORK.stations:
                     if origin == destination:
                         continue
                     connection = FASTEST_STATION_CONNECTION_NETWORK.get_fastest_connection(
@@ -36,20 +36,20 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                     walking_time = destination.position.distance_to(end) / WALKING_SPEED
                     transit_time = connection[1]
                     stations = connection[0]
-                    # TODO include entry, exit and waiting time
-                    other_time = 0
+                    # include entry, exit and waiting time
+                    other_time = 2 * PUBLIC_TRANSPORT_ENTRY_EXIT_TIME + PUBLIC_TRANSPORT_WAITING_TIME(STATE.current_interval.start)
                     total_time = vehicle_time + walking_time + transit_time + other_time
 
                     if total_time < default_route.total_time + L2:
                         # if the route contains transit ticket for public transport needs to be added to overall price
                         if transit_time > 0:
-                            opnv_ticket = 2
+                            public_transport_ticket = PUBLIC_TRANSPORT_TICKET_PRICE
                         else:
-                            opnv_ticket = 0
+                            public_transport_ticket = PUBLIC_TRANSPORT_TICKET_PRICE
 
                         #1.5 euro for each km with the vehicle 
-                        vehicle_price = start.distance_to(origin.position)*1.5 
-                        price = vehicle_price + opnv_ticket
+                        vehicle_price = start.distance_to(origin.position)*TAXI_PRICE 
+                        price = vehicle_price + public_transport_ticket
                         if price < default_route.price:
                             routes_per_order[order].append(
                                 Route(
@@ -69,7 +69,6 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
     return routes_per_order
 
 
-# TODO build class for return value
 def generate_driver_action_pairs(
     order_routes_dict: dict[Order, list[Route]]
 ) -> list[DriverActionPair]:
