@@ -40,6 +40,9 @@ class Time:
 
     def to_total_minutes(self):
         return self.hour * 60 + self.minute
+    
+    def to_total_seconds(self):
+        return self.to_total_minutes() * 60
 
 
 # Intervals work inclusive -> 12:33:22 part of 12:33

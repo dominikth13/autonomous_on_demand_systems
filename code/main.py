@@ -4,9 +4,12 @@ from algorithm import (
     generate_routes,
     solve_optimization_problem,
 )
+from time_interval import Time
 from state import STATE
 from location import Location
 from order import Order
+import pandas as pd
+from state_value_table import STATE_VALUE_TABLE
 
 def q_learning():
     # 1. Find all shortest paths in public transport network
@@ -42,3 +45,21 @@ def q_learning():
         STATE.update_order_expiry_duration()
         # Increment to next interval
         STATE.increment_time_interval()
+
+def export_epoch_to_csv():
+    export_table = pd.DataFrame(columns=["start_time", "end_time","zone_name","state_value"])
+    for time_interval in STATE_VALUE_TABLE.value_grid:
+        for zone in STATE_VALUE_TABLE.value_grid[time_interval]:
+            export_table.loc[len(export_table)] = [time_interval.start.to_total_minutes(), time_interval.end.to_total_minutes(), zone.name, STATE_VALUE_TABLE.value_grid[time_interval][zone]]
+
+    export_table.to_csv("training_data/state_value_table.csv")
+
+def import_state_values_from_csv():
+    import_table = pd.read_csv("training_data/state_value_table.csv")
+    
+    for i in range(len(import_table)):
+        start_time = Time.of_total_minutes(int(import_table[i]["start_time"]))
+        interval = STATE_VALUE_TABLE.time_series.find_interval(start_time)
+        zone = STATE_VALUE_TABLE.grid.zones_dict[import_table[i]["zone_name"]]
+        state_value = float(import_table[i]["state_value"])
+        STATE_VALUE_TABLE.value_grid[interval][zone] = state_value
