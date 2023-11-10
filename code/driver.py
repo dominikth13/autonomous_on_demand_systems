@@ -1,7 +1,7 @@
-import random
+#import random
 from location import Location
 from utils import IdProvider
-
+import csv
 ID_PROVIDER = IdProvider()
 
 
@@ -27,13 +27,35 @@ class Driver:
         else:
             self.job[0] -= duration
 
+##################ab hier änderungen#####################
 
-DRIVERS: list[Driver] = [
-    Driver(
-        Location(
-            random.Random(i).randint(0, 10000),
-            random.Random(i * i).randint(0, 10000),
+
+
+# Pfad zur CSV-Datei
+csv_file_path = 'drivers.csv'
+
+# Liste für geladene Fahrer
+DRIVERS = []
+with open(csv_file_path, mode='r') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        # Wir verwenden die korrekten Spaltennamen
+        lat = int(row['x']) ##float für genauere Koordinaten 
+        lon = int(row['y']) ##float für genauere Koordinaten
+        DRIVERS.append(
+            Driver(
+                start_position=Location(lat, lon)
+            )
         )
-    )
-    for i in range(100)
-]
+
+
+        # DRIVERS: list[Driver] = [
+#     Driver(
+#         Location(
+#             random.Random(i).randint(0, 10000),
+#             random.Random(i * i).randint(0, 10000),
+#         )
+#     )
+#     for i in range(100)
+# ]
+
