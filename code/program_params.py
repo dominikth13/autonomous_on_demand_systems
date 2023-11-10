@@ -2,7 +2,7 @@ import random
 from state_value_table import Time
 from location import Location
 from station import Station
-
+import csv
 # Minimal trip time for routes to be eligible for combined routes in seconds
 L1 = 600
 
@@ -10,8 +10,20 @@ L1 = 600
 L2 = 1200
 
 # Set of stations
-STATIONS = [Station(Location(random.Random(i**10).random() * 10000, random.Random(i**9).random() * 10000)) for i in range (0, 10)]
+#STATIONS = [Station(Location(random.Random(i**10).random() * 10000, random.Random(i**9).random() * 10000)) for i in range (0, 10)]
+# _stations = []
+# Pfad zur CSV-Datei
+stations_csv_file_path = 'stations.csv'
 
+# Erstellung der _stations Liste durch Einlesen der CSV-Datei
+STATIONS = []
+with open(stations_csv_file_path, mode='r') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        latitude = int(row['X'])
+        longitude = int(row['Y'])
+        STATIONS.append(Station(position=Location(lat=latitude, lon=longitude)))
+        
 # Static vehicle speed in m/s
 VEHICLE_SPEED = 15
 
