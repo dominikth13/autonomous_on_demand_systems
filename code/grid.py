@@ -29,7 +29,7 @@ class Grid:
         max_lon: float,
         step_distance: float,
     ):
-        self.zones = zones
+        self.zones_dict = {zone.name: zone for zone in zones}
         self.cells = [
             [
                 GridCell(Location(lat, lon), to_zone(lat, lon))

@@ -6,6 +6,7 @@ from program_params import *
 
 ID_PROVIDER = IdProvider()
 
+# Class route contains data model of route object
 class Route:
     def __init__(
         self,
@@ -41,6 +42,8 @@ class Route:
 
 
 def regular_route(order: Order) -> Route:
-    vehicle_time = order.start.distance_to(order.end) * VEHICLE_SPEED
-    # TODO calculate time and price for regular routes
-    return Route(order, order.start, order.end, [], vehicle_time, 0, 0, 0, vehicle_time, 5, 5)
+    distance_in_m = order.start.distance_to(order.end) * 1000
+    vehicle_time = distance_in_m/ VEHICLE_SPEED
+    price = (distance_in_m/1000)*1.5
+    #1.5 euro for each km with the vehicle 
+    return Route(order, order.start, order.end, [], vehicle_time, 0, 0, 0, vehicle_time, 5, price)

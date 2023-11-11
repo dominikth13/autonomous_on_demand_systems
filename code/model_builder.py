@@ -1,5 +1,4 @@
 import time
-from action import Action, DriverActionPair
 from station import Station
 from driver import Driver
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
@@ -7,6 +6,7 @@ from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 import networkx as nx
 
 # Not used because of computation complexity
+from action import Action, DriverActionPair
 def build_bipartite_matching_problem(
     driver_action_pairs: list[DriverActionPair],
 ) -> tuple[LpProblem, dict[LpVariable, tuple[Driver, Action]]]:

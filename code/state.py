@@ -1,4 +1,3 @@
-from action import Action, DriverActionPair
 from state_value_table import STATE_VALUE_TABLE
 from order import Order
 from program_params import *
@@ -8,6 +7,8 @@ from time_interval import *
 
 # Define here how the grid and intervals should look like
 class State:
+    from action import Action, DriverActionPair
+
     def __init__(self) -> None:
         # Dict containing orders mapped by id and the amount of remaining seconds to serve the order
         self.expiring_orders_dict: dict[int, tuple[Order, int]] = {}

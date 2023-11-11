@@ -1,5 +1,5 @@
 from grid import Grid, Zone
-from time_interval import GridInterval, TimeSeries
+from time_interval import GridInterval, TimeSeries, Time
 from utils import IdProvider
 from program_params import *
 from location import Location
@@ -10,7 +10,7 @@ ID_PROVIDER = IdProvider()
 class StateValueTable:
     def __init__(self, grid: Grid, time_series: TimeSeries) -> None:
         self.value_grid = {
-            interval: {zone: 0 for zone in grid.zones}
+            interval: {zone: 0 for zone in grid.zones_dict.values()}
             for interval in time_series.intervals
         }
         self.grid = grid

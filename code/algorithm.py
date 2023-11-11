@@ -10,6 +10,7 @@ from driver import DRIVERS, Driver
 from route import *
 from order import Order
 from program_params import *
+from station import FASTEST_CONNECTION_NETWORK
 
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 
@@ -24,26 +25,32 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
         end = order.end
 
         if default_route.total_time > L1:
-            for origin in STATIONS:
-                for destination in STATIONS:
+            for origin in FASTEST_CONNECTION_NETWORK().stations:
+                for destination in FASTEST_CONNECTION_NETWORK.stations:
                     if origin == destination:
                         continue
-                    connection = FASTEST_STATION_CONNECTION_NETWORK.get_fastest_connection(
+                    connection = FASTEST_CONNECTION_NETWORK.get_fastest_connection(
                         origin, destination
                     )
                     # Distance
-                    vehicle_time = start.distance_to(origin.position) * VEHICLE_SPEED
-                    walking_time = destination.position.distance_to(end) * WALKING_SPEED
+                    vehicle_time = start.distance_to(origin.position) / VEHICLE_SPEED
+                    walking_time = destination.position.distance_to(end) / WALKING_SPEED
                     transit_time = connection[1]
                     stations = connection[0]
-                    # TODO include entry, exit and waiting time
-                    other_time = 0
+                    # include entry, exit and waiting time
+                    other_time = 2 * PUBLIC_TRANSPORT_ENTRY_EXIT_TIME + PUBLIC_TRANSPORT_WAITING_TIME(STATE.current_interval.start)
                     total_time = vehicle_time + walking_time + transit_time + other_time
 
                     if total_time < default_route.total_time + L2:
-                        # TODO include price calculation
-                        price = 4
-                        vehicle_price = 2
+                        # if the route contains transit ticket for public transport needs to be added to overall price
+                        if transit_time > 0:
+                            public_transport_ticket = PUBLIC_TRANSPORT_TICKET_PRICE
+                        else:
+                            public_transport_ticket = PUBLIC_TRANSPORT_TICKET_PRICE
+
+                        #1.5 euro for each km with the vehicle 
+                        vehicle_price = start.distance_to(origin.position)*TAXI_PRICE 
+                        price = vehicle_price + public_transport_ticket
                         if price < default_route.price:
                             routes_per_order[order].append(
                                 Route(
@@ -63,7 +70,6 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
     return routes_per_order
 
 
-# TODO build class for return value
 def generate_driver_action_pairs(
     order_routes_dict: dict[Order, list[Route]]
 ) -> list[DriverActionPair]:

@@ -40,8 +40,8 @@ with open(csv_file_path, mode='r') as file:
     reader = csv.DictReader(file)
     for row in reader:
         # Wir verwenden die korrekten Spaltennamen
-        lat = int(row['x']) ##float für genauere Koordinaten 
-        lon = int(row['y']) ##float für genauere Koordinaten
+        lat = int(row['X']) ##float für genauere Koordinaten 
+        lon = int(row['Y']) ##float für genauere Koordinaten
         DRIVERS.append(
             Driver(
                 start_position=Location(lat, lon)

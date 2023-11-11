@@ -1,29 +1,11 @@
-import random
 from state_value_table import Time
-from location import Location
-from station import Station
-import csv
+
 # Minimal trip time for routes to be eligible for combined routes in seconds
 L1 = 600
 
 # Maximum difference between direct route time and combined route time in seconds
 L2 = 1200
 
-# Set of stations
-#STATIONS = [Station(Location(random.Random(i**10).random() * 10000, random.Random(i**9).random() * 10000)) for i in range (0, 10)]
-# _stations = []
-# Pfad zur CSV-Datei
-stations_csv_file_path = 'stations.csv'
-
-# Erstellung der _stations Liste durch Einlesen der CSV-Datei
-STATIONS = []
-with open(stations_csv_file_path, mode='r') as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        latitude = int(row['X'])
-        longitude = int(row['Y'])
-        STATIONS.append(Station(position=Location(lat=latitude, lon=longitude)))
-        
 # Static vehicle speed in m/s
 VEHICLE_SPEED = 15
 
@@ -42,3 +24,24 @@ def DISCOUNT_FACTOR(current_time: Time, time_after_action: Time) -> float:
 
 # Duration how long orders can be matched with drivers in seconds
 ORDER_EXPIRY_DURATION = 120
+
+# Time it takes for customers to enter or leave the public transport system in seconds
+PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120
+
+# Waiting time till next train depending on current time in seconds
+def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
+    five = Time(5,0)
+    six = Time(6,0)
+    seven = Time(7,0)
+    if time.is_before(five):
+        return 600
+    if time.is_before(six):
+        return 420
+    if time.is_before(seven):
+        return 240
+    return 120
+
+PUBLIC_TRANSPORT_TICKET_PRICE = 2
+
+# Taxi price per kilometer
+TAXI_PRICE = 1.5
