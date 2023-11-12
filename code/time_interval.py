@@ -1,4 +1,7 @@
 from __future__ import annotations
+from utils import IdProvider
+
+ID_PROVIDER = IdProvider()
 
 class Time:
     def __init__(self, hour: int, minute: int) -> None:
@@ -14,19 +17,25 @@ class Time:
     def distance_to_in_seconds(self, other: Time) -> int:
         return self.distance_to(other) * 60
 
-    def add_minutes(self, minutes: int) -> None:
-        if self.minute + minutes > 59:
-            minutes_to_next_hour = 60 - self.minute
-            self.minute = 0
+    def add_minutes(self, minutes: int) -> Time:
+        minute = self.minute
+        hour = self.hour
+        if minute + minutes > 59:
+            minutes_to_next_hour = 60 - minute
+            minute = 0
             minutes -= minutes_to_next_hour
 
             while minutes > 59:
-                self.hour += 1
-                if self.hour == 24:
-                    self.hour = 0
+                hour += 1
+                if hour == 24:
+                    hour = 0
                 minutes -= 60
-
-        self.minute += minutes
+        minute += minutes
+        return Time(hour, minute)
+    
+    def add_seconds(self, seconds: int):
+        minutes = seconds // 60
+        return self.add_minutes(minutes)
 
     def is_before(self, other: Time) -> bool:
         return self.hour <= other.hour or (
@@ -47,33 +56,29 @@ class Time:
 
 # Intervals work inclusive -> 12:33:22 part of 12:33
 class GridInterval:
-    def __init__(self, start: Time, end: Time) -> None:
+    def __init__(self, index: int, start: Time, end: Time) -> None:
+        self.id = ID_PROVIDER.get_id()
+        self.index = index
         self.start = start
         self.end = end
-        self.next_interval = None
-
-    def set_next_interval(self, next_interval: GridInterval) -> None:
-        self.next_interval = next_interval
-
 
 class TimeSeries:
     def __init__(self, start: Time, end: Time, intervalLength: int) -> None:
+        self.start_time = start
+        self.end_time = end
         self.intervals: list[GridInterval] = []
-        last_interval = None
 
-        # Build an single linked array list
+        counter = 0
         for start in range(
             start.to_total_minutes(), end.to_total_minutes(), intervalLength
         ):
             interval = GridInterval(
+                counter,
                 Time.of_total_minutes(start),
                 Time.of_total_minutes(start + intervalLength - 1),
             )
             self.intervals.append(interval)
-
-            if last_interval != None:
-                last_interval.set_next_interval(interval)
-            last_interval = interval
+            counter += 1
 
     def find_interval(self, time: Time) -> GridInterval:
         low = 0
@@ -99,3 +104,8 @@ class TimeSeries:
             raise Exception(f"Interval to time {time} not found")
 
         return interval
+    
+    def get_next_interval(self, current_interval: GridInterval) -> GridInterval:
+        if len(self.intervals) == current_interval.index + 1:
+            return None
+        return self.intervals[current_interval.index + 1]

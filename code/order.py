@@ -1,5 +1,6 @@
 from utils import IdProvider
 from location import Location
+from program_params import *
 
 ID_PROVIDER = IdProvider()
 
@@ -8,3 +9,4 @@ class Order:
         self.id = ID_PROVIDER.get_id()
         self.start = start
         self.end = end
+        self.expires = ORDER_EXPIRY_DURATION

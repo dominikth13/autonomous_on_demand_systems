@@ -1,13 +1,12 @@
-from location import Location
-from program_params import VEHICLE_SPEED
 from utils import IdProvider
-from driver import Driver
-from route import Route
+
 
 ID_PROVIDER = IdProvider()
 
 
 class Action:
+    from route import Route
+
     def __init__(self, route: Route) -> None:
         self.id = ID_PROVIDER.get_id()
         self.route = route
@@ -24,6 +23,9 @@ class Action:
 
 
 class DriverActionPair:
+    from driver import Driver
+    from location import Location
+
     def __init__(self, driver: Driver, action: Action, weight: float) -> None:
         self.driver = driver
         self.action = action
@@ -33,6 +35,7 @@ class DriverActionPair:
         return f"[Driver {self.driver.id} - Action: {self.action} - State-Action-Value {self.weight}]"
 
     def get_total_vehicle_travel_time_in_seconds(self) -> int:
+        from program_params import VEHICLE_SPEED
         if self.action.is_idling():
             return 0
         return self.get_total_vehicle_distance() // VEHICLE_SPEED
@@ -46,7 +49,7 @@ class DriverActionPair:
             )
         else:
             vehicle_distance_with_passenger = self.action.route.origin.distance_to(
-                self.action.route.stations[0]
+                self.action.route.stations[0].position
             )
         return vehicle_distance_with_passenger + self.driver.current_position.distance_to(self.action.route.origin)
 
@@ -55,4 +58,4 @@ class DriverActionPair:
             return self.driver.current_position
         if self.action.route.stations == []:
             return self.action.route.destination
-        return self.action.route.stations[0]
+        return self.action.route.stations[0].position
