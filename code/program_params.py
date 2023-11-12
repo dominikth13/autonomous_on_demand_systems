@@ -7,19 +7,19 @@ L1 = 600
 L2 = 1200
 
 # Static vehicle speed in m/s
-VEHICLE_SPEED = 15
+VEHICLE_SPEED = 14
 
 # Static walking speed in m/s
-WALKING_SPEED = 1
+WALKING_SPEED = 1.5
 
 # Pick-up distance threshold (how far away driver consider new orders) in meter
-PICK_UP_DISTANCE_THRESHOLD = 10000
+PICK_UP_DISTANCE_THRESHOLD = 1000
 
-LEARNING_RATE = 0.00001
+LEARNING_RATE = 0.001
 
 def DISCOUNT_FACTOR(current_time: Time, time_after_action: Time) -> float:
-    DISCOUNT_RATE = 0.98
-    LS = 0.99
+    DISCOUNT_RATE = 0.95
+    LS = 0.9
     return DISCOUNT_RATE ** (time_after_action.distance_to_in_seconds(current_time) / LS)
 
 # Duration how long orders can be matched with drivers in seconds

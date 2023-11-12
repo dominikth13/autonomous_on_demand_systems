@@ -25,6 +25,9 @@ class Driver:
 
     # Duration in seconds
     def update_job_status(self, duration: int) -> None:
+        if self.job == None:
+            return
+
         if self.job.total_driving_time - duration < 0:
             # Job is finished by next interval
             self.current_position = self.job.new_position

@@ -35,17 +35,18 @@ def q_learning():
         orders = [
             Order(
                 Location(
-                    random.Random(i + 15).randint(0, 10000),
-                    random.Random((i + 15) ** 3).randint(0, 10000),
+                    random.randint(0, 10000),
+                    random.randint(0, 10000),
                 ),
                 Location(
-                    random.Random((i + 15) ** 2).randint(0, 10000),
-                    random.Random((i + 15) ** 4).randint(0, 10000),
+                    random.randint(0, 10000),
+                    random.randint(0, 10000),
                 ),
             )
-            for i in range(random.randint(0, 20))
+            for i in range(random.randint(0, 50))
         ]
-        if counter == 495:
+
+        if counter == 232:
             pass
 
         # Add orders to state

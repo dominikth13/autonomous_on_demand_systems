@@ -11,9 +11,6 @@ from route import *
 from order import Order
 from program_params import *
 
-from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
-
-
 # The so called 'Algorithm 1'
 def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
     routes_per_order = {order: [] for order in orders}
@@ -50,7 +47,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                             public_transport_ticket = PUBLIC_TRANSPORT_TICKET_PRICE
 
                         #1.5 euro for each km with the vehicle 
-                        vehicle_price = start.distance_to(origin.position)*TAXI_PRICE 
+                        vehicle_price = (start.distance_to(origin.position)/1000)*TAXI_PRICE 
                         price = vehicle_price + public_transport_ticket
                         if price < default_route.price:
                             routes_per_order[order].append(

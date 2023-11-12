@@ -56,6 +56,10 @@ class Grid:
         while low <= high:
             mid = (high + low) // 2
 
+            if mid == 0 or mid == len(self.cells) - 1:
+                first_selection = self.cells[mid]
+                break
+
             if self.cells[mid][0].center.lat < location.lat:
                 if self.cells[mid + 1][0].center.lat >= location.lat:
                     first_selection = (
@@ -90,6 +94,10 @@ class Grid:
         # Use binary search for lon
         while low <= high:
             mid = (high + low) // 2
+
+            if mid == 0 or mid == len(first_selection) - 1:
+                final_cell = first_selection[mid]
+                break
 
             if first_selection[mid].center.lon < location.lon:
                 if first_selection[mid + 1].center.lon >= location.lon:

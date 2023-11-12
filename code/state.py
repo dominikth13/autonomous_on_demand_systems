@@ -17,9 +17,6 @@ class State:
         self.current_time = self.current_interval.start
 
     def apply_state_change(self, driver_action_pairs: list[DriverActionPair]) -> None:
-        # Build a set to check if all drivers applied a state change
-        remaining_drivers = set(DRIVERS)
-
         # Apply driver action pairs
         for pair in driver_action_pairs:
             driver = pair.driver
@@ -45,7 +42,6 @@ class State:
 
                 # Schedule new driver job and update it for the next state
                 driver.set_new_job(int(pair.get_total_vehicle_travel_time_in_seconds()), driver_final_destination)
-                driver.update_job_status(SIMULATION_UPDATE_RATE)
 
                 # Adjust state value
                 STATE_VALUE_TABLE.adjust_state_value(
@@ -58,10 +54,9 @@ class State:
 
                 # Remove order from open orders set
                 del self.orders_dict[route.order.id]
-            remaining_drivers.remove(driver)
 
-        # Compute job state changes for occupied drivers
-        for driver in remaining_drivers:
+        # Compute job state changes for all drivers
+        for driver in DRIVERS:
             driver.update_job_status(SIMULATION_UPDATE_RATE)
     
     def update_order_expiry_duration(self) -> None:
