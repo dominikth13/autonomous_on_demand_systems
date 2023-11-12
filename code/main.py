@@ -13,6 +13,7 @@ import pandas as pd
 from state_value_table import STATE_VALUE_TABLE
 from logger import LOGGER
 
+
 def q_learning():
     start_time = time.time()
     # import_state_values_from_csv()
@@ -22,7 +23,12 @@ def q_learning():
 
     # 2. Run Q-Learning algorithm to train state value table
     counter = 1
-    while STATE.current_interval.next_interval != None:
+    for start_minutes in range(
+        STATE_VALUE_TABLE.time_series.start_time.to_total_minutes(),
+        # TimeSeries is two hours longer than the simulation
+        STATE_VALUE_TABLE.time_series.end_time.to_total_minutes() - 120,
+    ):
+        current_time = Time.of_total_minutes(start_minutes)
         LOGGER.info(f"Starting iteration {counter}")
         LOGGER.debug("Collecting orders")
         # Collect new orders
@@ -39,6 +45,9 @@ def q_learning():
             )
             for i in range(random.randint(0, 20))
         ]
+        if counter == 495:
+            pass
+
         # Add orders to state
         STATE.add_orders(orders)
         # Generate routes
@@ -56,28 +65,38 @@ def q_learning():
         # Update the expiry durations of still open orders
         STATE.update_order_expiry_duration()
         # Increment to next interval
-        STATE.increment_time_interval()
+        STATE.increment_time_interval(current_time)
         counter += 1
     LOGGER.info("Exporting results...")
     export_epoch_to_csv()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
 
+
 def export_epoch_to_csv():
-    export_table = pd.DataFrame(columns=["start_time", "end_time","zone_name","state_value"])
+    export_table = pd.DataFrame(
+        columns=["start_time", "end_time", "zone_name", "state_value"]
+    )
     for time_interval in STATE_VALUE_TABLE.value_grid:
         for zone in STATE_VALUE_TABLE.value_grid[time_interval]:
-            export_table.loc[len(export_table)] = [time_interval.start.to_total_minutes(), time_interval.end.to_total_minutes(), zone.name, STATE_VALUE_TABLE.value_grid[time_interval][zone]]
+            export_table.loc[len(export_table)] = [
+                time_interval.start.to_total_minutes(),
+                time_interval.end.to_total_minutes(),
+                zone.name,
+                STATE_VALUE_TABLE.value_grid[time_interval][zone],
+            ]
 
     export_table.to_csv("training_data/state_value_table.csv")
 
+
 def import_state_values_from_csv():
     import_table = pd.read_csv("training_data/state_value_table.csv")
-    
+
     for i in range(len(import_table)):
         start_time = Time.of_total_minutes(int(import_table[i]["start_time"]))
         interval = STATE_VALUE_TABLE.time_series.find_interval(start_time)
         zone = STATE_VALUE_TABLE.grid.zones_dict[import_table[i]["zone_name"]]
         state_value = float(import_table[i]["state_value"])
         STATE_VALUE_TABLE.value_grid[interval][zone] = state_value
+
 
 q_learning()

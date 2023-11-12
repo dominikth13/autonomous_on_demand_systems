@@ -58,4 +58,4 @@ class DriverActionPair:
             return self.driver.current_position
         if self.action.route.stations == []:
             return self.action.route.destination
-        return self.action.route.stations[0]
+        return self.action.route.stations[0].position

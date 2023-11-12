@@ -45,3 +45,6 @@ PUBLIC_TRANSPORT_TICKET_PRICE = 2
 
 # Taxi price per kilometer
 TAXI_PRICE = 1.5
+
+# Time it takes until the simulation updates in seconds
+SIMULATION_UPDATE_RATE = 60

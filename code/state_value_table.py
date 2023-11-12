@@ -80,5 +80,5 @@ STATE_VALUE_TABLE: StateValueTable = StateValueTable(
         10000,
         10,
     ),
-    TimeSeries(Time(3, 0), Time(12, 0), 1),
+    TimeSeries(Time(3, 0), Time(14, 0), 5),
 )

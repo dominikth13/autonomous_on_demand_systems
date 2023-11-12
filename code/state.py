@@ -14,6 +14,7 @@ class State:
         self.orders_dict: dict[int, Order] = {}
 
         self.current_interval = STATE_VALUE_TABLE.time_series.intervals[0]
+        self.current_time = self.current_interval.start
 
     def apply_state_change(self, driver_action_pairs: list[DriverActionPair]) -> None:
         # Build a set to check if all drivers applied a state change
@@ -29,7 +30,7 @@ class State:
                     0,
                     current_interval=self.current_interval,
                     current_location=driver.current_position,
-                    next_interval=self.current_interval.next_interval,
+                    next_interval=STATE_VALUE_TABLE.time_series.get_next_interval(self.current_interval),
                     next_location=driver.current_position
                 )
             else:
@@ -44,14 +45,14 @@ class State:
 
                 # Schedule new driver job and update it for the next state
                 driver.set_new_job(int(pair.get_total_vehicle_travel_time_in_seconds()), driver_final_destination)
-                driver.update_job_status(self.current_interval.start.distance_to_in_seconds(self.current_interval.next_interval.start))
+                driver.update_job_status(SIMULATION_UPDATE_RATE)
 
                 # Adjust state value
                 STATE_VALUE_TABLE.adjust_state_value(
                     action.route.vehicle_price,
                     current_interval=self.current_interval,
                     current_location=driver.current_position,
-                    next_interval=self.current_interval.next_interval,
+                    next_time=self.current_time.add_seconds(pair.get_total_vehicle_travel_time_in_seconds()),
                     next_zone=action.route.vehicle_destination_zone,
                 )
 
@@ -61,10 +62,10 @@ class State:
 
         # Compute job state changes for occupied drivers
         for driver in remaining_drivers:
-            driver.update_job_status(self.current_interval.start.distance_to_in_seconds(self.current_interval.next_interval.start))
+            driver.update_job_status(SIMULATION_UPDATE_RATE)
     
     def update_order_expiry_duration(self) -> None:
-        duration = self.current_interval.start.distance_to_in_seconds(self.current_interval.next_interval.start)
+        duration = SIMULATION_UPDATE_RATE
         orders_to_delete = []
         for id in self.orders_dict:
             self.orders_dict[id].expires -= duration
@@ -78,8 +79,10 @@ class State:
         for order in orders:
             self.orders_dict[order.id] = order
     
-    def increment_time_interval(self) -> None:
-        self.current_interval = self.current_interval.next_interval
+    def increment_time_interval(self, current_time) -> None:
+        if self.current_interval.end.is_before(current_time):
+            self.current_interval = STATE_VALUE_TABLE.time_series.intervals[self.current_interval.index + 1]
+        self.current_time = current_time
 
 STATE: State = State()
         
