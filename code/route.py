@@ -35,7 +35,7 @@ class Route:
 
         self.vehicle_price = vehicle_price
         self.vehicle_time = vehicle_time
-        self.vehicle_destination_zone = STATE_VALUE_TABLE.grid.find_zone(destination if stations == [] else stations[0])
+        self.vehicle_destination_zone = STATE_VALUE_TABLE.grid.find_zone(destination if stations == [] else stations[0].position)
     
     def is_regular_route(self) -> bool:
         return self.stations == []

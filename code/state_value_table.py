@@ -18,15 +18,15 @@ class StateValueTable:
 
     def adjust_state_value(
         self,
-        current_time: Time,
-        current_interval: GridInterval,
-        current_location: Location,
-        current_zone: Zone,
-        next_time: Time,
-        next_interval: GridInterval,
-        next_location: Location,
-        next_zone: Zone,
         reward: float,
+        current_time: Time = None,
+        current_interval: GridInterval = None,
+        current_location: Location = None,
+        current_zone: Zone = None,
+        next_time: Time = None,
+        next_interval: GridInterval = None,
+        next_location: Location = None,
+        next_zone: Zone = None,
     ) -> None:
         if current_zone and current_location:
             raise Exception("Only current zone or location is allowed")
@@ -59,17 +59,26 @@ class StateValueTable:
 
         self.value_grid[current_interval][current_zone] = self.value_grid[
             current_interval
-        ][current_interval] + LEARNING_RATE * (
+        ][current_zone] + LEARNING_RATE * (
             reward
             + DISCOUNT_FACTOR(current_interval.start, next_interval.start)
             * self.value_grid[next_interval][next_zone]
-            - self.value_grid[next_interval][next_zone]
+            - self.value_grid[current_interval][current_zone]
         )
 
     def get_state_value(self, zone: Zone, interval: GridInterval) -> float:
         return self.value_grid[interval][zone]
 
 
+# TODO Robert build graph here
 STATE_VALUE_TABLE: StateValueTable = StateValueTable(
-    Grid([Zone("Zone_1"),Zone("Zone_2"),Zone("Zone_3"),Zone("Zone_4")], 0, 0, 10, 10, 1), TimeSeries(Time(3, 0), Time(12, 0), 1)
+    Grid(
+        [Zone("Zone_1"), Zone("Zone_2"), Zone("Zone_3"), Zone("Zone_4")],
+        0,
+        0,
+        10000,
+        10000,
+        10,
+    ),
+    TimeSeries(Time(3, 0), Time(12, 0), 1),
 )

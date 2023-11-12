@@ -49,7 +49,7 @@ class DriverActionPair:
             )
         else:
             vehicle_distance_with_passenger = self.action.route.origin.distance_to(
-                self.action.route.stations[0]
+                self.action.route.stations[0].position
             )
         return vehicle_distance_with_passenger + self.driver.current_position.distance_to(self.action.route.origin)
 

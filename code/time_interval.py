@@ -1,4 +1,7 @@
 from __future__ import annotations
+from utils import IdProvider
+
+ID_PROVIDER = IdProvider()
 
 class Time:
     def __init__(self, hour: int, minute: int) -> None:
@@ -14,19 +17,21 @@ class Time:
     def distance_to_in_seconds(self, other: Time) -> int:
         return self.distance_to(other) * 60
 
-    def add_minutes(self, minutes: int) -> None:
-        if self.minute + minutes > 59:
-            minutes_to_next_hour = 60 - self.minute
-            self.minute = 0
+    def add_minutes(self, minutes: int) -> Time:
+        minute = self.minute
+        hour = self.hour
+        if minute + minutes > 59:
+            minutes_to_next_hour = 60 - minute
+            minute = 0
             minutes -= minutes_to_next_hour
 
             while minutes > 59:
-                self.hour += 1
-                if self.hour == 24:
-                    self.hour = 0
+                hour += 1
+                if hour == 24:
+                    hour = 0
                 minutes -= 60
-
-        self.minute += minutes
+        minute += minutes
+        return Time(hour, minute)
 
     def is_before(self, other: Time) -> bool:
         return self.hour <= other.hour or (
@@ -48,6 +53,7 @@ class Time:
 # Intervals work inclusive -> 12:33:22 part of 12:33
 class GridInterval:
     def __init__(self, start: Time, end: Time) -> None:
+        self.id = ID_PROVIDER.get_id()
         self.start = start
         self.end = end
         self.next_interval = None

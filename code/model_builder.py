@@ -2,6 +2,7 @@ import time
 from station import Station
 from driver import Driver
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
+from logger import LOGGER
 
 import networkx as nx
 
@@ -72,11 +73,11 @@ def solve_as_bipartite_matching_problem(
     status = model.solve()
 
     end_time = time.time()
-    print(
+    LOGGER.debug(
         f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds"
     )
-    # Print results
-    print(f"Model name: {model.name}, status: {LpStatus[model.status]}")
+    # LOGGER.debug results
+    LOGGER.debug(f"Model name: {model.name}, status: {LpStatus[model.status]}")
 
     result_pairs = []
     for x in var_pair_dict:
@@ -142,7 +143,7 @@ def solve_as_min_cost_flow_problem(
     path = nx.min_cost_flow(graph)
     end_time = time.time()
 
-    print(
+    LOGGER.debug(
         f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds"
     )
 
@@ -261,7 +262,7 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
         start_arr, end_arr, capacities_arr, weights_arr
     )
 
-    print(all_arcs)
+    LOGGER.debug(all_arcs)
 
     # Add supply for each nodes.
     smcf.set_nodes_supplies(np.arange(0, len(supplies)), supplies)
@@ -272,11 +273,11 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
     status = smcf.solve()
     end_time = time.time()
     if status != smcf.OPTIMAL:
-        print("There was an issue with the min cost flow input.")
-        print(f"Status: {status}")
+        LOGGER.debug("There was an issue with the min cost flow input.")
+        LOGGER.debug(f"Status: {status}")
         exit(1)
-    print("Optimal solution found!")
-    print(
+    LOGGER.debug("Optimal solution found!")
+    LOGGER.debug(
         f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds"
     )
     solution_flows = smcf.flows(all_arcs)
@@ -318,7 +319,7 @@ def solve_all_pair_shortest_path_problem(connections: list[tuple[Station, float,
     dist_matrix, predecessors = floyd_warshall(csgraph=graph, directed=False, return_predecessors=True)
 
     result_dict = {id: {id2: None for id2 in sorted_station_ids} for id in sorted_station_ids}
-    print(type(dist_matrix))
+    LOGGER.debug(type(dist_matrix))
     for idx1 in range(len(dist_matrix)):
         for idx2 in range(len(dist_matrix)):
             idx = predecessors[idx1][idx2]

@@ -3,6 +3,7 @@ from utils import IdProvider
 
 ID_PROVIDER = IdProvider()
 
+
 # We have the problem that zones not all the time match some straight lines
 # We define our zones as sets of smaller squares where it is super easy to
 # find the fitting square in a coordinate system (2-layer binary search)
@@ -13,10 +14,17 @@ class Zone:
         self.name = name
 
 
-def to_zone(lat: float, lon: float):
+def to_zone(lat: float, lon: float, zones: list[Zone]):
     # Do some dark magic to find zone of location
     # Be aware that object references are still different
-    return Zone("")
+    if lat > 5000:
+        if lon > 5000:
+            return zones[1]
+        return zones[0]
+    else:
+        if lon > 5000:
+            return zones[3]
+        return zones[2]
 
 
 class Grid:
@@ -32,7 +40,7 @@ class Grid:
         self.zones_dict = {zone.name: zone for zone in zones}
         self.cells = [
             [
-                GridCell(Location(lat, lon), to_zone(lat, lon))
+                GridCell(Location(lat, lon), to_zone(lat, lon, zones))
                 for lon in range(min_lon, max_lon, step_distance)
             ]
             for lat in range(min_lat, max_lat, step_distance)
@@ -49,7 +57,7 @@ class Grid:
             mid = (high + low) // 2
 
             if self.cells[mid][0].center.lat < location.lat:
-                if self.cells[mid + 1][0].center.lat > location.lat:
+                if self.cells[mid + 1][0].center.lat >= location.lat:
                     first_selection = (
                         self.cells[mid]
                         if abs(self.cells[mid][0].center.lat - location.lat)
@@ -59,8 +67,8 @@ class Grid:
                     break
                 else:
                     low = mid + 1
-            elif self.cells[mid][0].center.lat > location.lat:
-                if self.cells[mid - 1][0].center.lat < location.lat:
+            else:
+                if self.cells[mid - 1][0].center.lat <= location.lat:
                     first_selection = (
                         self.cells[mid]
                         if abs(self.cells[mid][0].center.lat - location.lat)
@@ -84,7 +92,7 @@ class Grid:
             mid = (high + low) // 2
 
             if first_selection[mid].center.lon < location.lon:
-                if first_selection[mid + 1].center.lon > location.lon:
+                if first_selection[mid + 1].center.lon >= location.lon:
                     final_cell = (
                         first_selection[mid]
                         if abs(first_selection[mid].center.lon - location.lon)
@@ -94,8 +102,8 @@ class Grid:
                     break
                 else:
                     low = mid + 1
-            elif first_selection[mid].center.lon > location.lon:
-                if first_selection[mid - 1].center.lon < location.lon:
+            else:
+                if first_selection[mid - 1].center.lon <= location.lon:
                     final_cell = (
                         first_selection[mid]
                         if abs(first_selection[mid].center.lon - location.lon)

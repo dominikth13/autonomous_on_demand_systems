@@ -10,7 +10,6 @@ from driver import DRIVERS, Driver
 from route import *
 from order import Order
 from program_params import *
-from station import FASTEST_CONNECTION_NETWORK
 
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 
@@ -18,6 +17,7 @@ from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 # The so called 'Algorithm 1'
 def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
     routes_per_order = {order: [] for order in orders}
+    fastest_connection_network = FastestStationConnectionNetwork.get_instance()
     for order in orders:
         default_route = regular_route(order)
         routes_per_order[order].append(default_route)
@@ -25,13 +25,14 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
         end = order.end
 
         if default_route.total_time > L1:
-            for origin in FASTEST_CONNECTION_NETWORK().stations:
-                for destination in FASTEST_CONNECTION_NETWORK.stations:
+            for origin in fastest_connection_network.stations:
+                for destination in fastest_connection_network.stations:
                     if origin == destination:
                         continue
-                    connection = FASTEST_CONNECTION_NETWORK.get_fastest_connection(
+                    connection = fastest_connection_network.get_fastest_connection(
                         origin, destination
                     )
+
                     # Distance
                     vehicle_time = start.distance_to(origin.position) / VEHICLE_SPEED
                     walking_time = destination.position.distance_to(end) / WALKING_SPEED
