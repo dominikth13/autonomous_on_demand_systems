@@ -4,22 +4,24 @@ from utils import IdProvider
 ID_PROVIDER = IdProvider()
 
 class Time:
-    def __init__(self, hour: int, minute: int) -> None:
+    
+    # add new attribute "seconds"
+    def __init__(self, hour: int, minute: int, second: int) -> None:
         self.hour = hour
         self.minute = minute
+        self.second = second  
 
-    def of_total_minutes(minutes: int) -> Time:
-        return Time(minutes // 60, minutes % 60)
+    def of_total_minutes(minutes: float) -> Time:
+        return Time(minutes // 60, minutes % 60, (minutes % 1) * 60 )
 
+    # Calculate time difference(distance) in seconds
     def distance_to(self, other: Time) -> int:
-        return abs(60 * (self.hour - other.hour)) + abs(self.minute - other.minute)
-
-    def distance_to_in_seconds(self, other: Time) -> int:
-        return self.distance_to(other) * 60
+        return abs(self.to_total_seconds() - other.to_total_seconds())
 
     def add_minutes(self, minutes: int) -> Time:
         minute = self.minute
         hour = self.hour
+        second = self.second
         if minute + minutes > 59:
             minutes_to_next_hour = 60 - minute
             minute = 0
@@ -31,24 +33,24 @@ class Time:
                     hour = 0
                 minutes -= 60
         minute += minutes
-        return Time(hour, minute)
+        return Time(hour, minute, second)
     
     def add_seconds(self, seconds: int):
-        minutes = seconds // 60
+        minute = self.minute
+        hour = self.hour
+        second = self.second
+        second = (second + seconds) % 60 
+        minutes = (second + seconds) // 60
         return self.add_minutes(minutes)
 
     def is_before(self, other: Time) -> bool:
-        return self.hour <= other.hour or (
-            self.hour == other.hour and self.minute <= other.minute
-        )
+        return self.to_total_seconds() <= other.to_total_seconds()
 
     def is_after(self, other: Time) -> bool:
-        return self.hour >= other.hour or (
-            self.hour == other.hour and self.minute >= other.minute
-        )
+        return self.to_total_seconds() >= other.to_total_seconds()
 
     def to_total_minutes(self):
-        return self.hour * 60 + self.minute
+        return self.hour * 60 + self.minute + self.second % 60
     
     def to_total_seconds(self):
         return self.to_total_minutes() * 60
