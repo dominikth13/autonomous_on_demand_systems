@@ -20,7 +20,7 @@ LEARNING_RATE = 0.001
 def DISCOUNT_FACTOR(current_time: Time, time_after_action: Time) -> float:
     DISCOUNT_RATE = 0.95
     LS = 0.9
-    return DISCOUNT_RATE ** (time_after_action.distance_to_in_seconds(current_time) / LS)
+    return DISCOUNT_RATE ** (time_after_action.distance_to(current_time) / LS)
 
 # Duration how long orders can be matched with drivers in seconds
 ORDER_EXPIRY_DURATION = 120
@@ -30,9 +30,9 @@ PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120
 
 # Waiting time till next train depending on current time in seconds
 def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
-    five = Time(5,0)
-    six = Time(6,0)
-    seven = Time(7,0)
+    five = Time(5,0,0)
+    six = Time(6,0,0)
+    seven = Time(7,0,0)
     if time.is_before(five):
         return 600
     if time.is_before(six):

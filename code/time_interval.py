@@ -4,54 +4,51 @@ from utils import IdProvider
 ID_PROVIDER = IdProvider()
 
 class Time:
-    def __init__(self, hour: int, minute: int) -> None:
-        self.hour = hour
-        self.minute = minute
-
-    def of_total_minutes(minutes: int) -> Time:
-        return Time(minutes // 60, minutes % 60)
-
-    def distance_to(self, other: Time) -> int:
-        return abs(60 * (self.hour - other.hour)) + abs(self.minute - other.minute)
-
-    def distance_to_in_seconds(self, other: Time) -> int:
-        return self.distance_to(other) * 60
-
-    def add_minutes(self, minutes: int) -> Time:
-        minute = self.minute
-        hour = self.hour
-        if minute + minutes > 59:
-            minutes_to_next_hour = 60 - minute
-            minute = 0
-            minutes -= minutes_to_next_hour
-
-            while minutes > 59:
-                hour += 1
-                if hour == 24:
-                    hour = 0
-                minutes -= 60
-        minute += minutes
-        return Time(hour, minute)
     
-    def add_seconds(self, seconds: int):
-        minutes = seconds // 60
-        return self.add_minutes(minutes)
+    # delete other variables, only create total_seconds
+    def __init__(self, hour: int, minute: int, second: int) -> None:
+        self.total_seconds = hour * 3600 + minute * 60 + second
 
+    def of_total_minutes(minutes: float) -> Time:
+        return Time(minutes // 60, minutes % 60, (minutes % 1) * 60 )
+
+    # Calculate time difference(distance) in seconds
+    def distance_to(self, other: Time) -> int:
+        return abs(self.total_seconds - other.total_seconds)
+    
+    def add_minutes(self, minutes: int):
+        seconds = minutes * 60
+        return self.add_seconds(seconds)
+    
+    def add_seconds(self, seconds: int) -> Time:
+        new_total_second = self.total_seconds + seconds
+        hour = new_total_second // 3600
+        minute = (new_total_second % 3600) // 60
+        second = new_total_second % 60 
+        return Time(hour, minute, second)
+    
     def is_before(self, other: Time) -> bool:
-        return self.hour <= other.hour or (
-            self.hour == other.hour and self.minute <= other.minute
-        )
+        return self.total_seconds <= other.total_seconds
 
     def is_after(self, other: Time) -> bool:
-        return self.hour >= other.hour or (
-            self.hour == other.hour and self.minute >= other.minute
-        )
+        return self.total_seconds >= other.total_seconds
 
     def to_total_minutes(self):
-        return self.hour * 60 + self.minute
+        return self.total_seconds // 60
     
     def to_total_seconds(self):
-        return self.to_total_minutes() * 60
+        return self.total_seconds
+
+        # in case need to print time
+    def __str__(self) -> str:
+        hours, minutes, seconds = self.to_hours_minutes_seconds()
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+    def to_hours_minutes_seconds(self):
+        hours = self.total_seconds // 3600
+        minutes = (self.total_seconds % 3600) // 60
+        seconds = self.total_seconds % 60
+        return hours, minutes, seconds
 
 
 # Intervals work inclusive -> 12:33:22 part of 12:33
@@ -62,21 +59,21 @@ class GridInterval:
         self.start = start
         self.end = end
 
-class TimeSeries:
-    def __init__(self, start: Time, end: Time, intervalLength: int) -> None:
+class TimeSeries: 
+    def __init__(self, start: Time, end: Time, intervalLengthInSeconds: int) -> None:
         self.start_time = start
         self.end_time = end
         self.intervals: list[GridInterval] = []
 
+    # start, end, intervalength are all in second
         counter = 0
-        for start in range(
-            start.to_total_minutes(), end.to_total_minutes(), intervalLength
-        ):
-            interval = GridInterval(
-                counter,
-                Time.of_total_minutes(start),
-                Time.of_total_minutes(start + intervalLength - 1),
-            )
+        start_seconds = start.to_total_seconds()
+        end_seconds = end.to_total_seconds()
+        
+        for current_seconds in range(start_seconds, end_seconds, intervalLengthInSeconds):
+            interval_start = Time(0, 0, current_seconds)
+            interval_end = Time(0, 0, current_seconds + intervalLengthInSeconds - 1)
+            interval = GridInterval(counter, interval_start, interval_end)
             self.intervals.append(interval)
             counter += 1
 

@@ -80,8 +80,8 @@ def export_epoch_to_csv():
     for time_interval in STATE_VALUE_TABLE.value_grid:
         for zone in STATE_VALUE_TABLE.value_grid[time_interval]:
             export_table.loc[len(export_table)] = [
-                time_interval.start.to_total_minutes(),
-                time_interval.end.to_total_minutes(),
+                time_interval.start.to_total_seconds(),
+                time_interval.end.to_total_seconds(),
                 zone.name,
                 STATE_VALUE_TABLE.value_grid[time_interval][zone],
             ]

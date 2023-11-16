@@ -30,7 +30,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                         origin, destination
                     )
 
-                    # Distance
+                    # Distance (time in second)
                     vehicle_time = start.distance_to(origin.position) / VEHICLE_SPEED
                     walking_time = destination.position.distance_to(end) / WALKING_SPEED
                     transit_time = connection[1]
