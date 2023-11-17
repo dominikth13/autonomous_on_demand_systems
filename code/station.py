@@ -62,7 +62,7 @@ class FastestStationConnectionNetwork:
             station_set.add(connection[0])
             station_set.add(connection[2])
 
-        self.stations = sorted(station_set, key=lambda x: x.id)
+        self.stations: list[Station] = sorted(station_set, key=lambda x: x.id)
 
     # Returns: tuple[List of stations, transit time]
     def get_fastest_connection(self, start: Station, end: Station) -> tuple[list[Station], float]:

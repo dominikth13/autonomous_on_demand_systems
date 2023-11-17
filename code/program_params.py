@@ -6,8 +6,8 @@ L1 = 600
 # Maximum difference between direct route time and combined route time in seconds
 L2 = 1200
 
-# Static vehicle speed in m/s
-VEHICLE_SPEED = 14
+# Static vehicle speed in m/s -> assume these small busses driving in Berlin
+VEHICLE_SPEED = 5
 
 # Static walking speed in m/s
 WALKING_SPEED = 1.5
