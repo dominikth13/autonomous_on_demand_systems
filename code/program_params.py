@@ -6,8 +6,8 @@ L1 = 600
 # Maximum difference between direct route time and combined route time in seconds
 L2 = 1200
 
-# Static vehicle speed in m/s
-VEHICLE_SPEED = 14
+# Static vehicle speed in m/s -> assume these small busses driving in Berlin
+VEHICLE_SPEED = 5
 
 # Static walking speed in m/s
 WALKING_SPEED = 1.5
@@ -40,11 +40,6 @@ def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
     if time.is_before(seven):
         return 240
     return 120
-
-PUBLIC_TRANSPORT_TICKET_PRICE = 2
-
-# Taxi price per kilometer
-TAXI_PRICE = 1.5
 
 # Time it takes until the simulation updates in seconds
 SIMULATION_UPDATE_RATE = 60
