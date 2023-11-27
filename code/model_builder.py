@@ -278,8 +278,17 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
         exit(1)
     LOGGER.debug("Optimal solution found!")
     LOGGER.debug(
-        f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds"
-    )
+        f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds")
+    ########################################################################################
+    print(f"Minimum cost: {smcf.optimal_cost()}")
+    print("")
+    print(" Arc    Flow / Capacity Cost")
+    solution_flows = smcf.flows(all_arcs)
+    costs = solution_flows
+    for arc, flow, cost in zip(all_arcs, solution_flows, costs):
+        print(f"{smcf.tail(arc):1} -> {smcf.head(arc)}  {flow:3}  / {smcf.capacity(arc):3}       {cost}")
+    ########################################################################################
+
     solution_flows = smcf.flows(all_arcs)
     
     return list(filter(lambda pair: solution_flows[pair_to_index[pair]] == 1, driver_action_pairs))

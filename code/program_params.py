@@ -28,7 +28,7 @@ ORDER_EXPIRY_DURATION = 120
 # Time it takes for customers to enter or leave the public transport system in seconds
 PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120
 
-# Waiting time till next train depending on current time in seconds
+# Waitin
 def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
     five = Time(5,0)
     six = Time(6,0)
