@@ -77,3 +77,6 @@ travel_times_df.to_csv('training_data\zone_travel_times.csv', index=False)
 
 # Hinweis: Der Code ist so konzipiert, dass Sie Ihre eigene CSV-Datei mit den Zonendaten einlesen können.
 ### Stationen: https://data.ny.gov/Transportation/MTA-Subway-Stations/39hk-dx4f
+#https://new.mta.info/map/5341
+#https://new.mta.info/document/9426
+#https://data.ny.gov/widgets/i9wp-a4ja
