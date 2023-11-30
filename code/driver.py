@@ -40,7 +40,7 @@ class Driver:
 
 
 # Pfad zur CSV-Datei
-csv_file_path = 'data/drivers.csv'
+csv_file_path = 'code/data/drivers.csv'
 
 # Liste für geladene Fahrer
 DRIVERS = []

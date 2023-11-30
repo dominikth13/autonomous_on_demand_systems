@@ -1,14 +1,17 @@
 from __future__ import annotations
 from location import Location
 from utils import IdProvider
+from logger import LOGGER
+import pandas as pd
 import csv
 
 ID_PROVIDER = IdProvider()
 
 class Station:
-    def __init__(self, position: Location) -> None:
-        self.id = ID_PROVIDER.get_id()
+    def __init__(self, id: int, position: Location, name: str) -> None:
+        self.id = id
         self.position = position
+        self.name = name
 
 # Singleton class containing the global fastest station connections
 class FastestStationConnectionNetwork:
@@ -16,53 +19,66 @@ class FastestStationConnectionNetwork:
 
     def get_instance():
         if FastestStationConnectionNetwork._connection_network == None:
-            print("Build fastest-station connection network")
-            # Pfad zur CSV-Datei
-            stations_csv_file_path = 'data/stations.csv'
+            LOGGER.debug("Starting to create fastest connection network")
 
-            # Erstellung der _stations Liste durch Einlesen der CSV-Datei
-            _stations = []
-            with open(stations_csv_file_path, mode='r') as file:
+            csv_file_path = "code/data/continuous_subway_data.csv"
+            line_id_to_station_id = {}
+            id_to_station_dict = {}
+
+            with open(csv_file_path, mode='r') as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    latitude = int(row['X'])
-                    longitude = int(row['Y'])
-                    _stations.append(Station(position=Location(lat=latitude, lon=longitude)))
+                    line_id = row["line"]
+                    station_name = row["station_name"]
+                    lat = float(row["LAT"])
+                    long = float(row["LONG"])
+                    station_id = int(row["ID"])
 
-            # _connections = []
+                    if station_id not in id_to_station_dict:
+                        id_to_station_dict[station_id] = Station(station_id, Location(lat, long), station_name)
+                    if line_id not in line_id_to_station_id:
+                        line_id_to_station_id[line_id] = []
+                    line_id_to_station_id[line_id].append(station_id)
+            
+            from line import Line
+            lines = []
+            for line_id in line_id_to_station_id:
+                lines.append(Line(list(map(lambda station_id: id_to_station_dict[station_id], line_id_to_station_id[line_id])), line_id))
+            stations = list(sorted(id_to_station_dict.values(), key=lambda x: x.id))
 
-            connections_csv_file_path = 'data/connections.csv'
-            connections = []
-            with open(connections_csv_file_path, mode='r') as file:
+            csv_file_path = "code/data/shortest_paths.csv"
+            fastest_connections = []
+
+            with open(csv_file_path, mode='r') as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    from_station_id = int(row['FromStationID'])
-                    to_station_id = int(row['ToStationID'])
-                    distance = float(row['Distance'])
-                    
-                    # Finden der Stationen in der _stations Liste anhand ihrer ID
-                    from_station = next((s for s in _stations if s.id == from_station_id), None)
-                    to_station = next((s for s in _stations if s.id == to_station_id), None)
-                    
-                    if from_station is not None and to_station is not None:
-                        # Hinzufügen der Verbindung zur Liste
-                        connections.append((from_station, distance, to_station))
+                    start_id = row["start_station"]
+                    end_id = row["end_station"]
+                    connections = list(map(lambda x: id_to_station_dict[int(x)], row["connection"].split(" -> ")[0].strip("][").split(", ")))
+                    travel_time = float(row["connection"].split(" -> ")[1])
+                    fastest_connections.append((start_id, end_id, connections, travel_time))
 
-            FastestStationConnectionNetwork._connection_network = FastestStationConnectionNetwork(connections)
+            FastestStationConnectionNetwork._connection_network = FastestStationConnectionNetwork(fastest_connections, stations, lines)
+            LOGGER.debug("Finished to create fastest connection network")
+
 
         return FastestStationConnectionNetwork._connection_network
 
-    def __init__(self, connections: list[tuple[Station, float, Station]]) -> None:
-        from model_builder import solve_all_pair_shortest_path_problem
+    def __init__(self, fastest_connections: list[tuple[Station, Station, list[Station], float]], stations: [Station], lines) -> None:
 
-        self.connection_network = solve_all_pair_shortest_path_problem(connections)
+        from line import Line
+        self.lines: Line = lines
+        self.stations = stations
 
-        station_set = set()
-        for connection in connections:
-            station_set.add(connection[0])
-            station_set.add(connection[2])
+        self.connection_network: dict[int, dict[int, tuple(list[Station], float)]] = {}
+        for connection in fastest_connections:
+            start_id = connection[0] if connection[0] <= connection[1] else connection[1]
+            end_id = connection[1] if connection[1] > connection[0] else connection[0]
 
-        self.stations: list[Station] = sorted(station_set, key=lambda x: x.id)
+            if start_id not in self.connection_network:
+                self.connection_network[start_id] = {}
+
+            self.connection_network[start_id][end_id] = (connection[2], connection[3])
 
     # Returns: tuple[List of stations, transit time]
     def get_fastest_connection(self, start: Station, end: Station) -> tuple[list[Station], float]:

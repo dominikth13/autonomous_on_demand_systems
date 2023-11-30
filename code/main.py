@@ -86,11 +86,11 @@ def export_epoch_to_csv():
                 STATE_VALUE_TABLE.value_grid[time_interval][zone],
             ]
 
-    export_table.to_csv("training_data/state_value_table.csv")
+    export_table.to_csv("code/training_data/state_value_table.csv")
 
 
 def import_state_values_from_csv():
-    import_table = pd.read_csv("training_data/state_value_table.csv")
+    import_table = pd.read_csv("code/training_data/state_value_table.csv")
 
     for _, row in import_table.iterrows():
         start_time = Time.of_total_seconds(int(row["start_time"]))
