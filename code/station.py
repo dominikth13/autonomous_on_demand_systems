@@ -18,7 +18,7 @@ class FastestStationConnectionNetwork:
         if FastestStationConnectionNetwork._connection_network == None:
             print("Build fastest-station connection network")
             # Pfad zur CSV-Datei
-            stations_csv_file_path = 'stations.csv'
+            stations_csv_file_path = 'data/stations.csv'
 
             # Erstellung der _stations Liste durch Einlesen der CSV-Datei
             _stations = []
@@ -31,7 +31,7 @@ class FastestStationConnectionNetwork:
 
             # _connections = []
 
-            connections_csv_file_path = 'connections.csv'
+            connections_csv_file_path = 'data/connections.csv'
             connections = []
             with open(connections_csv_file_path, mode='r') as file:
                 reader = csv.DictReader(file)
@@ -62,7 +62,7 @@ class FastestStationConnectionNetwork:
             station_set.add(connection[0])
             station_set.add(connection[2])
 
-        self.stations = sorted(station_set, key=lambda x: x.id)
+        self.stations: list[Station] = sorted(station_set, key=lambda x: x.id)
 
     # Returns: tuple[List of stations, transit time]
     def get_fastest_connection(self, start: Station, end: Station) -> tuple[list[Station], float]:

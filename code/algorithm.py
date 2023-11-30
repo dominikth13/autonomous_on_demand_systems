@@ -30,7 +30,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                         origin, destination
                     )
 
-                    # Distance
+                    # Distance (time in second)
                     vehicle_time = start.distance_to(origin.position) / VEHICLE_SPEED
                     walking_time = destination.position.distance_to(end) / WALKING_SPEED
                     transit_time = connection[1]
@@ -40,31 +40,20 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                     total_time = vehicle_time + walking_time + transit_time + other_time
 
                     if total_time < default_route.total_time + L2:
-                        # if the route contains transit ticket for public transport needs to be added to overall price
-                        if transit_time > 0:
-                            public_transport_ticket = PUBLIC_TRANSPORT_TICKET_PRICE
-                        else:
-                            public_transport_ticket = PUBLIC_TRANSPORT_TICKET_PRICE
-
-                        #1.5 euro for each km with the vehicle 
-                        vehicle_price = (start.distance_to(origin.position)/1000)*TAXI_PRICE 
-                        price = vehicle_price + public_transport_ticket
-                        if price < default_route.price:
-                            routes_per_order[order].append(
-                                Route(
-                                    order,
-                                    start,
-                                    end,
-                                    stations,
-                                    vehicle_time,
-                                    transit_time,
-                                    walking_time,
-                                    other_time,
-                                    total_time,
-                                    vehicle_price,
-                                    price,
-                                )
+                        routes_per_order[order].append(
+                            Route(
+                                order,
+                                start,
+                                end,
+                                stations,
+                                vehicle_time,
+                                transit_time,
+                                walking_time,
+                                other_time,
+                                total_time,
+                                order.direct_connection[1] - total_time
                             )
+                        )
     return routes_per_order
 
 
@@ -108,9 +97,10 @@ def generate_driver_action_pairs(
                         pair.get_total_vehicle_travel_time_in_seconds() // 60
                     )
                 )
-                # weight = revenue for driver + state value after this option
+                # TODO potentially bring in a Malus for long trips since they bind the car more longer
+                # weight = time reduction for passenger + state value after this option
                 weight = (
-                    pair.action.route.vehicle_price
+                    pair.action.route.time_reduction
                     + DISCOUNT_FACTOR(
                         STATE.current_interval.start, arrival_interval.start
                     )
