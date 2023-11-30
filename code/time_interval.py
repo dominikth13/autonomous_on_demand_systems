@@ -11,6 +11,9 @@ class Time:
 
     def of_total_minutes(minutes: float) -> Time:
         return Time(minutes // 60, minutes % 60, (minutes % 1) * 60 )
+    
+    def of_total_seconds(seconds: float) -> Time:
+        return Time(seconds // 3600, (seconds % 3600) // 60, seconds % 60)
 
     # Calculate time difference(distance) in seconds
     def distance_to(self, other: Time) -> int:
