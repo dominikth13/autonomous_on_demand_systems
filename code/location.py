@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# the inputs of lat & lon are in meter
 class Location:
     def __init__(self, lat: float, lon: float):
         self.lat = lat

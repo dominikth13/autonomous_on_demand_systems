@@ -19,8 +19,7 @@ class Route:
         walking_time: float,
         other_time: float,
         total_time: float,
-        vehicle_price: float,
-        price: float,
+        time_reduction: float
     ) -> None:
         self.id = ID_PROVIDER.get_id()
         self.order = order
@@ -31,19 +30,17 @@ class Route:
         self.walking_time = walking_time
         self.other_time = other_time
         self.total_time = total_time
-        self.price = price
-
-        self.vehicle_price = vehicle_price
         self.vehicle_time = vehicle_time
         self.vehicle_destination_zone = STATE_VALUE_TABLE.grid.find_zone(destination if stations == [] else stations[0].position)
+        # How many seconds the route saves for the customer
+        self.time_reduction = time_reduction
     
     def is_regular_route(self) -> bool:
         return self.stations == []
 
 
 def regular_route(order: Order) -> Route:
-    distance_in_m = order.start.distance_to(order.end) * 1000
-    vehicle_time = distance_in_m/ VEHICLE_SPEED
-    price = (distance_in_m/1000)*1.5
-    #1.5 euro for each km with the vehicle 
-    return Route(order, order.start, order.end, [], vehicle_time, 0, 0, 0, vehicle_time, 5, price)
+    distance_in_m = order.start.distance_to(order.end)
+    vehicle_time = distance_in_m / VEHICLE_SPEED
+    
+    return Route(order, order.start, order.end, [], vehicle_time, 0, 0, 0, vehicle_time, vehicle_time - order.direct_connection[1])

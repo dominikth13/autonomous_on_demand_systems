@@ -16,7 +16,7 @@ from logger import LOGGER
 
 def q_learning():
     start_time = time.time()
-    # import_state_values_from_csv()
+    import_state_values_from_csv()
 
     # 1. Find all shortest paths in public transport network
     # Is done automatically in station.py
@@ -80,8 +80,8 @@ def export_epoch_to_csv():
     for time_interval in STATE_VALUE_TABLE.value_grid:
         for zone in STATE_VALUE_TABLE.value_grid[time_interval]:
             export_table.loc[len(export_table)] = [
-                time_interval.start.to_total_minutes(),
-                time_interval.end.to_total_minutes(),
+                time_interval.start.to_total_seconds(),
+                time_interval.end.to_total_seconds(),
                 zone.name,
                 STATE_VALUE_TABLE.value_grid[time_interval][zone],
             ]
@@ -92,11 +92,11 @@ def export_epoch_to_csv():
 def import_state_values_from_csv():
     import_table = pd.read_csv("training_data/state_value_table.csv")
 
-    for i in range(len(import_table)):
-        start_time = Time.of_total_minutes(int(import_table[i]["start_time"]))
+    for _, row in import_table.iterrows():
+        start_time = Time.of_total_seconds(int(row["start_time"]))
         interval = STATE_VALUE_TABLE.time_series.find_interval(start_time)
-        zone = STATE_VALUE_TABLE.grid.zones_dict[import_table[i]["zone_name"]]
-        state_value = float(import_table[i]["state_value"])
+        zone = STATE_VALUE_TABLE.grid.zones_dict[row["zone_name"]]
+        state_value = float(row["state_value"])
         STATE_VALUE_TABLE.value_grid[interval][zone] = state_value
 
 

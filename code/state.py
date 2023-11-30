@@ -45,7 +45,7 @@ class State:
 
                 # Adjust state value
                 STATE_VALUE_TABLE.adjust_state_value(
-                    action.route.vehicle_price,
+                    action.route.time_reduction,
                     current_interval=self.current_interval,
                     current_location=driver.current_position,
                     next_time=self.current_time.add_seconds(pair.get_total_vehicle_travel_time_in_seconds()),
