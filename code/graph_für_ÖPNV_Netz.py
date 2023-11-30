@@ -71,7 +71,7 @@ def read_csv_data(filename):
     with open(filename, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            data.append((int(row['station_id']), row['stop_name'], row['line'], float(row['gtfs_latitude']), float(row['gtfs_longitude'])))
+            data.append((int(row['ID']), row['Station Name'], row['Line'], float(row['LAT']), float(row['LONG'])))
     return data
 
 ###############################################################################
@@ -154,7 +154,7 @@ def save_paths_to_csv(paths, filename):
 
 
 if __name__ == "__main__": 
-    station_data = read_csv_data('training_data\stationen_NY_full.csv')
+    station_data = read_csv_data('training_data\continuous_subway_data.csv')
     station_data.sort(key=lambda x: x[0])
     edges = create_edges(station_data)
     graph = Graph(edges)
