@@ -16,7 +16,7 @@ class StateValueTable:
         if StateValueTable._state_value_table == None:
             StateValueTable._state_value_table = StateValueTable(
                 Grid(),
-                TimeSeries(Time(3, 0, 0), Time(14, 0, 0), 300),
+                TimeSeries(Time(3, 0, 0), Time(18, 0, 0), 300),
             )
         return StateValueTable._state_value_table
 

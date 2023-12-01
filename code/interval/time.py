@@ -4,12 +4,12 @@ class Time:
     
     # delete other variables, only create total_seconds
     def __init__(self, hour: int, minute: int, second: int) -> None:
-        self.total_seconds = hour * 3600 + minute * 60 + second
+        self.total_seconds = int(hour * 3600 + minute * 60 + second)
 
-    def of_total_minutes(minutes: float) -> Time:
-        return Time(minutes // 60, minutes % 60, (minutes % 1) * 60 )
+    def of_total_minutes(minutes: int) -> Time:
+        return Time(minutes // 60, minutes % 60, 0)
     
-    def of_total_seconds(seconds: float) -> Time:
+    def of_total_seconds(seconds: int) -> Time:
         return Time(seconds // 3600, (seconds % 3600) // 60, seconds % 60)
 
     # Calculate time difference(distance) in seconds
@@ -21,11 +21,7 @@ class Time:
         return self.add_seconds(seconds)
     
     def add_seconds(self, seconds: int) -> Time:
-        new_total_second = self.total_seconds + seconds
-        hour = new_total_second // 3600
-        minute = (new_total_second % 3600) // 60
-        second = new_total_second % 60 
-        return Time(hour, minute, second)
+        return Time.of_total_seconds(self.total_seconds + seconds)
     
     def is_before(self, other: Time) -> bool:
         return self.total_seconds <= other.total_seconds
@@ -45,7 +41,7 @@ class Time:
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
     def to_hours_minutes_seconds(self):
-        hours = self.total_seconds // 3600
-        minutes = (self.total_seconds % 3600) // 60
-        seconds = self.total_seconds % 60
+        hours = int(self.total_seconds // 3600)
+        minutes = int((self.total_seconds % 3600) // 60)
+        seconds = int(self.total_seconds % 60)
         return hours, minutes, seconds

@@ -22,28 +22,25 @@ def q_learning():
     for start_minutes in range(
         StateValueTable.get_state_value_table().time_series.start_time.to_total_minutes(),
         # TimeSeries is two hours longer than the simulation
-        StateValueTable.get_state_value_table().time_series.end_time.to_total_minutes() - 120,
+        StateValueTable.get_state_value_table().time_series.end_time.to_total_minutes() - 360,
     ):
         current_time = Time.of_total_minutes(start_minutes)
-        LOGGER.info(f"Starting iteration {counter}")
+        LOGGER.info(f"Simulate time {current_time}")
         LOGGER.debug("Collecting orders")
         # Collect new orders
         orders = [
             Order(
                 Location(
-                    random.randint(0, 10000),
-                    random.randint(0, 10000),
+                    random.randint(40534522, 40925205) / 1000000,
+                    random.randint(-74050826, -73685841) / 1000000,
                 ),
                 Location(
-                    random.randint(0, 10000),
-                    random.randint(0, 10000),
+                    random.randint(40534522, 40925205) / 1000000,
+                    random.randint(-74050826, -73685841) / 1000000,
                 ),
             )
             for i in range(random.randint(0, 50))
         ]
-
-        if counter == 232:
-            pass
 
         # Add orders to state
         State.get_state().add_orders(orders)
@@ -78,7 +75,7 @@ def export_epoch_to_csv():
             export_table.loc[len(export_table)] = [
                 time_interval.start.to_total_seconds(),
                 time_interval.end.to_total_seconds(),
-                zone.name,
+                zone.id,
                 StateValueTable.get_state_value_table().value_grid[time_interval][zone],
             ]
 

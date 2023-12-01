@@ -17,8 +17,8 @@ class TimeSeries:
         end_seconds = end.to_total_seconds()
         
         for current_seconds in range(start_seconds, end_seconds, intervalLengthInSeconds):
-            interval_start = Time(0, 0, current_seconds)
-            interval_end = Time(0, 0, current_seconds + intervalLengthInSeconds - 1)
+            interval_start = Time.of_total_seconds(current_seconds)
+            interval_end = Time.of_total_seconds(current_seconds + intervalLengthInSeconds - 1)
             interval = GridInterval(counter, interval_start, interval_end)
             self.intervals.append(interval)
             counter += 1

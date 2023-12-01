@@ -44,8 +44,8 @@ class FastestStationConnectionNetwork:
             with open(csv_file_path, mode='r') as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    start_id = row["start_station"]
-                    end_id = row["end_station"]
+                    start_id = int(row["start_station"])
+                    end_id = int(row["end_station"])
                     connections = list(map(lambda x: id_to_station_dict[int(x)], row["connection"].split(" -> ")[0].strip("][").split(", ")))
                     travel_time = float(row["connection"].split(" -> ")[1])
                     fastest_connections.append((start_id, end_id, connections, travel_time))
@@ -64,7 +64,7 @@ class FastestStationConnectionNetwork:
         self.connection_network: dict[int, dict[int, tuple(list[Station], float)]] = {}
         for connection in fastest_connections:
             start_id = connection[0] if connection[0] <= connection[1] else connection[1]
-            end_id = connection[1] if connection[1] > connection[0] else connection[0]
+            end_id = connection[1] if connection[0] <= connection[1] else connection[0]
 
             if start_id not in self.connection_network:
                 self.connection_network[start_id] = {}
@@ -73,4 +73,7 @@ class FastestStationConnectionNetwork:
 
     # Returns: tuple[List of stations, transit time]
     def get_fastest_connection(self, start: Station, end: Station) -> tuple[list[Station], float]:
-        return self.connection_network[start.id][end.id]
+        start_id = start.id if start.id <= end.id else end.id
+        end_id = end.id if start.id <= end.id else start.id
+
+        return self.connection_network[start_id][end_id]

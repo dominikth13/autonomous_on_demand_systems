@@ -22,8 +22,17 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
         end = order.end
 
         if default_route.total_time > L1:
-            for origin in fastest_connection_network.stations:
-                for destination in fastest_connection_network.stations:
+            # 1. Get the closest start and end station for each line
+            from public_transport.station import Station
+            origins: list[Station] = []
+            destinations: list[Station] = []
+            for line in fastest_connection_network.lines:
+                origins.append(line.get_closest_station(start))
+                destinations.append(line.get_closest_station(end))
+
+            # 2. Generate combination routes
+            for origin in origins:
+                for destination in destinations:
                     if origin == destination:
                         continue
                     connection = fastest_connection_network.get_fastest_connection(

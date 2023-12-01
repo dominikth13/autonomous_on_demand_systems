@@ -8,4 +8,4 @@ class Location:
     
     # define distance between two points in meter
     def distance_to(self, other: Location) -> float:
-        return 111.3 * abs(self.lat - other.lat) + 71.5 * abs(self.lon - other.lon)
+        return (111.3 * abs(self.lat - other.lat) + 71.5 * abs(self.lon - other.lon)) * 1000
