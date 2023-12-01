@@ -1,4 +1,4 @@
-from state_value_table import Time
+from interval.time import Time
 
 # Minimal trip time for routes to be eligible for combined routes in seconds
 L1 = 600
@@ -28,7 +28,7 @@ ORDER_EXPIRY_DURATION = 120
 # Time it takes for customers to enter or leave the public transport system in seconds
 PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120
 
-# Waitin
+# Medium waiting time
 def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
     five = Time(5,0,0)
     six = Time(6,0,0)

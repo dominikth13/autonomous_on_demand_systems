@@ -1,5 +1,5 @@
 from utils import IdProvider
-from location import Location
+from location.location import Location
 from program_params import *
 
 ID_PROVIDER = IdProvider()
@@ -12,7 +12,7 @@ class Order:
         self.expires = ORDER_EXPIRY_DURATION
 
         fastest_connection = None
-        from station import FastestStationConnectionNetwork
+        from public_transport.fastest_station_connection_network import FastestStationConnectionNetwork
         fastest_connection_network = FastestStationConnectionNetwork.get_instance()
         # Find the most fastest connection without any autonomous on-demand services
         for origin in fastest_connection_network.stations:

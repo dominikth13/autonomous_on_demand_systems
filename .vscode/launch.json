@@ -2,19 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Q-Learning",
+            "name": "Debug Q-Learning",
             "type": "python",
             "request": "launch",
             "program": "code/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },
-        {
-            "name": "Python: File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "justMyCode": true
-        }
+
     ]
 }
