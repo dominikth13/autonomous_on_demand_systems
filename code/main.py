@@ -12,7 +12,7 @@ from state.state_value_table import StateValueTable
 
 def q_learning():
     start_time = time.time()
-    #import_state_values_from_csv()
+    import_state_values_from_csv()
 
     # 1. Find all shortest paths in public transport network
     # Is done automatically in station.py
