@@ -5,8 +5,11 @@ from location.location import Location
 from logger import LOGGER
 import shapely
 
-csv.field_size_limit(sys.maxsize)
-
+#csv.field_size_limit(sys.maxsize)
+if sys.maxsize > 2**32:
+    csv.field_size_limit(2**31 - 1)  # für 64-Bit-Systeme
+else:
+    csv.field_size_limit(2**15 - 1) 
 
 # We have the problem that zones not all the time match some straight lines
 # We define our zones as sets of smaller squares where it is super easy to

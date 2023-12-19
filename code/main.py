@@ -8,7 +8,22 @@ import pandas as pd
 from logger import LOGGER
 from state.state import State
 from state.state_value_table import StateValueTable
+import numpy as np
 
+grid_cells = pd.read_csv('code\data\grid_cells.csv') 
+grid_cells.columns = ['Index', 'id', 'lat', 'long', 'zone_id']
+
+np.random.seed(42)
+random.seed(42)
+def get_random_coordinates_for_zone(zone):
+    
+    possible_locations = grid_cells[grid_cells['zone_id'] == zone]
+    if not possible_locations.empty:
+        selected_row = possible_locations.sample(n=1).iloc[0]
+        return (selected_row['lat'], selected_row['long'])
+    else:
+        # Entscheiden, wie mit fehlenden Koordinaten umgegangen werden soll
+        raise ValueError(f"Keine Koordinaten für Zone {zone} gefunden")
 
 def q_learning():
     start_time = time.time()
@@ -16,31 +31,29 @@ def q_learning():
 
     # 1. Find all shortest paths in public transport network
     # Is done automatically in station.py
-
+    np.random.seed(42)
+    random.seed(42)
     # 2. Run Q-Learning algorithm to train state value table
     counter = 1
+    df = pd.read_csv('code\data\orders_2015-07-01.csv')
+
     for start_minutes in range(
         StateValueTable.get_state_value_table().time_series.start_time.to_total_minutes(),
-        # TimeSeries is two hours longer than the simulation
         StateValueTable.get_state_value_table().time_series.end_time.to_total_minutes() - 360,
     ):
         current_time = Time.of_total_minutes(start_minutes)
         LOGGER.info(f"Simulate time {current_time}")
-        LOGGER.debug("Collecting orders")
-        # Collect new orders
+
+        # Filtern der Daten basierend auf dem Zeitfenster
+        hours, minutes, seconds = current_time.to_hours_minutes_seconds()
+        df['pickup_time'] = pd.to_datetime(df['pickup_time'], format='%H:%M:%S').dt.time
+        filtered_orders = df[(df['pickup_time'].apply(lambda x: x.hour) == hours) &(df['pickup_time'].apply(lambda x: x.minute) == minutes)]
+
         orders = [
             Order(
-                Location(
-                    random.randint(40534522, 40925205) / 1000000,
-                    random.randint(-74050826, -73685841) / 1000000,
-                ),
-                Location(
-                    random.randint(40534522, 40925205) / 1000000,
-                    random.randint(-74050826, -73685841) / 1000000,
-                ),
-            )
-            for i in range(random.randint(0, 50))
-        ]
+            Location(*get_random_coordinates_for_zone(row.PULocationID)),
+            Location(*get_random_coordinates_for_zone(row.DOLocationID))
+        ) for row in filtered_orders.itertuples()]     
 
         # Add orders to state
         State.get_state().add_orders(orders)
@@ -52,8 +65,11 @@ def q_learning():
         driver_action_pairs = generate_driver_action_pairs(order_routes_dict)
         # Find Action-Driver matches based on a min-cost-flow problem
         LOGGER.debug("Generate driver-action matches")
+    
         matches = solve_optimization_problem(driver_action_pairs)
+
         # Apply state changes based on Action-Driver matches and existing driver jobs
+      
         LOGGER.debug("Apply state-value changes")
         State.get_state().apply_state_change(matches)
         # Update the expiry durations of still open orders
@@ -61,10 +77,10 @@ def q_learning():
         # Increment to next interval
         State.get_state().increment_time_interval(current_time)
         counter += 1
+
     LOGGER.info("Exporting results...")
     export_epoch_to_csv()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
-
 
 def export_epoch_to_csv():
     export_table = pd.DataFrame(
@@ -93,3 +109,15 @@ def import_state_values_from_csv():
         StateValueTable.get_state_value_table().value_grid[interval][zone] = state_value
 
 q_learning()
+
+
+# INFO:algorithm:Simulate time 03:00:00
+# Laufzeit filtered_orders: 0.0 Sekunden
+# Laufzeit orders: 620.99849152565 Sekunden
+# Laufzeit add_orders: 0.029900312423706055 Sekunden
+# Laufzeit generate Routes: 345.75252294540405 Sekunden
+# Laufzeit generate_driver_action_pairs: 794.6348361968994 Sekunden
+# Laufzeit solve optimization_problem: 31.162750244140625 Sekunden
+# Laufzeit rest: 0.7596573829650879 Sekunden
+# INFO:algorithm:Simulate time 03:01:00
+# Laufzeit filtered_orders: 0.0 Sekunden
