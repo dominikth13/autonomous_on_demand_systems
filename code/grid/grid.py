@@ -1,0 +1,124 @@
+from __future__ import annotations
+import csv
+from grid.grid_cell import GridCell
+from location.location import Location
+from location.zone import Zone
+from logger import LOGGER
+from utils import IdProvider
+
+
+ID_PROVIDER = IdProvider()
+
+class Grid:
+    def __init__(
+        self
+    ):
+        self.zones_dict = {zone.id: zone for zone in Zone.get_zones()}
+        
+        LOGGER.debug("Starting to create grid cells")
+        cells_by_lat_long = {}
+        # TODO sort cells based on lat and long
+        csv_file_path = "code/data/grid_cells.csv"
+        with open(csv_file_path, mode="r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                zone_id = int(float(row["zone_id"]))
+                lat = float(row["lat"])
+                long = float(row["long"])
+
+                if lat not in cells_by_lat_long:
+                    cells_by_lat_long[lat] = {}
+
+                cells_by_lat_long[lat][long] = GridCell(Location(lat, long), self.zones_dict[zone_id])
+
+        # cells is a two dimensional sorted array sorted by lat in the outer and long in the inner dimension
+        self.cells: list[list[GridCell]] = [[None for long in cells_by_lat_long[lat]] for lat in cells_by_lat_long]
+        sorted_lat = sorted(cells_by_lat_long)
+        for i in range(len(sorted_lat)):
+            sorted_long = sorted(cells_by_lat_long[sorted_lat[i]])
+            for j in range(len(sorted_long)):
+                self.cells[i][j] = cells_by_lat_long[sorted_lat[i]][sorted_long[j]]
+        LOGGER.debug("Finished to create grid cells")
+
+    # Find the fitting zone to a coordinate location
+    # Use two binary searches on lat and long to reduce runtime to O(log(sqrt(n)))
+    def find_zone(self, location: Location) -> Zone:
+        low = 0
+        high = len(self.cells) - 1
+        mid = 0
+
+        first_selection = []
+        # Use binary search for lat
+        while low <= high:
+            mid = (high + low) // 2
+
+            if mid == 0 or mid == len(self.cells) - 1:
+                first_selection = self.cells[mid]
+                break
+
+            if self.cells[mid][0].center.lat < location.lat:
+                if self.cells[mid + 1][0].center.lat >= location.lat:
+                    first_selection = (
+                        self.cells[mid]
+                        if abs(self.cells[mid][0].center.lat - location.lat)
+                        <= abs(self.cells[mid + 1][0].center.lat - location.lat)
+                        else self.cells[mid + 1]
+                    )
+                    break
+                else:
+                    low = mid + 1
+            else:
+                if self.cells[mid - 1][0].center.lat <= location.lat:
+                    first_selection = (
+                        self.cells[mid]
+                        if abs(self.cells[mid][0].center.lat - location.lat)
+                        <= abs(self.cells[mid - 1][0].center.lat - location.lat)
+                        else self.cells[mid + 1]
+                    )
+                    break
+                else:
+                    high = mid - 1
+
+        if len(first_selection) == 0:
+            raise Exception(f"Latitute {location.lat} not in range")
+
+        low = 0
+        high = len(first_selection) - 1
+        mid = 0
+
+        final_cell = None
+        # Use binary search for lon
+        while low <= high:
+            mid = (high + low) // 2
+
+            if mid == 0 or mid == len(first_selection) - 1:
+                final_cell = first_selection[mid]
+                break
+
+            if first_selection[mid].center.lon < location.lon:
+                if first_selection[mid + 1].center.lon >= location.lon:
+                    final_cell = (
+                        first_selection[mid]
+                        if abs(first_selection[mid].center.lon - location.lon)
+                        <= abs(first_selection[mid + 1].center.lon - location.lon)
+                        else first_selection[mid + 1]
+                    )
+                    break
+                else:
+                    low = mid + 1
+            else:
+                if first_selection[mid - 1].center.lon <= location.lon:
+                    final_cell = (
+                        first_selection[mid]
+                        if abs(first_selection[mid].center.lon - location.lon)
+                        <= abs(first_selection[mid - 1].center.lon - location.lon)
+                        else first_selection[mid - 1]
+                    )
+                    break
+                else:
+                    high = mid - 1
+
+        if final_cell == None:
+            raise Exception(f"Longitude {location.lon} not in range")
+
+        return final_cell.zone
