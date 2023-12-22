@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+from grid.grid_cell import GridCell
 from location.location import Location
+from location.zone import Zone
 from logger import LOGGER
-from grid import GridCell, Zone
 
 def to_zone(location: Location):
 

@@ -1,19 +1,17 @@
+import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from state import STATE
-from state_value_table import STATE_VALUE_TABLE
-from model_builder import (
-    or_tools_min_cost_flow,
-    solve_as_bipartite_matching_problem,
-    solve_as_min_cost_flow_problem,
-)
-from action import Action, DriverActionPair
-from driver import DRIVERS, Driver
-from route import *
+from action.action import Action
+from action.driver_action_pair import DriverActionPair
+from algorithm.algorithm import generate_routes
+from driver.driver import Driver
+from driver.drivers import Drivers
 from order import Order
 from program_params import *
 import pandas as pd
+
+from route import Route
 
 
 # Define a simple neural network
@@ -33,32 +31,31 @@ class NeuroNet(nn.Module):
 
         x = self.fc3(x)
 
+
 # Define a loss function and optimizer
-def td_error(output_net, output_target_net,reward):
-    loss = (reward + output_target_net - output_net)**2
+def td_error(output_net, output_target_net, reward):
+    loss = (reward + output_target_net - output_net) ** 2
     return loss
- # Commonly used for classification problems
 
 
-def generate_driver_action_pairs_without_weights(
-    order_routes_dict: dict[Order, list[Route]]
-) -> list[DriverActionPair]:
+# Commonly used for classification problems
+
+
+def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
+    orders = []
+    for i in range(1440):
+        sub_orders = Order.get_orders_by_time()[Time.of_total_minutes(i)]
+        if len(sub_orders) == 0:
+            continue
+        orders.extend(random.sample(sub_orders, int(len(sub_orders) / 10)))
+
     driver_to_orders_to_routes_dict: dict[
         Driver, dict[Order, list[DriverActionPair]]
-    ] = {driver: {} for driver in DRIVERS}
-    driver_to_idling_dict = {driver: None for driver in DRIVERS}
-
-    # Central idling action
-    idling = Action(None)
+    ] = {driver: {} for driver in Drivers.get_drivers()}
 
     # 1. Generate DriverActionPair for each pair that is valid (distance), add DriverIdlingPair for each driver
-    for driver in DRIVERS:
-        driver_to_idling_dict[driver] = DriverActionPair(driver, idling, 0)
-        if driver.is_occupied():
-            # If driver is occupied he cannot take any new order
-            continue
-
-        for order in order_routes_dict:
+    for driver in Drivers.get_drivers():
+        for order in orders:
             if (
                 order.start.distance_to(driver.current_position)
                 > PICK_UP_DISTANCE_THRESHOLD
@@ -66,39 +63,43 @@ def generate_driver_action_pairs_without_weights(
                 # If driver is currently to far away for this order he ignores it
                 continue
             driver_to_orders_to_routes_dict[driver][order] = []
-            for route in order_routes_dict[order]:
+            for route in generate_routes([order]):
                 driver_to_orders_to_routes_dict[driver][order].append(
                     DriverActionPair(driver, Action(route), 0)
                 )
-    data = pd.DataFrame(columns=['Reward', 'Target Destination', 'Target Arrival', 'Current Time', 'Current Position'])
+
+    data = pd.DataFrame(
+        columns=[
+            "Reward",
+            "Target Time",
+            "Target Position",
+            "Current Time",
+            "Current Position",
+        ]
+    )
     # 2. For each DriverActionPair: calculate edge weight based on reward and state value function
     for driver in driver_to_orders_to_routes_dict:
         for order in driver_to_orders_to_routes_dict[driver]:
             for pair in driver_to_orders_to_routes_dict[driver][order]:
-                arrival_interval = STATE_VALUE_TABLE.time_series.find_interval(
-                    STATE.current_interval.start.add_minutes(
-                        pair.get_total_vehicle_travel_time_in_seconds() // 60
-                    )
-                )
                 # TODO potentially bring in a Malus for long trips since they bind the car more longer
                 # weight = time reduction for passenger + state value after this option
 
                 reward = pair.action.route.time_reduction
-                target_destination = pair.action.route.vehicle_destination_zone
-                target_arrival = arrival_interval.end
-                current_time = STATE.current_interval.start
+                target_position = pair.action.route.vehicle_destination
+                target_time = pair.action.route.order.dispatch_time.add_seconds(
+                    pair.action.route.vehicle_time
+                ).to_total_seconds()
+                current_time = pair.action.route.order.dispatch_time.to_total_seconds()
                 current_position = pair.driver.current_position
 
                 row = {
-                'Driver': driver,
-                'Order': order,
-                'Reward': reward,
-                'Target Destination': target_destination,
-                'Target Arrival': target_arrival,
-                'Current Time': current_time,
-                'Current Position': current_position    
+                    "Reward": reward,
+                    "Target Time": target_time,
+                    "Target Position": target_position,
+                    "Current Time": current_time,
+                    "Current Position": current_position,
                 }
 
-                 # Append to DataFrame
+                # Append to DataFrame
                 data = data.append(row, ignore_index=True)
     return data
