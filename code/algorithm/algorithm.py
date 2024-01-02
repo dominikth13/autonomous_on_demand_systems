@@ -112,7 +112,7 @@ def generate_driver_action_pairs(
                 weight = (
                     pair.action.route.time_reduction
                     + DISCOUNT_FACTOR(
-                        State.get_state().current_interval.start, arrival_interval.start
+                        State.get_state().current_interval.start.distance_to(arrival_interval.start)
                     )
                     * StateValueTable.get_state_value_table().get_state_value(pair.action.route.vehicle_destination_cell.zone, arrival_interval)
                 )

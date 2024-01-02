@@ -9,6 +9,7 @@ from public_transport.fastest_station_connection_network import FastestStationCo
 from state.state import State
 from state.state_value_table import StateValueTable
 import pandas as pd
+from program_params import *
 
 def q_learning():
     start_time = time.time()
@@ -33,11 +34,11 @@ def q_learning():
     # Is done automatically in station.py
 
     # 2. Run Q-Learning algorithm to train state value table
-    for start_minutes in range(
+    for current_total_minutes in range(
         TimeSeries.get_instance().start_time.to_total_minutes(),
         TimeSeries.get_instance().end_time.to_total_minutes() - 360,
     ):
-        current_time = Time.of_total_minutes(start_minutes)
+        current_time = Time.of_total_minutes(current_total_minutes)
         LOGGER.info(f"Simulate time {current_time}")
 
         LOGGER.debug(f"Dispatch orders")
@@ -62,6 +63,10 @@ def q_learning():
         # Apply state changes based on Action-Driver matches and existing driver jobs
         LOGGER.debug("Apply state-value changes")
         State.get_state().apply_state_change(matches)
+
+        if current_total_minutes - TimeSeries.get_instance().start_time.to_total_minutes() % MAX_IDLING_TIME == 0:
+            LOGGER.debug("Relocate long time idle drivers")
+            State.get_state().relocate()
 
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
