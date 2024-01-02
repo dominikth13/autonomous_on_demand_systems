@@ -10,10 +10,18 @@ from utils import IdProvider
 ID_PROVIDER = IdProvider()
 
 class Grid:
+    _grid = None
+
+    def get_instance() -> Grid:
+        if Grid._grid == None:
+            Grid._grid = Grid()
+        return Grid._grid
+
     def __init__(
         self
     ):
-        self.zones_dict = {zone.id: zone for zone in Zone.get_zones()}
+        self.zones_dict: dict[int, Zone] = {zone.id: zone for zone in Zone.get_zones()}
+        self.cells_dict: dict[int, list[GridCell]] = {zone_id: [] for zone_id in self.zones_dict.keys()}
         
         LOGGER.debug("Starting to create grid cells")
         cells_by_lat_long = {}
@@ -30,6 +38,7 @@ class Grid:
                     cells_by_lat_long[lat] = {}
 
                 cells_by_lat_long[lat][long] = GridCell(Location(lat, long), self.zones_dict[zone_id])
+                self.cells_dict[zone_id].append(cells_by_lat_long[lat][long])
 
         # cells is a two dimensional sorted array sorted by lat in the outer and long in the inner dimension
         self.cells: list[list[GridCell]] = [[None for long in cells_by_lat_long[lat]] for lat in cells_by_lat_long]
@@ -41,8 +50,12 @@ class Grid:
         LOGGER.debug("Finished to create grid cells")
 
     # Find the fitting zone to a coordinate location
-    # Use two binary searches on lat and long to reduce runtime to O(log(sqrt(n)))
     def find_zone(self, location: Location) -> Zone:
+        return self.find_cell(location).zone
+
+    # Find the fitting cell to a coordinate location
+    # Use two binary searches on lat and long to reduce runtime to O(log(sqrt(n)))
+    def find_cell(self, location: Location) -> GridCell:
         low = 0
         high = len(self.cells) - 1
         mid = 0
@@ -121,4 +134,4 @@ class Grid:
         if final_cell == None:
             raise Exception(f"Longitude {location.lon} not in range")
 
-        return final_cell.zone
+        return final_cell

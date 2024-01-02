@@ -3,7 +3,7 @@ from __future__ import annotations
 class Time:
     
     # delete other variables, only create total_seconds
-    def __init__(self, hour: int, minute: int, second: int) -> None:
+    def __init__(self, hour: int, minute: int, second = 0) -> None:
         self.total_seconds = int(hour * 3600 + minute * 60 + second)
 
     def of_total_minutes(minutes: int) -> Time:
@@ -45,3 +45,13 @@ class Time:
         minutes = int((self.total_seconds % 3600) // 60)
         seconds = int(self.total_seconds % 60)
         return hours, minutes, seconds
+    
+    # Override equals implementation
+    def __eq__(self, other):
+        if isinstance(other, Time):
+            return self.total_seconds == other.total_seconds
+        return False
+
+    # Override hash implementation
+    def __hash__(self):
+      return self.total_seconds

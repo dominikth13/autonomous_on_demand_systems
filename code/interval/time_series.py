@@ -5,7 +5,14 @@ from utils import IdProvider
 
 ID_PROVIDER = IdProvider()
 
-class TimeSeries: 
+class TimeSeries:
+    _time_series = None
+
+    def get_instance() -> TimeSeries:
+        if TimeSeries._time_series == None:
+            TimeSeries._time_series = TimeSeries(Time(3, 0, 0), Time(18, 0, 0), 300)
+        return TimeSeries._time_series
+
     def __init__(self, start: Time, end: Time, intervalLengthInSeconds: int) -> None:
         self.start_time = start
         self.end_time = end

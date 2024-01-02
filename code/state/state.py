@@ -1,6 +1,7 @@
 from __future__ import annotations
 from action.driver_action_pair import DriverActionPair
 from driver.drivers import Drivers
+from interval.time_series import TimeSeries
 from state.state_value_table import StateValueTable
 from order import Order
 from program_params import *
@@ -17,7 +18,7 @@ class State:
         # Dict containing orders mapped by id
         self.orders_dict: dict[int, Order] = {}
 
-        self.current_interval = StateValueTable.get_state_value_table().time_series.intervals[0]
+        self.current_interval = TimeSeries.get_instance().intervals[0]
         self.current_time = self.current_interval.start
 
     def apply_state_change(self, driver_action_pairs: list[DriverActionPair]) -> None:
@@ -31,7 +32,7 @@ class State:
                     0,
                     current_interval=self.current_interval,
                     current_location=driver.current_position,
-                    next_interval=StateValueTable.get_state_value_table().time_series.get_next_interval(self.current_interval),
+                    next_interval=TimeSeries.get_instance().get_next_interval(self.current_interval),
                     next_location=driver.current_position
                 )
             else:
@@ -53,7 +54,7 @@ class State:
                     current_interval=self.current_interval,
                     current_location=driver.current_position,
                     next_time=self.current_time.add_seconds(pair.get_total_vehicle_travel_time_in_seconds()),
-                    next_zone=action.route.vehicle_destination_zone,
+                    next_zone=action.route.vehicle_destination_cell.zone,
                 )
 
                 # Remove order from open orders set
@@ -80,7 +81,7 @@ class State:
     
     def increment_time_interval(self, current_time) -> None:
         if self.current_interval.end.is_before(current_time):
-            self.current_interval = StateValueTable.get_state_value_table().time_series.intervals[self.current_interval.index + 1]
+            self.current_interval = TimeSeries.get_instance().intervals[self.current_interval.index + 1]
         self.current_time = current_time
         
                 

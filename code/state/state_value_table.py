@@ -1,5 +1,7 @@
 from __future__ import annotations
+import itertools
 from grid.grid import Grid
+from grid.grid_cell import GridCell
 from location.location import Location
 from interval.time_series import GridInterval, TimeSeries, Time
 from location.zone import Zone
@@ -15,18 +17,17 @@ class StateValueTable:
     def get_state_value_table() -> StateValueTable:
         if StateValueTable._state_value_table == None:
             StateValueTable._state_value_table = StateValueTable(
-                Grid(),
-                TimeSeries(Time(3, 0, 0), Time(18, 0, 0), 300),
+                Grid.get_instance(),
+                TimeSeries.get_instance(),
             )
         return StateValueTable._state_value_table
 
     def __init__(self, grid: Grid, time_series: TimeSeries) -> None:
+        # TODO fix
         self.value_grid = {
             interval: {zone: 0 for zone in grid.zones_dict.values()}
             for interval in time_series.intervals
         }
-        self.grid = grid
-        self.time_series = time_series
 
     def adjust_state_value(
         self,
@@ -34,11 +35,11 @@ class StateValueTable:
         current_time: Time = None,
         current_interval: GridInterval = None,
         current_location: Location = None,
-        current_zone: Zone = None,
+        current_zone: GridCell = None,
         next_time: Time = None,
         next_interval: GridInterval = None,
         next_location: Location = None,
-        next_zone: Zone = None,
+        next_zone: GridCell = None,
     ) -> None:
         if current_zone and current_location:
             raise Exception("Only current zone or location is allowed")
@@ -61,13 +62,13 @@ class StateValueTable:
             raise Exception("No next time or interval was specified")
 
         if current_zone == None:
-            current_zone = self.grid.find_zone(current_location)
+            current_zone = Grid.get_instance().find_zone(current_location)
         if current_interval == None:
-            current_interval = self.time_series.find_interval(current_time)
+            current_interval = TimeSeries.get_instance().find_interval(current_time)
         if next_zone == None:
-            next_zone = self.grid.find_zone(next_location)
+            next_zone = Grid.get_instance().find_zone(next_location)
         if next_interval == None:
-            next_interval = self.time_series.find_interval(next_time)
+            next_interval = TimeSeries.get_instance().find_interval(next_time)
 
         self.value_grid[current_interval][current_zone] = self.value_grid[
             current_interval

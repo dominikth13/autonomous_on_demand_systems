@@ -1,3 +1,4 @@
+from grid.grid import Grid
 from public_transport.station import Station
 from state.state_value_table import StateValueTable
 from location.location import Location
@@ -32,8 +33,9 @@ class Route:
         self.other_time = other_time
         self.total_time = total_time
         self.vehicle_time = vehicle_time
-        self.vehicle_destination_zone = (
-            StateValueTable.get_state_value_table().grid.find_zone(
+        self.vehicle_destination = destination if stations == [] else stations[0].position
+        self.vehicle_destination_cell = (
+            Grid.get_instance().find_cell(
                 destination if stations == [] else stations[0].position
             )
         )

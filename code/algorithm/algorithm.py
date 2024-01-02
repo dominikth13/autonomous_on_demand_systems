@@ -1,6 +1,7 @@
 from action.driver_action_pair import DriverActionPair
 from algorithm.model_builder import or_tools_min_cost_flow
 from driver.drivers import Drivers
+from interval.time_series import TimeSeries
 from public_transport.fastest_station_connection_network import FastestStationConnectionNetwork
 
 from action.action import Action
@@ -101,7 +102,7 @@ def generate_driver_action_pairs(
     for driver in driver_to_orders_to_routes_dict:
         for order in driver_to_orders_to_routes_dict[driver]:
             for pair in driver_to_orders_to_routes_dict[driver][order]:
-                arrival_interval = StateValueTable.get_state_value_table().time_series.find_interval(
+                arrival_interval = TimeSeries.get_instance().find_interval(
                     State.get_state().current_interval.start.add_minutes(
                         pair.get_total_vehicle_travel_time_in_seconds() // 60
                     )
@@ -113,7 +114,7 @@ def generate_driver_action_pairs(
                     + DISCOUNT_FACTOR(
                         State.get_state().current_interval.start, arrival_interval.start
                     )
-                    * StateValueTable.get_state_value_table().get_state_value(pair.action.route.vehicle_destination_zone, arrival_interval)
+                    * StateValueTable.get_state_value_table().get_state_value(pair.action.route.vehicle_destination_cell.zone, arrival_interval)
                 )
                 pair.weight = weight
 

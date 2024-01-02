@@ -1,5 +1,6 @@
 import csv
 from driver.driver import Driver
+from grid.grid import Grid
 from location.location import Location
 from state.state_value_table import StateValueTable
 
@@ -15,7 +16,7 @@ class Drivers:
                 reader = csv.DictReader(file)
                 for row in reader:
                     zone_id = int(row["Zone_ID"])
-                    location = StateValueTable.get_state_value_table().grid.zones_dict[zone_id].central_location
+                    location = Grid.get_instance().zones_dict[zone_id].central_location
                     Drivers._drivers.append(Driver(location))
 
         return Drivers._drivers
