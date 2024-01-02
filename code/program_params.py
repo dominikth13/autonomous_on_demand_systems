@@ -17,10 +17,10 @@ PICK_UP_DISTANCE_THRESHOLD = 1000
 
 LEARNING_RATE = 0.001
 
-def DISCOUNT_FACTOR(current_time: Time, time_after_action: Time) -> float:
+def DISCOUNT_FACTOR(duration_in_seconds: int) -> float:
     DISCOUNT_RATE = 0.95
     LS = 0.9
-    return DISCOUNT_RATE ** (time_after_action.distance_to(current_time) / LS)
+    return DISCOUNT_RATE ** (duration_in_seconds / LS)
 
 # Duration how long orders can be matched with drivers in seconds
 ORDER_EXPIRY_DURATION = 120
@@ -43,3 +43,6 @@ def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
 
 # Time it takes until the simulation updates in seconds
 SIMULATION_UPDATE_RATE = 60
+
+# Time the driver need to idle until he can relocate
+MAX_IDLING_TIME = 150

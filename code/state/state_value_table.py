@@ -74,7 +74,7 @@ class StateValueTable:
             current_interval
         ][current_zone] + LEARNING_RATE * (
             reward
-            + DISCOUNT_FACTOR(current_interval.start, next_interval.start)
+            + DISCOUNT_FACTOR(current_interval.start.distance_to(next_interval.start))
             * self.value_grid[next_interval][next_zone]
             - self.value_grid[current_interval][current_zone]
         )
