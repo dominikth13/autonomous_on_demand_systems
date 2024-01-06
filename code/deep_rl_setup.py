@@ -10,6 +10,7 @@ from driver.drivers import Drivers
 from order import Order
 from program_params import *
 import pandas as pd
+import torch.nn.functional as F
 
 from route import Route
 
@@ -22,18 +23,10 @@ class NeuroNet(nn.Module):
         self.fc2 = nn.Linear(16, 32)
         self.fc3 = nn.Linear(32, 1)
 
-    def forward(self, x, y, time):
-         # Process each input separately
-        x_processed = nn.ReLU()(self.fc_x(x))
-        y_processed = nn.ReLU()(self.fc_y(y))
-        time_processed = nn.ReLU()(self.fc_time(time))
-
-        # Merge the outputs
-        combined = torch.cat([x_processed, y_processed, time_processed], dim=1)
-
-        # Further processing after merging
-        combined = nn.ReLU()(self.fc_combined(combined))
-        output = self.fc_final(combined)
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        output = F.relu(self.fc3(x))
 
         return output
 
