@@ -47,7 +47,7 @@ def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
         sub_orders = Order.get_orders_by_time()[Time.of_total_minutes(i)]
         if len(sub_orders) == 0:
             continue
-        orders.extend(random.sample(sub_orders, int(len(sub_orders) / 10)))
+        orders.extend(random.sample(sub_orders,1))
 
     driver_to_orders_to_routes_dict: dict[
         Driver, dict[Order, list[DriverActionPair]]
@@ -55,6 +55,7 @@ def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
 
     # 1. Generate DriverActionPair for each pair that is valid (distance), add DriverIdlingPair for each driver
     for driver in Drivers.get_drivers():
+
         for order in orders:
             if (
                 order.start.distance_to(driver.current_position)
@@ -63,7 +64,8 @@ def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
                 # If driver is currently to far away for this order he ignores it
                 continue
             driver_to_orders_to_routes_dict[driver][order] = []
-            for route in generate_routes([order]):
+            order.dispatch()
+            for route  in generate_routes([order])[order]:
                 driver_to_orders_to_routes_dict[driver][order].append(
                     DriverActionPair(driver, Action(route), 0)
                 )
@@ -101,5 +103,5 @@ def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
                 }
 
                 # Append to DataFrame
-                data = data.append(row, ignore_index=True)
+                data = data._append(row, ignore_index=True)
     return data

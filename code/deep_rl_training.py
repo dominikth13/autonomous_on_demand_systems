@@ -36,12 +36,12 @@ for epocch_target in range(100):
     # Ensure that the new network is in the same mode (train or eval) as the original
     target_net.train(mode=net.training)
       
-
+    LOGGER.info("Generate trajectories")
     df = generate_driver_action_pairs_without_weights()
 
     for epoch in range(100):  # loop over the dataset multiple times
         index = random.randint(0,len(df)-1)
-
+        LOGGER.debug(f"small Epoch {epoch}")
         optimizer.zero_grad()  # zero the parameter gradients
         output_target_net = target_net(df.loc[index,'Target Position'].lat, df.loc[index,'Target Position'].lon, df.loc[index,'Target Time'])
         # Forward pass
@@ -50,10 +50,10 @@ for epocch_target in range(100):
         # Compute loss
         loss = td_error(output, output_target_net, df.loc[index,'Reward'])
         #loss = loss.pow(2)  # Squaring the TD error (if needed) I don`t want negative losses
-
+        LOGGER.info("Backpropagation")
         # Backward pass
         loss.backward()
-
+        LOGGER.debug("Backpropagation")
         # Optimize
         optimizer.step()
 
