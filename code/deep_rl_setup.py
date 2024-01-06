@@ -22,14 +22,20 @@ class NeuroNet(nn.Module):
         self.fc2 = nn.Linear(16, 32)
         self.fc3 = nn.Linear(32, 1)
 
-    def forward(self, x):
-        #  ReLU activation function after first layer
-        x = nn.ReLU()(self.fc1(x))
+    def forward(self, x, y, time):
+         # Process each input separately
+        x_processed = nn.ReLU()(self.fc_x(x))
+        y_processed = nn.ReLU()(self.fc_y(y))
+        time_processed = nn.ReLU()(self.fc_time(time))
 
-        #  ReLU activation function after second layer
-        x = nn.ReLU()(self.fc2(x))
+        # Merge the outputs
+        combined = torch.cat([x_processed, y_processed, time_processed], dim=1)
 
-        x = self.fc3(x)
+        # Further processing after merging
+        combined = nn.ReLU()(self.fc_combined(combined))
+        output = self.fc_final(combined)
+
+        return output
 
 
 # Define a loss function and optimizer
