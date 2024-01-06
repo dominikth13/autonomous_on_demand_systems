@@ -15,13 +15,20 @@ import torch.nn.functional as F
 from route import Route
 
 
-# Define a simple neural network
+
+import torch.nn.functional as F
+
 class NeuroNet(nn.Module):
     def __init__(self):
         super(NeuroNet, self).__init__()
-        self.fc1 = nn.Linear(3, 16)
-        self.fc2 = nn.Linear(16, 32)
-        self.fc3 = nn.Linear(32, 1)
+        # Define separate layers for each input
+        self.fc_x = nn.Linear(1, 16)  # Assuming x is a scalar
+        self.fc_y = nn.Linear(1, 16)  # Assuming y is a scalar
+        self.fc_time = nn.Linear(1, 16)  # Assuming time is a scalar
+
+        # Layers after merging
+        self.fc_combined = nn.Linear(16 * 3, 32)
+        self.fc_final = nn.Linear(32, 1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -29,6 +36,11 @@ class NeuroNet(nn.Module):
         output = F.relu(self.fc3(x))
 
         return output
+
+# Example usage:
+# model = NeuroNet()
+# output = model(input_x, input_y, input_time)
+
 
 
 # Define a loss function and optimizer
