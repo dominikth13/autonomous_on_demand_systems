@@ -37,23 +37,25 @@ for epocch_target in range(100):
     target_net.train(mode=net.training)
       
     LOGGER.info("Generate trajectories")
-    df = generate_driver_action_pairs_without_weights()
+    trajectories = generate_driver_action_pairs_without_weights()
 
     for epoch in range(100):  # loop over the dataset multiple times
-        index = random.randint(0,len(df)-1)
+        trajectory = random.choice(trajectories)
         LOGGER.debug(f"small Epoch {epoch}")
         optimizer.zero_grad()  # zero the parameter gradients
-        output_target_net = target_net(df.loc[index,'Target Position'].lat, df.loc[index,'Target Position'].lon, df.loc[index,'Target Time'])
+        output_target_net = target_net(torch.Tensor([trajectory[2].lat, trajectory[2].lon, trajectory[1]]))
         # Forward pass
-        output = net(df.loc[index,'Current Position'].lat, df.loc[index,'Current Position'].lon, df.loc[index,'Current Time'])
+        LOGGER.debug("Forwardpropagation")
+        output = net(torch.Tensor([trajectory[4].lat, trajectory[4].lon, trajectory[3]]))
 
         # Compute loss
-        loss = td_error(output, output_target_net, df.loc[index,'Reward'])
+        LOGGER.info("TD Loss")
+        loss = td_error(output, output_target_net, trajectory[0])
         #loss = loss.pow(2)  # Squaring the TD error (if needed) I don`t want negative losses
         LOGGER.info("Backpropagation")
         # Backward pass
         loss.backward()
-        LOGGER.debug("Backpropagation")
+        LOGGER.debug("Optimize")
         # Optimize
         optimizer.step()
 

@@ -41,7 +41,7 @@ def td_error(output_net, output_target_net, reward):
 # Commonly used for classification problems
 
 
-def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
+def generate_driver_action_pairs_without_weights() -> list[tuple]:
     orders = []
     for i in range(1440):
         sub_orders = Order.get_orders_by_time()[Time.of_total_minutes(i)]
@@ -70,15 +70,16 @@ def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
                     DriverActionPair(driver, Action(route), 0)
                 )
 
-    data = pd.DataFrame(
-        columns=[
-            "Reward",
-            "Target Time",
-            "Target Position",
-            "Current Time",
-            "Current Position",
-        ]
-    )
+    # data = pd.DataFrame(
+    #     columns=[
+    #         "Reward",
+    #         "Target Time",
+    #         "Target Position",
+    #         "Current Time",
+    #         "Current Position",
+    #     ]
+    # )
+    data = []
     # 2. For each DriverActionPair: calculate edge weight based on reward and state value function
     for driver in driver_to_orders_to_routes_dict:
         for order in driver_to_orders_to_routes_dict[driver]:
@@ -93,15 +94,6 @@ def generate_driver_action_pairs_without_weights() -> pd.DataFrame:
                 ).to_total_seconds()
                 current_time = pair.action.route.order.dispatch_time.to_total_seconds()
                 current_position = pair.driver.current_position
-
-                row = {
-                    "Reward": reward,
-                    "Target Time": target_time,
-                    "Target Position": target_position,
-                    "Current Time": current_time,
-                    "Current Position": current_position,
-                }
-
-                # Append to DataFrame
-                data = data._append(row, ignore_index=True)
+                
+                data.append((reward, target_time, target_position, current_time, current_position))
     return data
