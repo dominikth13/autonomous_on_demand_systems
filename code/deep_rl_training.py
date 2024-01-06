@@ -30,7 +30,7 @@ def import_trajectories() -> list[dict[str, float]]:
 
 def train() -> None:
     LOGGER.info("Initialize training environment and data")
-    initialization_first_time = True
+    initialization_first_time = False
     # Define a simple neural network
 
     # Initialize the network
@@ -51,7 +51,7 @@ def train() -> None:
 
     trajectories = import_trajectories()
     # Training loop
-    for epoch_target in range(10):
+    for epoch_target in range(1):
         LOGGER.info(f"Epoch {epoch_target}")
         original_state_dict = net.state_dict() # Save the state dict of the original network
         # Load the state dict of the original network into the new network
@@ -60,7 +60,12 @@ def train() -> None:
         target_net.train(mode=net.training)
         
         training_data = random.sample(trajectories, len(trajectories) // 10)
-        for trajectory in training_data:  # loop over the dataset multiple times
+        counter = 0
+        for trajectory in training_data:
+            if counter % 100 == 0:
+                target_net.load_state_dict(net.state_dict())
+            if counter % 50000 == 0:
+                LOGGER.info(f"Processed {counter}/{len(training_data)} trajectories")
             optimizer.zero_grad()  # zero the parameter gradients
             output_target_net = target_net(torch.Tensor([trajectory["target_lat"], trajectory["target_lon"], trajectory["target_time"]]))
             # Forward pass
@@ -68,10 +73,10 @@ def train() -> None:
             output = net(torch.Tensor([trajectory["current_lat"], trajectory["current_lon"], trajectory["current_time"]]))
 
             # Compute loss
-            LOGGER.info("TD Loss")
+            LOGGER.debug("TD Loss")
             loss = td_error(output, output_target_net, trajectory["reward"])
             #loss = loss.pow(2)  # Squaring the TD error (if needed) I don`t want negative losses
-            LOGGER.info("Backpropagation")
+            LOGGER.debug("Backpropagation")
             # Backward pass
             loss.backward()
             LOGGER.debug("Optimize")
@@ -80,6 +85,7 @@ def train() -> None:
 
             # Print statistics
             LOGGER.debug(f"Loss: {loss.item()}")
+            counter += 1
 
     print('Finished Training')
 
