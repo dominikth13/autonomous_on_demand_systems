@@ -14,28 +14,40 @@ import pandas as pd
 from route import Route
 
 
-# Define a simple neural network
+
+import torch.nn.functional as F
+
 class NeuroNet(nn.Module):
     def __init__(self):
         super(NeuroNet, self).__init__()
-        self.fc1 = nn.Linear(3, 16)
-        self.fc2 = nn.Linear(16, 32)
-        self.fc3 = nn.Linear(32, 1)
+        # Define separate layers for each input
+        self.fc_x = nn.Linear(1, 16)  # Assuming x is a scalar
+        self.fc_y = nn.Linear(1, 16)  # Assuming y is a scalar
+        self.fc_time = nn.Linear(1, 16)  # Assuming time is a scalar
+
+        # Layers after merging
+        self.fc_combined = nn.Linear(16 * 3, 32)
+        self.fc_final = nn.Linear(32, 1)
 
     def forward(self, x, y, time):
-         # Process each input separately
-        x_processed = nn.ReLU()(self.fc_x(x))
-        y_processed = nn.ReLU()(self.fc_y(y))
-        time_processed = nn.ReLU()(self.fc_time(time))
+        # Process each input separately
+        x_processed = F.relu(self.fc_x(x))
+        y_processed = F.relu(self.fc_y(y))
+        time_processed = F.relu(self.fc_time(time))
 
         # Merge the outputs
         combined = torch.cat([x_processed, y_processed, time_processed], dim=1)
 
         # Further processing after merging
-        combined = nn.ReLU()(self.fc_combined(combined))
+        combined = F.relu(self.fc_combined(combined))
         output = self.fc_final(combined)
 
         return output
+
+# Example usage:
+# model = NeuroNet()
+# output = model(input_x, input_y, input_time)
+
 
 
 # Define a loss function and optimizer
