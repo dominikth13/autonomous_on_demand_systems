@@ -29,7 +29,7 @@ def create_cell_grid():
 
     cells = []
     counter = 0
-    total_amount = range(len(np.arange(min_lat, max_lat, step_distance))) * range(len(np.arange(min_lon, max_lon, step_distance)))
+    total_amount = len(np.arange(min_lat, max_lat, step_distance)) * len(np.arange(min_lon, max_lon, step_distance))
     for lat in np.arange(min_lat, max_lat, step_distance):
         for lon in np.arange(min_lon, max_lon, step_distance):
             LOGGER.debug(f" Generate cell {counter}/{total_amount}")
@@ -48,6 +48,3 @@ def create_cell_grid():
         ]
 
     export_table.to_csv("code/data/grid_cells.csv")
-
-
-create_cell_grid()
