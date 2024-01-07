@@ -39,9 +39,9 @@ def train() -> None:
     target_net = NeuroNet()
 
     if initialization_first_time == False:
-        net.load_state_dict(torch.load('code/data/net_state_dict.pth'))
+        net.load_state_dict(torch.load('code/training_data/net_state_dict.pth'))
         #either model.eval() or model.train() depending on what we currently doing
-        target_net.load_state_dict(torch.load('code/data/target_net_state_dict.pth'))
+        target_net.load_state_dict(torch.load('code/training_data/target_net_state_dict.pth'))
         #either model.eval() or model.train() depending on what we currently doing
 
 
@@ -89,5 +89,5 @@ def train() -> None:
 
     LOGGER.info('Finished Training')
 
-    torch.save(net.state_dict(), 'code/data/net_state_dict.pth')
-    torch.save(target_net.state_dict(), 'code/data/target_net_state_dict.pth')
+    torch.save(net.state_dict(), 'code/training_data/net_state_dict.pth')
+    torch.save(target_net.state_dict(), 'code/training_data/target_net_state_dict.pth')

@@ -41,8 +41,8 @@ def train_ope() -> None:
     LOGGER.info("Initialize environment")
     ope_net = NeuroNet()
 
-    if False:
-        ope_net.load_state_dict(torch.load('net_state_dict.pth'))
+    if True:
+        ope_net.load_state_dict(torch.load("code/training_data/ope_net_state_dict.pth"))
 
     trajectories = import_trajectories()
 
@@ -94,4 +94,4 @@ def train_ope() -> None:
         optimizer.step()
     LOGGER.info('Finished Training')
 
-    torch.save(ope_net.state_dict(), "code/data/ope_net_state_dict.pth")
+    torch.save(ope_net.state_dict(), "code/training_data/ope_net_state_dict.pth")
