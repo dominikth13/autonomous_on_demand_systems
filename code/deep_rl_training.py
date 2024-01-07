@@ -8,7 +8,7 @@ import time
 from driver.driver import Driver
 from driver.drivers import Drivers
 from grid.grid import Grid
-
+from torch.optim.lr_scheduler import StepLR
 from logger import LOGGER
 
 def import_trajectories() -> list[dict[str, float]]:
@@ -27,6 +27,7 @@ def import_trajectories() -> list[dict[str, float]]:
             trajectory["current_lon"] = float(row["current_lon"])
             trajectories.append(trajectory)
     return trajectories
+loss_list = []
 
 def train() -> None:
     LOGGER.info("Initialize training environment and data")
@@ -44,11 +45,11 @@ def train() -> None:
         target_net.load_state_dict(torch.load('target_net_state_dict.pth'))
         #either model.eval() or model.train() depending on what we currently doing
 
-
+    
 
     # Commonly used for classification problems
     optimizer = optim.SGD(net.parameters(), lr=0.01)  # Stochastic Gradient Descent
-
+    scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
     trajectories = import_trajectories()
     # Training loop
     for epoch_target in range(1):
@@ -59,11 +60,13 @@ def train() -> None:
         # Ensure that the new network is in the same mode (train or eval) as the original
         target_net.train(mode=net.training)
         
-        training_data = random.sample(trajectories, len(trajectories) // 10)
+        training_data = random.sample(trajectories, len(trajectories) // 100)
         counter = 0
         for trajectory in training_data:
+            net.train()
             if counter % 100 == 0:
                 target_net.load_state_dict(net.state_dict())
+                scheduler.step()
             if counter % 50000 == 0:
                 LOGGER.info(f"Processed {counter}/{len(training_data)} trajectories")
             optimizer.zero_grad()  # zero the parameter gradients
@@ -75,6 +78,9 @@ def train() -> None:
             # Compute loss
             LOGGER.debug("TD Loss")
             loss = td_error(output, output_target_net, trajectory["reward"])
+            if counter % 1000 == 0:
+
+                loss_list.append(loss.item())
             #loss = loss.pow(2)  # Squaring the TD error (if needed) I don`t want negative losses
             LOGGER.debug("Backpropagation")
             # Backward pass
@@ -93,3 +99,4 @@ def train() -> None:
     torch.save(target_net.state_dict(), 'target_net_state_dict.pth')
 
 train()
+print(loss_list)
