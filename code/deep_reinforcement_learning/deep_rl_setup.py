@@ -17,23 +17,14 @@ from route import Route
 from logger import LOGGER
 
 
-
 import torch.nn.functional as F
 
 
-class NeuroNet(nn.Module):
+class NeuroNet(nn.Sequential):
     def __init__(self):
-        super(NeuroNet, self).__init__()
-        self.fc1 = nn.Linear(3, 16)  # Assuming x is a scalar
-        self.fc2 = nn.Linear(16, 32)
-        self.fc3 = nn.Linear(32, 1)
-
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        output = F.relu(self.fc3(x))
-
-        return output
+        super(NeuroNet, self).__init__(
+            nn.Linear(3, 16), nn.ReLU(), nn.Linear(16, 32), nn.ReLU(), nn.Linear(32, 1)
+        )
 
 
 # Example usage:

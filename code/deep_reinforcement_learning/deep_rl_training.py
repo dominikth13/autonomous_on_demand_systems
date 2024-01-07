@@ -11,11 +11,12 @@ from grid.grid import Grid
 
 from logger import LOGGER
 
-def import_trajectories() -> list[dict[str, float]]:
-    trajectories = []
+def import_trajectories() -> dict[int, dict[str, float]]:
+    trajectories = {}
     csv_file_path = "code/data/trajectories.csv"
     with open(csv_file_path, mode="r") as file:
         reader = csv.DictReader(file)
+        counter = 0
         for row in reader:
             trajectory = {}
             trajectory["reward"] = float(row["reward"])
@@ -25,7 +26,8 @@ def import_trajectories() -> list[dict[str, float]]:
             trajectory["current_time"] = int(row["current_time"])
             trajectory["current_lat"] = float(row["current_lat"])
             trajectory["current_lon"] = float(row["current_lon"])
-            trajectories.append(trajectory)
+            trajectories[counter] = trajectory
+            counter += 1
     return trajectories
 
 def train() -> None:
@@ -59,9 +61,10 @@ def train() -> None:
         # Ensure that the new network is in the same mode (train or eval) as the original
         target_net.train(mode=net.training)
         
-        training_data = random.sample(trajectories, len(trajectories) // 10)
+        training_data = random.sample(trajectories.keys(), len(trajectories) // 10)
         counter = 0
-        for trajectory in training_data:
+        for key in training_data:
+            trajectory = trajectories[key]
             if counter % 100 == 0:
                 target_net.load_state_dict(net.state_dict())
             if counter % 50000 == 0:
