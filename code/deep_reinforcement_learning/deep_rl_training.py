@@ -2,9 +2,9 @@ import csv
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from deep_rl_setup import NeuroNet, td_error
 import random
 import time
+from deep_reinforcement_learning.deep_rl_setup import NeuroNet, td_error
 from driver.driver import Driver
 from driver.drivers import Drivers
 from grid.grid import Grid
@@ -40,9 +40,9 @@ def train() -> None:
     target_net = NeuroNet()
 
     if initialization_first_time == False:
-        net.load_state_dict(torch.load('net_state_dict.pth'))
+        net.load_state_dict(torch.load('code/training_data/net_state_dict.pth'))
         #either model.eval() or model.train() depending on what we currently doing
-        target_net.load_state_dict(torch.load('target_net_state_dict.pth'))
+        target_net.load_state_dict(torch.load('code/training_data/target_net_state_dict.pth'))
         #either model.eval() or model.train() depending on what we currently doing
 
     
@@ -93,10 +93,15 @@ def train() -> None:
             LOGGER.debug(f"Loss: {loss.item()}")
             counter += 1
 
-    print('Finished Training')
+    LOGGER.info('Finished Training')
 
+<<<<<<< HEAD:code/deep_rl_training.py
     torch.save(net.state_dict(), 'net_state_dict.pth')
     torch.save(target_net.state_dict(), 'target_net_state_dict.pth')
 
 train()
 print(loss_list)
+=======
+    torch.save(net.state_dict(), 'code/training_data/net_state_dict.pth')
+    torch.save(target_net.state_dict(), 'code/training_data/target_net_state_dict.pth')
+>>>>>>> 8f7b15f1832081bcdac0a69265b44a7eb3131c29:code/deep_reinforcement_learning/deep_rl_training.py

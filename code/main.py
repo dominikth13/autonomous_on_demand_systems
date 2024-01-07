@@ -6,6 +6,8 @@ from algorithm.algorithm import (
     generate_routes,
     solve_optimization_problem,
 )
+from deep_reinforcement_learning.deep_rl_training import train
+from deep_reinforcement_learning.offline_policy_evaluation import train_ope
 from grid.grid import Grid
 from interval.time_series import Time, TimeSeries
 from order import Order
@@ -18,7 +20,7 @@ from state.state_value_table import StateValueTable
 import pandas as pd
 from program_params import *
 from static_data_generation.grid_builder import create_cell_grid
-from static_data_generation.trajectory_data_builder import generate_trajectories
+from static_data_generation.trajectory_data_builder import generate_trajectories, remove_idle_trajectories
 
 
 def q_learning():
@@ -110,6 +112,7 @@ def export_epoch_to_csv():
                     ]
                 )
 
+
 def import_state_values_from_csv():
     import_table = pd.read_csv("code/training_data/state_value_table.csv")
 
@@ -123,17 +126,45 @@ def import_state_values_from_csv():
 
 while True:
     user_input = input(
-        "Which script do you want to start? (Reinforcement Learning -> 1, Grid Builder -> 2, Trajectory Builder -> 3) "
+        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Static Data Generation -> 3) "
     )
     if user_input == "1":
         q_learning()
         break
+
     elif user_input == "2":
-        create_cell_grid()
+        while True:
+            user_input = input(
+                "Which script do you want to start? (Offline Policy Evaluation (Dominik) -> 1, DRL (Malik) -> 2) "
+            )
+            if user_input == "1":
+                train_ope()
+                break
+            elif user_input == "2":
+                train()
+                break
+            else:
+                print("This option is not allowed. Please try again.")
         break
+
     elif user_input == "3":
-        generate_trajectories()
+        while True:
+            user_input = input(
+                "Which script do you want to start? (Grid Cell Creation -> 1, Generate Trajectories -> 2, Remove Idle Trajectories -> 3) "
+            )
+            if user_input == "1":
+                create_cell_grid()
+                break
+            elif user_input == "2":
+                generate_trajectories()
+                break
+            elif user_input == "3":
+                remove_idle_trajectories()
+                break
+            else:
+                print("This option is not allowed. Please try again.")
         break
+
     else:
         print("This option is not allowed. Please try again.")
 # INFO:algorithm:Simulate time 03:00:00
