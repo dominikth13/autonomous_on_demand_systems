@@ -8,7 +8,7 @@ from deep_reinforcement_learning.deep_rl_setup import NeuroNet, td_error
 from driver.driver import Driver
 from driver.drivers import Drivers
 from grid.grid import Grid
-
+from torch.optim.lr_scheduler import StepLR
 from logger import LOGGER
 
 def import_trajectories() -> dict[int, dict[str, float]]:
@@ -29,6 +29,7 @@ def import_trajectories() -> dict[int, dict[str, float]]:
             trajectories[counter] = trajectory
             counter += 1
     return trajectories
+loss_list = []
 
 def train() -> None:
     LOGGER.info("Initialize training environment and data")
@@ -46,11 +47,11 @@ def train() -> None:
         target_net.load_state_dict(torch.load('code/training_data/target_net_state_dict.pth'))
         #either model.eval() or model.train() depending on what we currently doing
 
-
+    
 
     # Commonly used for classification problems
     optimizer = optim.SGD(net.parameters(), lr=0.01)  # Stochastic Gradient Descent
-
+    scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
     trajectories = import_trajectories()
     # Training loop
     for epoch_target in range(1):
@@ -63,10 +64,13 @@ def train() -> None:
         
         training_data = random.sample(trajectories.keys(), len(trajectories) // 10)
         counter = 0
+        net.train()
+        target_net.train()
         for key in training_data:
             trajectory = trajectories[key]
             if counter % 100 == 0:
                 target_net.load_state_dict(net.state_dict())
+                scheduler.step()
             if counter % 50000 == 0:
                 LOGGER.info(f"Processed {counter}/{len(training_data)} trajectories")
             optimizer.zero_grad()  # zero the parameter gradients
@@ -78,6 +82,9 @@ def train() -> None:
             # Compute loss
             LOGGER.debug("TD Loss")
             loss = td_error(output, output_target_net, trajectory["reward"])
+            if counter % 1000 == 0:
+
+                loss_list.append(loss.item())
             #loss = loss.pow(2)  # Squaring the TD error (if needed) I don`t want negative losses
             LOGGER.debug("Backpropagation")
             # Backward pass
