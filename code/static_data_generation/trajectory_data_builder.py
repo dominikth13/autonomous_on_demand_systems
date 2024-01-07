@@ -5,6 +5,7 @@ import pandas as pd
 from action.action import Action
 from action.driver_action_pair import DriverActionPair
 from algorithm.algorithm import generate_routes
+from deep_reinforcement_learning.deep_rl_training import import_trajectories
 from driver.driver import Driver
 from driver.drivers import Drivers
 from interval.time import Time
@@ -68,6 +69,9 @@ def generate_trajectories() -> None:
                 current_time = pair.action.route.order.dispatch_time.to_total_seconds()
                 current_position = pair.driver.current_position
 
+                if target_time - current_time == 0:
+                    continue
+
                 data.append(
                     (
                         reward,
@@ -102,5 +106,38 @@ def generate_trajectories() -> None:
                     trajectory[3],
                     trajectory[4].lat,
                     trajectory[4].lon,
+                ]
+            )
+
+def remove_idle_trajectories():
+    trajectories = import_trajectories()
+    valid_trajectories = []
+    for trajectory in trajectories:
+        if trajectory["target_time"] - trajectory["current_time"] == 0:
+            continue
+        valid_trajectories.append(trajectory)
+    with open("code/data/trajectories.csv", "w") as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            [
+                "reward",
+                "target_time",
+                "target_lat",
+                "target_lon",
+                "current_time",
+                "current_lat",
+                "current_lon",
+            ]
+        )
+        for trajectory in valid_trajectories:
+            writer.writerow(
+                [
+                    trajectory["reward"],
+                    trajectory["target_time"],
+                    trajectory["target_lat"],
+                    trajectory["target_lon"],
+                    trajectory["current_time"],
+                    trajectory["current_lat"],
+                    trajectory["current_lon"],
                 ]
             )
