@@ -1,9 +1,9 @@
 from grid.grid import Grid
+from program_params import ProgramParams
 from public_transport.station import Station
 from state.state_value_table import StateValueTable
 from location.location import Location
 from order import Order
-from program_params import *
 from utils import IdProvider
 
 ID_PROVIDER = IdProvider()
@@ -47,7 +47,7 @@ class Route:
 
 def regular_route(order: Order) -> Route:
     distance_in_m = order.start.distance_to(order.end)
-    vehicle_time = distance_in_m / VEHICLE_SPEED
+    vehicle_time = distance_in_m / ProgramParams.VEHICLE_SPEED
 
     return Route(
         order,

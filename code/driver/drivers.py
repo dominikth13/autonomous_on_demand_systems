@@ -1,8 +1,6 @@
 import csv
 from driver.driver import Driver
 from grid.grid import Grid
-from location.location import Location
-from state.state_value_table import StateValueTable
 
 # Singleton class containing all the drivers
 class Drivers:

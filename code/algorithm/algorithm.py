@@ -2,15 +2,20 @@ from action.driver_action_pair import DriverActionPair
 from algorithm.model_builder import or_tools_min_cost_flow
 from driver.drivers import Drivers
 from interval.time_series import TimeSeries
-from public_transport.fastest_station_connection_network import FastestStationConnectionNetwork
+from logger import LOGGER
+from program_params import Mode, ProgramParams
+from public_transport.fastest_station_connection_network import (
+    FastestStationConnectionNetwork,
+)
 
 from action.action import Action
 from driver.driver import Driver
 from order import Order
-from program_params import *
 from route import Route, regular_route
 from state.state import State
+from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
+
 
 # The so called 'Algorithm 1'
 def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
@@ -22,9 +27,10 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
         start = order.start
         end = order.end
 
-        if default_route.total_time > L1:
+        if default_route.total_time > ProgramParams.L1:
             # 1. Get the closest start and end station for each line
             from public_transport.station import Station
+
             origins: list[Station] = []
             destinations: list[Station] = []
             for line in fastest_connection_network.lines:
@@ -41,15 +47,20 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                     )
 
                     # Distance (time in second)
-                    vehicle_time = start.distance_to(origin.position) / VEHICLE_SPEED
-                    walking_time = destination.position.distance_to(end) / WALKING_SPEED
+                    vehicle_time = start.distance_to(origin.position) / ProgramParams.VEHICLE_SPEED
+                    walking_time = destination.position.distance_to(end) / ProgramParams.WALKING_SPEED
                     transit_time = connection[1]
                     stations = connection[0]
                     # include entry, exit and waiting time
-                    other_time = 2 * PUBLIC_TRANSPORT_ENTRY_EXIT_TIME + PUBLIC_TRANSPORT_WAITING_TIME(State.get_state().current_interval.start)
+                    other_time = (
+                        2 * ProgramParams.PUBLIC_TRANSPORT_ENTRY_EXIT_TIME
+                        + ProgramParams.PUBLIC_TRANSPORT_WAITING_TIME(
+                            State.get_state().current_interval.start
+                        )
+                    )
                     total_time = vehicle_time + walking_time + transit_time + other_time
 
-                    if total_time < default_route.total_time + L2:
+                    if total_time < default_route.total_time + ProgramParams.L2:
                         routes_per_order[order].append(
                             Route(
                                 order,
@@ -61,7 +72,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                                 walking_time,
                                 other_time,
                                 total_time,
-                                order.direct_connection[1] - total_time
+                                order.direct_connection[1] - total_time,
                             )
                         )
     return routes_per_order
@@ -88,7 +99,7 @@ def generate_driver_action_pairs(
         for order in order_routes_dict:
             if (
                 order.start.distance_to(driver.current_position)
-                > PICK_UP_DISTANCE_THRESHOLD
+                > ProgramParams.PICK_UP_DISTANCE_THRESHOLD
             ):
                 # If driver is currently to far away for this order he ignores it
                 continue
@@ -102,19 +113,32 @@ def generate_driver_action_pairs(
     for driver in driver_to_orders_to_routes_dict:
         for order in driver_to_orders_to_routes_dict[driver]:
             for pair in driver_to_orders_to_routes_dict[driver][order]:
-                arrival_interval = TimeSeries.get_instance().find_interval(
-                    State.get_state().current_interval.start.add_minutes(
-                        pair.get_total_vehicle_travel_time_in_seconds() // 60
-                    )
+                arrival_time = State.get_state().current_interval.start.add_seconds(
+                    pair.get_total_vehicle_travel_time_in_seconds()
                 )
-                # TODO potentially bring in a Malus for long trips since they bind the car more longer
+                arrival_interval = TimeSeries.get_instance().find_interval(arrival_time)
                 # weight = time reduction for passenger + state value after this option
+                if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
+                    state_value = (
+                        StateValueTable.get_state_value_table().get_state_value(
+                            pair.action.route.vehicle_destination_cell.zone,
+                            arrival_interval,
+                        )
+                    )
+                else:
+                    state_value = (
+                        StateValueNetworks.get_instance().get_target_state_value(
+                            pair.action.route.vehicle_destination, arrival_time
+                        )
+                    )
                 weight = (
                     pair.action.route.time_reduction
-                    + DISCOUNT_FACTOR(
-                        State.get_state().current_interval.start.distance_to(arrival_interval.start)
+                    + ProgramParams.DISCOUNT_FACTOR(
+                        State.get_state().current_interval.start.distance_to(
+                            arrival_interval.start
+                        )
                     )
-                    * StateValueTable.get_state_value_table().get_state_value(pair.action.route.vehicle_destination_cell.zone, arrival_interval)
+                    * state_value
                 )
                 pair.weight = weight
 
@@ -128,7 +152,6 @@ def generate_driver_action_pairs(
                 if pair.weight > best_action_route.weight:
                     best_action_route = pair
             driver_action_pairs.append(best_action_route)
-
 
     return driver_action_pairs
 

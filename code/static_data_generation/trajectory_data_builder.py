@@ -11,7 +11,7 @@ from driver.drivers import Drivers
 from interval.time import Time
 from logger import LOGGER
 from order import Order
-from program_params import PICK_UP_DISTANCE_THRESHOLD
+from program_params import ProgramParams
 
 
 def generate_trajectories() -> None:
@@ -32,7 +32,7 @@ def generate_trajectories() -> None:
         for order in orders:
             if (
                 order.start.distance_to(driver.current_position)
-                > PICK_UP_DISTANCE_THRESHOLD
+                > ProgramParams.PICK_UP_DISTANCE_THRESHOLD
             ):
                 # If driver is currently to far away for this order he ignores it
                 continue

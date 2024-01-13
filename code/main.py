@@ -16,34 +16,41 @@ from public_transport.fastest_station_connection_network import (
     FastestStationConnectionNetwork,
 )
 from state.state import State
+from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
 import pandas as pd
-from program_params import *
+from program_params import Mode, ProgramParams
 from static_data_generation.grid_builder import create_cell_grid
 from static_data_generation.trajectory_data_builder import generate_trajectories, remove_idle_trajectories
 
 
-def q_learning():
+def start():
+    # 1. Initialize environment data
     start_time = time.time()
     LOGGER.info("Initialize Grid")
     Grid.get_instance()
     LOGGER.info("Initialize time series")
     TimeSeries.get_instance()
-    LOGGER.info("Initialize state value table")
-    StateValueTable.get_state_value_table()
+    if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
+        LOGGER.info("Initialize state value table")
+        StateValueTable.get_state_value_table()
+    else:
+        LOGGER.info("Initialize state value networks")
+        StateValueNetworks.get_instance()
     LOGGER.info("Initialize state")
     State.get_state()
     LOGGER.info("Initialize fastest connection network")
     FastestStationConnectionNetwork.get_instance()
     LOGGER.info("Initialize orders")
     Order.get_orders_by_time()
-    # import_state_values_from_csv()
 
-    # 1. Initialize environment data
+    if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
+        StateValueTable.get_state_value_table().import_state_value_table_from_csv()
+    else:
+        StateValueNetworks.get_instance().import_weights()
 
-    # Is done automatically in station.py
 
-    # 2. Run Q-Learning algorithm to train state value table
+    # 2. Run Q-Learning/DQ-Learning algorithm to train state value table/network
     for current_total_minutes in range(
         TimeSeries.get_instance().start_time.to_total_minutes(),
         TimeSeries.get_instance().end_time.to_total_minutes() - 360,
@@ -76,7 +83,7 @@ def q_learning():
 
         if (
             current_total_minutes
-            - TimeSeries.get_instance().start_time.to_total_minutes() % MAX_IDLING_TIME
+            - TimeSeries.get_instance().start_time.to_total_minutes() % ProgramParams.MAX_IDLING_TIME
             == 0
         ):
             LOGGER.debug("Relocate long time idle drivers")
@@ -89,59 +96,44 @@ def q_learning():
         State.get_state().increment_time_interval(current_time)
 
     LOGGER.info("Exporting results...")
-    export_epoch_to_csv()
-    LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
-
-
-def export_epoch_to_csv():
-    with open("code/training_data/state_value_table.csv", "w") as file:
-        writer = csv.writer(file)
-        writer.writerow(["start_time", "end_time", "zone_id", "state_value"])
-        for time_interval in StateValueTable.get_state_value_table().value_grid:
-            for zone in StateValueTable.get_state_value_table().value_grid[
-                time_interval
-            ]:
-                writer.writerow(
-                    [
-                        int(time_interval.start.to_total_seconds()),
-                        int(time_interval.end.to_total_seconds()),
-                        int(zone.id),
-                        StateValueTable.get_state_value_table().value_grid[
-                            time_interval
-                        ][zone],
-                    ]
-                )
-
-
-def import_state_values_from_csv():
-    import_table = pd.read_csv("code/training_data/state_value_table.csv")
-
-    for _, row in import_table.iterrows():
-        start_time = Time.of_total_seconds(int(row["start_time"]))
-        interval = TimeSeries.get_instance().find_interval(start_time)
-        zone = Grid.get_instance().zones_dict[row["zone_id"]]
-        state_value = float(row["state_value"])
-        StateValueTable.get_state_value_table().value_grid[interval][zone] = state_value
-
+    if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
+        StateValueTable.get_state_value_table().export_state_value_table_to_csv()
+    else:
+        StateValueNetworks.get_instance().export_weights()
+    LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")    
 
 while True:
     user_input = input(
         "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Static Data Generation -> 3) "
     )
     if user_input == "1":
-        q_learning()
+        while True:
+            user_input = input(
+                "Which script do you want to start? (Start Q-Learning -> 1) "
+            )
+            if user_input == "1":
+                ProgramParams.EXECUTION_MODE = Mode.TABULAR
+                start()
+                break
+            else:
+                print("This option is not allowed. Please try again.")
         break
+
 
     elif user_input == "2":
         while True:
             user_input = input(
-                "Which script do you want to start? (Offline Policy Evaluation (Dominik) -> 1, DRL (Malik) -> 2) "
+                "Which script do you want to start? (Offline Policy Evaluation (Dominik) -> 1, Offline Policy Evaluation (Malik) -> 2, Start DRL -> 3) "
             )
             if user_input == "1":
                 train_ope()
                 break
             elif user_input == "2":
                 train()
+                break
+            elif user_input == "3":
+                ProgramParams.EXECUTION_MODE = Mode.DEEP_NEURAL_NETWORKS
+                start()
                 break
             else:
                 print("This option is not allowed. Please try again.")

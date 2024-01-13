@@ -3,39 +3,11 @@
 import math
 import random
 import torch
-import torch.nn as nn
 import torch.optim as optim
-from deep_reinforcement_learning.deep_rl_setup import NeuroNet
+from deep_reinforcement_learning.neuro_net import NeuroNet
 from deep_reinforcement_learning.deep_rl_training import import_trajectories
+from deep_reinforcement_learning.temporal_difference_loss import TemporalDifferenceLoss
 from logger import LOGGER
-from program_params import DISCOUNT_FACTOR
-
-
-class TemporalDifferenceLoss(nn.Module):
-    def __init__(self):
-        super(TemporalDifferenceLoss, self).__init__()
-
-    def forward(self, trajectories_and_state_values):
-        loss = 0
-        for x in trajectories_and_state_values:
-            start_state_value = x[1]
-            end_state_value = x[2]
-            start_t = x[0]["current_time"]
-            end_t = x[0]["target_time"]
-            duration = end_t - start_t
-            reward = x[0]["reward"]
-            loss += (
-                (
-                    (reward * (DISCOUNT_FACTOR(duration) - 1))
-                    / (duration * (DISCOUNT_FACTOR(1) - 1))
-                )
-                + DISCOUNT_FACTOR(duration) * end_state_value
-                - start_state_value
-            ) ** 2
-        
-        # TODO find out what this Lipschitz constant is
-        return loss #+ math.exp(-4) * 
-
 
 def train_ope() -> None:
     LOGGER.info("Initialize environment")

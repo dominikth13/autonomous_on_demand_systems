@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import random
 import time
-from deep_reinforcement_learning.deep_rl_setup import NeuroNet, td_error
+from deep_reinforcement_learning.neuro_net import NeuroNet, td_error
 from driver.driver import Driver
 from driver.drivers import Drivers
 from grid.grid import Grid
