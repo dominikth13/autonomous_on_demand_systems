@@ -1,12 +1,13 @@
 from __future__ import annotations
+import csv
 import itertools
 from grid.grid import Grid
 from grid.grid_cell import GridCell
 from location.location import Location
 from interval.time_series import GridInterval, TimeSeries, Time
 from location.zone import Zone
+from program_params import ProgramParams
 from utils import IdProvider
-from program_params import *
 
 ID_PROVIDER = IdProvider()
 
@@ -72,12 +73,42 @@ class StateValueTable:
 
         self.value_grid[current_interval][current_zone] = self.value_grid[
             current_interval
-        ][current_zone] + LEARNING_RATE * (
+        ][current_zone] + ProgramParams.LEARNING_RATE * (
             reward
-            + DISCOUNT_FACTOR(current_interval.start.distance_to(next_interval.start))
+            + ProgramParams.DISCOUNT_FACTOR(current_interval.start.distance_to(next_interval.start))
             * self.value_grid[next_interval][next_zone]
             - self.value_grid[current_interval][current_zone]
         )
 
     def get_state_value(self, zone: Zone, interval: GridInterval) -> float:
         return self.value_grid[interval][zone]
+    
+    def export_state_value_table_to_csv(self):
+        with open("code/training_data/state_value_table.csv", "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(["start_time", "end_time", "zone_id", "state_value"])
+            for time_interval in self.value_grid:
+                for zone in self.value_grid[
+                    time_interval
+                ]:
+                    writer.writerow(
+                        [
+                            int(time_interval.start.to_total_seconds()),
+                            int(time_interval.end.to_total_seconds()),
+                            int(zone.id),
+                            self.value_grid[
+                                time_interval
+                            ][zone],
+                        ]
+                    )
+
+    def import_state_value_table_from_csv(self):
+        csv_file_path = "code/training_data/state_value_table.csv"
+        with open(csv_file_path, mode="r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                start_time = Time.of_total_seconds(int(float(row["start_time"])))
+                interval = TimeSeries.get_instance().find_interval(start_time)
+                zone = Grid.get_instance().zones_dict[int(float(row["zone_id"]))]
+                state_value = float(row["state_value"])
+                self.value_grid[interval][zone] = state_value

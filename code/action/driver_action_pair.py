@@ -13,10 +13,10 @@ class DriverActionPair:
         return f"[Driver {self.driver.id} - Action: {self.action} - State-Action-Value {self.weight}]"
 
     def get_total_vehicle_travel_time_in_seconds(self) -> int:
-        from program_params import VEHICLE_SPEED
+        from program_params import ProgramParams
         if self.action.is_idling():
             return 0
-        return self.get_total_vehicle_distance() // VEHICLE_SPEED
+        return self.get_total_vehicle_distance() // ProgramParams.VEHICLE_SPEED
 
     def get_total_vehicle_distance(self) -> float:
         if self.action.is_idling():

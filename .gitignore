@@ -1,4 +1,4 @@
 **/__pycache__
-
+**/trajectories.csv
 .vscode
 code/data/orders.parquet

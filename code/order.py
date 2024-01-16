@@ -1,10 +1,11 @@
 from __future__ import annotations
 import random
 from grid.grid import Grid
+from interval.time import Time
 from logger import LOGGER
+from program_params import ProgramParams
 from utils import IdProvider
 from location.location import Location
-from program_params import *
 import pandas as pd
 
 ID_PROVIDER = IdProvider()
@@ -53,7 +54,7 @@ class Order:
         self.direct_connection = None
 
     def dispatch(self) -> None:
-        self.expires = ORDER_EXPIRY_DURATION
+        self.expires = ProgramParams.ORDER_EXPIRY_DURATION
 
         fastest_connection = None
         from public_transport.fastest_station_connection_network import (
@@ -82,7 +83,7 @@ class Order:
                 total_walking_time = (
                     self.start.distance_to(origin.position)
                     + destination.position.distance_to(self.end)
-                ) / WALKING_SPEED
+                ) / ProgramParams.WALKING_SPEED
 
                 if (
                     fastest_connection == None
