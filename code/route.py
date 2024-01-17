@@ -1,5 +1,5 @@
 from grid.grid import Grid
-from program_params import ProgramParams
+from program.program_params import ProgramParams
 from public_transport.station import Station
 from state.state_value_table import StateValueTable
 from location.location import Location

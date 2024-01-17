@@ -20,10 +20,11 @@ from state.state import State
 from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
 import pandas as pd
-from program_params import Mode, ProgramParams
+from program.program_params import Mode, ProgramParams
 from static_data_generation.grid_builder import create_cell_grid
 from static_data_generation.initial_driver_positions import initialize_driver_positions
 from static_data_generation.trajectory_data_builder import generate_trajectories, remove_idle_trajectories
+from data_visualization.Datavisualisierung import visualize_drivers
 
 
 def start():
@@ -110,7 +111,7 @@ def start():
 
 while True:
     user_input = input(
-        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Static Data Generation -> 3) "
+        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Static Data Generation -> 3, Visualization -> 4) "
     )
     if user_input == "1":
         while True:
@@ -161,6 +162,17 @@ while True:
                 break
             elif user_input == "4":
                 initialize_driver_positions()
+                break
+            else:
+                print("This option is not allowed. Please try again.")
+        break
+    elif user_input == "4":
+        while True:
+            user_input = input(
+                "Which script do you want to start? (Visualize driver positions -> 1) "
+            )
+            if user_input == "1":
+                visualize_drivers()
                 break
             else:
                 print("This option is not allowed. Please try again.")

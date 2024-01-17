@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from program_params import ProgramParams
+from program.program_params import ProgramParams
 
 class TemporalDifferenceLoss(nn.Module):
     def __init__(self):

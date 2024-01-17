@@ -8,7 +8,7 @@ from deep_reinforcement_learning.temporal_difference_loss import TemporalDiffere
 from interval.time import Time
 from location.location import Location
 from logger import LOGGER
-from program_params import ProgramParams
+from program.program_params import ProgramParams
 
 
 class StateValueNetworks:

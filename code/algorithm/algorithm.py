@@ -3,7 +3,7 @@ from algorithm.model_builder import or_tools_min_cost_flow
 from driver.drivers import Drivers
 from interval.time_series import TimeSeries
 from logger import LOGGER
-from program_params import Mode, ProgramParams
+from program.program_params import Mode, ProgramParams
 from public_transport.fastest_station_connection_network import (
     FastestStationConnectionNetwork,
 )
@@ -160,4 +160,9 @@ def solve_optimization_problem(
     driver_action_pairs: list[DriverActionPair],
 ) -> list[DriverActionPair]:
     # solve_as_min_cost_flow_problem(driver_action_pairs)
-    return or_tools_min_cost_flow(driver_action_pairs)
+    driver_action_pairs = or_tools_min_cost_flow(driver_action_pairs)
+    occupied_drivers = len(list(filter(lambda x: x.driver.is_occupied(), driver_action_pairs)))
+    idling_drivers = len(list(filter(lambda x: x.action.is_idling(), driver_action_pairs))) - occupied_drivers
+    matched_drivers = len(driver_action_pairs) - idling_drivers - occupied_drivers
+    LOGGER.debug(f"Matched drivers: {matched_drivers}, Occupied drivers: {occupied_drivers}, Idling drivers: {idling_drivers}")
+    return driver_action_pairs

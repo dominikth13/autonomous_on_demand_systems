@@ -1,6 +1,8 @@
 from argparse import Action
 import time
 from action.driver_action_pair import DriverActionPair
+from interval.time_series import TimeSeries
+from program.program_stats import ProgramStats
 from public_transport.station import Station
 from driver.driver import Driver
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
@@ -263,7 +265,7 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
         start_arr, end_arr, capacities_arr, weights_arr
     )
 
-    LOGGER.debug(all_arcs)
+    #LOGGER.debug(all_arcs)
 
     # Add supply for each nodes.
     smcf.set_nodes_supplies(np.arange(0, len(supplies)), supplies)
@@ -277,17 +279,24 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
         LOGGER.debug("There was an issue with the min cost flow input.")
         LOGGER.debug(f"Status: {status}")
         exit(1)
-    LOGGER.debug("Optimal solution found!")
     LOGGER.debug(
-        f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds")
+        f"The calculation took {round((end_time - medium_time)*1000,4)} ms, while preparation took {round((medium_time - start_time)*1000,4)} ms")
     ########################################################################################
     LOGGER.debug(f"Minimum cost: {smcf.optimal_cost()}")
-    LOGGER.debug("")
-    LOGGER.debug(" Arc    Flow / Capacity Cost")
+    # LOGGER.debug("")
+    # LOGGER.debug(" Arc    Flow / Capacity Cost")
     solution_flows = smcf.flows(all_arcs)
     costs = solution_flows
-    for arc, flow, cost in zip(all_arcs, solution_flows, costs):
-        LOGGER.debug(f"{smcf.tail(arc):1} -> {smcf.head(arc)}  {flow:3}  / {smcf.capacity(arc):3}       {cost}")
+    ProgramStats.SUM_OF_TIMESAFE += smcf.optimal_cost()
+    LOGGER.debug(f"Sum of timesafe: {ProgramStats.SUM_OF_TIMESAFE}")
+
+    hours = (TimeSeries.get_instance().end_time.to_total_minutes() + 1  - TimeSeries.get_instance().start_time.to_total_minutes())/ 60 
+    LOGGER.debug(f"Time hours: {hours}")
+    LOGGER.debug(f"Sum of timesafe per car, per hour, in minutes: {ProgramStats.SUM_OF_TIMESAFE / len(driver_list) / 60/ hours}")
+
+
+    # for arc, flow, cost in zip(all_arcs, solution_flows, costs):
+    #     LOGGER.debug(f"{smcf.tail(arc):1} -> {smcf.head(arc)}  {flow:3}  / {smcf.capacity(arc):3}       {cost}")
     ########################################################################################
 
     solution_flows = smcf.flows(all_arcs)

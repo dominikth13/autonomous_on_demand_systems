@@ -11,7 +11,7 @@ from driver.drivers import Drivers
 from interval.time import Time
 from logger import LOGGER
 from order import Order
-from program_params import ProgramParams
+from program.program_params import ProgramParams
 
 
 def generate_trajectories() -> None:

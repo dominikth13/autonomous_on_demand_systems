@@ -6,7 +6,7 @@ from grid.grid_cell import GridCell
 from location.location import Location
 from interval.time_series import GridInterval, TimeSeries, Time
 from location.zone import Zone
-from program_params import ProgramParams
+from program.program_params import ProgramParams
 from utils import IdProvider
 
 ID_PROVIDER = IdProvider()

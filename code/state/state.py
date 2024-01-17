@@ -5,7 +5,7 @@ from action.driver_action_pair import DriverActionPair
 from grid.grid import Grid
 from driver.drivers import Drivers
 from interval.time_series import TimeSeries
-from program_params import Mode, ProgramParams
+from program.program_params import Mode, ProgramParams
 from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
 from order import Order

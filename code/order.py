@@ -3,7 +3,7 @@ import random
 from grid.grid import Grid
 from interval.time import Time
 from logger import LOGGER
-from program_params import ProgramParams
+from program.program_params import ProgramParams
 from utils import IdProvider
 from location.location import Location
 import pandas as pd

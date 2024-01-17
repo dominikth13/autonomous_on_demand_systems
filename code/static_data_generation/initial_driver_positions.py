@@ -19,7 +19,7 @@ def initialize_driver_positions() -> None:
     first_orders = []
     for minute in range(30):
         first_orders.extend(orders_by_time[Time.of_total_minutes(minute)])
-    from program_params import ProgramParams
+    from program.program_params import ProgramParams
     sampled_orders = random.Random(42).choices(first_orders, k=ProgramParams.AMOUNT_OF_DRIVERS)
 
     counter = 0
