@@ -149,3 +149,4 @@ class Grid:
         for i in range(min_i, max_i + 1):
             for j in range(min_j, max_j + 1):
                 cell_set.add(self.cells[i][j])
+        return cell_set

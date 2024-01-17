@@ -55,6 +55,8 @@ class ProgramParams:
     # Number of iterations until the weights of main net are copied to target net
     MAIN_AND_TARGET_NET_SYNC_ITERATIONS = 100
 
+    AMOUNT_OF_DRIVERS = 100
+
 class Mode(Enum):
     TABULAR = "Tabular"
     DEEP_NEURAL_NETWORKS = "Deep Neural Networks"

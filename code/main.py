@@ -22,6 +22,7 @@ from state.state_value_table import StateValueTable
 import pandas as pd
 from program_params import Mode, ProgramParams
 from static_data_generation.grid_builder import create_cell_grid
+from static_data_generation.initial_driver_positions import initialize_driver_positions
 from static_data_generation.trajectory_data_builder import generate_trajectories, remove_idle_trajectories
 
 
@@ -147,7 +148,7 @@ while True:
     elif user_input == "3":
         while True:
             user_input = input(
-                "Which script do you want to start? (Grid Cell Creation -> 1, Generate Trajectories -> 2, Remove Idle Trajectories -> 3) "
+                "Which script do you want to start? (Grid Cell Creation -> 1, Generate Trajectories -> 2, Remove Idle Trajectories -> 3, Initialize Drivers -> 4) "
             )
             if user_input == "1":
                 create_cell_grid()
@@ -157,6 +158,9 @@ while True:
                 break
             elif user_input == "3":
                 remove_idle_trajectories()
+                break
+            elif user_input == "4":
+                initialize_driver_positions()
                 break
             else:
                 print("This option is not allowed. Please try again.")
