@@ -24,6 +24,7 @@ import pandas as pd
 from program.program_params import Mode, ProgramParams
 from static_data_generation.grid_builder import create_cell_grid
 from static_data_generation.initial_driver_positions import initialize_driver_positions
+from static_data_generation.time_series_discretization import TimeSeriesDiscretization
 from static_data_generation.trajectory_data_builder import (
     generate_trajectories,
     remove_idle_trajectories,
@@ -60,7 +61,7 @@ def start():
 
     # 2. Run Q-Learning/DQ-Learning algorithm to train state value table/network
     for current_total_minutes in range(
-        TimeSeries.get_instance().start_time.to_total_minutes() ,
+        TimeSeries.get_instance().start_time.to_total_minutes(),
         TimeSeries.get_instance().end_time.to_total_minutes() + 1,
     ):
         current_time = Time.of_total_minutes(current_total_minutes)
@@ -89,7 +90,7 @@ def start():
         LOGGER.debug("Apply state-value changes")
         State.get_state().apply_state_change(matches)
 
-        if current_time.to_total_seconds() % ProgramParams.MAX_IDLING_TIME == 0:
+        if ProgramParams.FEATURE_RELOCATION_ENABLED and current_time.to_total_seconds() % ProgramParams.MAX_IDLING_TIME == 0:
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
@@ -162,7 +163,7 @@ while True:
     elif user_input == "3":
         while True:
             user_input = input(
-                "Which script do you want to start? (Grid Cell Creation -> 1, Generate Trajectories -> 2, Remove Idle Trajectories -> 3, Initialize Drivers -> 4) "
+                "Which script do you want to start? (Grid Cell Creation -> 1, Generate Trajectories -> 2, Remove Idle Trajectories -> 3, Initialize Drivers -> 4, Discretize days -> 5) "
             )
             if user_input == "1":
                 create_cell_grid()
@@ -175,6 +176,9 @@ while True:
                 break
             elif user_input == "4":
                 initialize_driver_positions()
+                break
+            elif user_input == "5":
+                TimeSeriesDiscretization.discretize_day()
                 break
             else:
                 print("This option is not allowed. Please try again.")

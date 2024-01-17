@@ -221,7 +221,7 @@ class State:
                     probability_list.append(cells_to_weight[cell] / total_weight)
 
                 # Get the relocation target based on weighted stochastic choices
-                relocation_cell = random.choice(cell_list, weights=probability_list)
+                relocation_cell = random.choices(cell_list, weights=probability_list, k=1)[0]
 
                 # Create relocation job
                 driving_time = int(

@@ -67,7 +67,11 @@ class ProgramParams:
     MAX_WALKING_DURATION = 600
     
     # File paths to orders
-    ORDERS_FILE_PATH = "code/data/orders_2015-07-01__5_percent.csv"
+    ORDERS_FILE_PATH = "code/data/orders_2015-07-01.csv"
+
+    # If algorithm should do relocation
+    FEATURE_RELOCATION_ENABLED = False
+
 class Mode(Enum):
     TABULAR = "Tabular"
     DEEP_NEURAL_NETWORKS = "Deep Neural Networks"
