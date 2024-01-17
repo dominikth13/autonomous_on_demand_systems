@@ -1,7 +1,7 @@
 from collections import deque, namedtuple
 import csv
 import math
-
+from program.program_params import Mode, ProgramParams
 # This file generates the fastest connection public transit network only
 
 Edge = namedtuple('Edge', 'start, end, cost')
@@ -80,11 +80,10 @@ def read_csv_data(filename):
 
 def create_edges(data):
     edges = []
-    station_dauer = 80  # Setzen Sie hier den Wert für Station_Dauer
-    umsteige_selbe_station = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
-    max_lauf_dauer = 600
-    lauf_geschwindigkeit = 1.3 #in m/s (ca. 4,7km/h)
-
+    station_dauer = ProgramParams.STATION_DURATION # Setzen Sie hier den Wert für Station_Dauer
+    umsteige_selbe_station = ProgramParams.TRANSFER_SAME_STATION  # Setzen Sie hier den Wert für Umsteige_selbe_Station
+    max_lauf_dauer = ProgramParams.MAX_WALKING_DURATION
+    lauf_geschwindigkeit = ProgramParams.WALKING_SPEED 
 
     
     # Zählvariablen für die verschiedenen Arten von Kanten

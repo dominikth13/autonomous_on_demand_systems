@@ -19,7 +19,8 @@ class Order:
             Order._orders_by_time = {
                 Time(hour, minute): [] for minute in range(60) for hour in range(24)
             }
-            df = pd.read_csv("code/data/orders_2015-07-01.csv")
+            #change the path to other orders like orders_2015-07-01.csv 
+            df = pd.read_csv(ProgramParams.ORDERS_FILE_PATH)
             counter = 0
             for _, row in df.iterrows():
                 if counter % 50000 == 0:

@@ -2,6 +2,7 @@ from __future__ import annotations
 import math
 import random
 from action.driver_action_pair import DriverActionPair
+from data_output.data_collector import DataCollector
 from grid.grid import Grid
 from driver.drivers import Drivers
 from interval.time_series import TimeSeries
@@ -32,6 +33,7 @@ class State:
         self.action_tuples = []
 
     def apply_state_change(self, driver_action_pairs: list[DriverActionPair]) -> None:
+        order_time_reduction_quota = []
         # Apply changes in simulation
         for pair in driver_action_pairs:
             driver = pair.driver
@@ -102,10 +104,33 @@ class State:
                         )
                     )
 
+                # Save reduction quota
+                order_time_reduction_quota.append(
+                    (
+                        (action.route.time_reduction - route.order.direct_connection[1])
+                        / route.order.direct_connection[1]
+                    )
+                )
                 # Remove order from open orders set
                 del self.orders_dict[route.order.id]
 
         self.apply_state_changes_to_value_function()
+
+        amount_of_unserved_orders = len(self.orders_dict)
+        DataCollector.append_orders_data(
+            self.current_time,
+            amount_of_unserved_orders
+            / (amount_of_unserved_orders + len(order_time_reduction_quota)),
+            len(order_time_reduction_quota),
+        )
+        average_time_reduction_quota = (
+            sum(order_time_reduction_quota) / len(order_time_reduction_quota)
+            if len(order_time_reduction_quota) > 0
+            else 0
+        )
+        DataCollector.append_time_reduction_quota(
+            self.current_time, average_time_reduction_quota
+        )
 
         # Compute job state changes for all drivers
         for driver in Drivers.get_drivers():
@@ -156,12 +181,15 @@ class State:
             if driver.idle_time >= ProgramParams.MAX_IDLING_TIME:
                 # Calculate probability distribution
                 current_cell = Grid.get_instance().find_cell(driver.current_position)
-                cells = Grid.get_instance().find_n_adjacent_cells(current_cell, 2)
+                cells = Grid.get_instance().find_n_adjacent_cells(
+                    current_cell, ProgramParams.RELOCATION_RADIUS
+                )
                 cells_to_weight = {}
 
                 for cell in cells:
                     driving_time = int(
-                        current_cell.center.distance_to(cell.center) / ProgramParams.VEHICLE_SPEED
+                        current_cell.center.distance_to(cell.center)
+                        / ProgramParams.VEHICLE_SPEED
                     )
                     if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
                         state_value = (

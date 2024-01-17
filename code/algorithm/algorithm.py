@@ -1,5 +1,6 @@
 from action.driver_action_pair import DriverActionPair
 from algorithm.model_builder import or_tools_min_cost_flow
+from data_output.data_collector import DataCollector
 from driver.drivers import Drivers
 from interval.time_series import TimeSeries
 from logger import LOGGER
@@ -162,7 +163,11 @@ def solve_optimization_problem(
     # solve_as_min_cost_flow_problem(driver_action_pairs)
     driver_action_pairs = or_tools_min_cost_flow(driver_action_pairs)
     occupied_drivers = len(list(filter(lambda x: x.driver.is_occupied(), driver_action_pairs)))
+    relocated_drivers = len(list(filter(lambda x: x.driver.is_occupied() and x.driver.job.is_relocation, driver_action_pairs)))
+    occupied_drivers = occupied_drivers - relocated_drivers
     idling_drivers = len(list(filter(lambda x: x.action.is_idling(), driver_action_pairs))) - occupied_drivers
     matched_drivers = len(driver_action_pairs) - idling_drivers - occupied_drivers
-    LOGGER.debug(f"Matched drivers: {matched_drivers}, Occupied drivers: {occupied_drivers}, Idling drivers: {idling_drivers}")
+    LOGGER.debug(f"Matched drivers: {matched_drivers}, Occupied drivers: {occupied_drivers}, Relocated drivers: {relocated_drivers}, Idling drivers: {idling_drivers}")
+    DataCollector.append_workload(State.get_state().current_time, occupied_drivers)
+    DataCollector.append_relocation(State.get_state().current_time, relocated_drivers)
     return driver_action_pairs

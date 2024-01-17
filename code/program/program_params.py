@@ -10,18 +10,18 @@ class ProgramParams:
     L2 = 1200
 
     # Static vehicle speed in m/s -> assume these small busses driving in Berlin
-    VEHICLE_SPEED = 10
+    VEHICLE_SPEED = 6.33 # FIX, wie im Paper Feng et al. 2022
 
     # Static walking speed in m/s
-    WALKING_SPEED = 1.5
+    WALKING_SPEED = 1 # FIX, wie im Paper Feng et al. 2022
 
     # Pick-up distance threshold (how far away driver consider new orders) in meter
     PICK_UP_DISTANCE_THRESHOLD = 1000
 
-    LEARNING_RATE = 0.001
+    LEARNING_RATE = 0.001 # im Paper Feng et al. 2022 ist es 0.005
 
     def DISCOUNT_FACTOR(duration_in_seconds: int) -> float:
-        DISCOUNT_RATE = 0.95
+        DISCOUNT_RATE = 0.95 # im Paper Feng et al. 2022 ist es 0.95
         LS = 0.9
         return DISCOUNT_RATE ** (duration_in_seconds / LS)
 
@@ -32,6 +32,7 @@ class ProgramParams:
     PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120
 
     # Medium waiting time
+    #TODO: create waiting time for the entire day 
     def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
         five = Time(5,0,0)
         six = Time(6,0,0)
@@ -57,6 +58,16 @@ class ProgramParams:
 
     AMOUNT_OF_DRIVERS = 100
 
+    # Radius for relocation in 100 meters
+    RELOCATION_RADIUS = 2
+
+    # Inilization of the static_data
+    STATION_DURATION = 80   #Fahrzeit für eine Station 
+    TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
+    MAX_WALKING_DURATION = 600
+    
+    # File paths to orders
+    ORDERS_FILE_PATH = "code/data/orders_2015-07-01.csv"
 class Mode(Enum):
     TABULAR = "Tabular"
     DEEP_NEURAL_NETWORKS = "Deep Neural Networks"

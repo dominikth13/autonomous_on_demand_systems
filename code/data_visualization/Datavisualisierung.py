@@ -47,7 +47,7 @@ def visualize_drivers():
     plt.title("Karte mit Zonengrenzen, Stationen und Fahrern")
     plt.xlabel("Längengrad")
     plt.ylabel("Breitengrad")
-    plt.savefig('code\Data Visualization\Karte.png', dpi=600)
+    plt.savefig('code/data_visualization/Karte.png', dpi=600)
     # Karte anzeigen
     plt.show()
 
