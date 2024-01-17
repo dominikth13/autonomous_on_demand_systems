@@ -24,7 +24,7 @@ class Drivers:
         drivers = Drivers.get_drivers()
         csv_file_path = "code/data/drivers.csv"
         with open(csv_file_path, mode="w") as file:
-            writer = csv.DictWriter(file)
+            writer = csv.writer(file)
             writer.writerow(["driver_id", "lat", "lon"])
             for driver in drivers:
                 writer.writerow(
