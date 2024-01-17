@@ -16,7 +16,7 @@ class ProgramParams:
     WALKING_SPEED = 1 # FIX, wie im Paper Feng et al. 2022
 
     # Pick-up distance threshold (how far away driver consider new orders) in meter
-    PICK_UP_DISTANCE_THRESHOLD = 1000
+    PICK_UP_DISTANCE_THRESHOLD = 5000 #im Paper 950 Meter
 
     LEARNING_RATE = 0.001 # im Paper Feng et al. 2022 ist es 0.005
 
@@ -67,7 +67,7 @@ class ProgramParams:
     MAX_WALKING_DURATION = 600
     
     # File paths to orders
-    ORDERS_FILE_PATH = "code/data/orders_2015-07-01.csv"
+    ORDERS_FILE_PATH = "code/data/orders_2015-07-01__5_percent.csv"
 class Mode(Enum):
     TABULAR = "Tabular"
     DEEP_NEURAL_NETWORKS = "Deep Neural Networks"

@@ -120,7 +120,9 @@ class State:
         DataCollector.append_orders_data(
             self.current_time,
             amount_of_unserved_orders
-            / (amount_of_unserved_orders + len(order_time_reduction_quota)),
+            / (amount_of_unserved_orders + len(order_time_reduction_quota)) 
+            if (amount_of_unserved_orders + len(order_time_reduction_quota)) >0 
+            else 0,
             len(order_time_reduction_quota),
         )
         average_time_reduction_quota = (
