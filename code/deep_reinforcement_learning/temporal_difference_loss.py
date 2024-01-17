@@ -13,7 +13,7 @@ class TemporalDifferenceLoss(nn.Module):
             end_state_value = x[2]
             start_t = x[0]["current_time"]
             end_t = x[0]["target_time"]
-            duration = end_t - start_t
+            duration = end_t - start_t if end_t > start_t else 86400 - start_t + end_t
             reward = x[0]["reward"]
             loss += (
                 (

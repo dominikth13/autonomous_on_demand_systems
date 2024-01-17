@@ -4,12 +4,19 @@ class Time:
     
     # delete other variables, only create total_seconds
     def __init__(self, hour: int, minute: int, second = 0) -> None:
+        assert hour >= 0 and hour <= 23
+        assert minute >= 0 and minute <= 59
+        assert second >= 0 and second <= 59
         self.total_seconds = int(hour * 3600 + minute * 60 + second)
 
     def of_total_minutes(minutes: int) -> Time:
+        while minutes >= 1440:
+            minutes -= 1440
         return Time(minutes // 60, minutes % 60, 0)
     
     def of_total_seconds(seconds: int) -> Time:
+        if seconds >= 86400:
+            seconds -= 86400
         return Time(seconds // 3600, (seconds % 3600) // 60, seconds % 60)
 
     # Calculate time difference(distance) in seconds

@@ -10,7 +10,7 @@ class TimeSeries:
 
     def get_instance() -> TimeSeries:
         if TimeSeries._time_series == None:
-            TimeSeries._time_series = TimeSeries(Time(3, 0, 0), Time(18, 0, 0), 300)
+            TimeSeries._time_series = TimeSeries(Time(0, 0, 0), Time(23, 59, 59), 300)
         return TimeSeries._time_series
 
     def __init__(self, start: Time, end: Time, intervalLengthInSeconds: int) -> None:
@@ -23,7 +23,7 @@ class TimeSeries:
         start_seconds = start.to_total_seconds()
         end_seconds = end.to_total_seconds()
         
-        for current_seconds in range(start_seconds, end_seconds, intervalLengthInSeconds):
+        for current_seconds in range(start_seconds, end_seconds + 1, intervalLengthInSeconds):
             interval_start = Time.of_total_seconds(current_seconds)
             interval_end = Time.of_total_seconds(current_seconds + intervalLengthInSeconds - 1)
             interval = GridInterval(counter, interval_start, interval_end)
