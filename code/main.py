@@ -58,7 +58,7 @@ def start():
 
     # 2. Run Q-Learning/DQ-Learning algorithm to train state value table/network
     for current_total_minutes in range(
-        TimeSeries.get_instance().start_time.to_total_minutes() + 1380,
+        TimeSeries.get_instance().start_time.to_total_minutes() ,
         TimeSeries.get_instance().end_time.to_total_minutes() + 1,
     ):
         current_time = Time.of_total_minutes(current_total_minutes)
