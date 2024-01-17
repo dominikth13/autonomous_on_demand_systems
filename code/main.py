@@ -8,6 +8,7 @@ from algorithm.algorithm import (
 )
 from deep_reinforcement_learning.deep_rl_training import train
 from deep_reinforcement_learning.offline_policy_evaluation import train_ope
+from driver.drivers import Drivers
 from grid.grid import Grid
 from interval.time_series import Time, TimeSeries
 from order import Order
@@ -43,6 +44,8 @@ def start():
     FastestStationConnectionNetwork.get_instance()
     LOGGER.info("Initialize orders")
     Order.get_orders_by_time()
+    LOGGER.info("Initialize vehicles")
+    Drivers.get_drivers()
 
     if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
         StateValueTable.get_state_value_table().import_state_value_table_from_csv()
@@ -52,7 +55,7 @@ def start():
 
     # 2. Run Q-Learning/DQ-Learning algorithm to train state value table/network
     for current_total_minutes in range(
-        TimeSeries.get_instance().start_time.to_total_minutes() + 1380,
+        TimeSeries.get_instance().start_time.to_total_minutes(),
         TimeSeries.get_instance().end_time.to_total_minutes() + 1,
     ):
         current_time = Time.of_total_minutes(current_total_minutes)
@@ -95,7 +98,9 @@ def start():
         # Increment to next interval
         State.get_state().increment_time_interval(current_time)
 
-    LOGGER.info("Exporting results...")
+    LOGGER.info("Exporting final driver positions")
+    Drivers.export_drivers()
+    LOGGER.info("Exporting training results")
     if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
         StateValueTable.get_state_value_table().export_state_value_table_to_csv()
     else:
