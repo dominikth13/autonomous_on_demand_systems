@@ -24,7 +24,10 @@ import pandas as pd
 from program.program_params import Mode, ProgramParams
 from static_data_generation.grid_builder import create_cell_grid
 from static_data_generation.initial_driver_positions import initialize_driver_positions
-from static_data_generation.trajectory_data_builder import generate_trajectories, remove_idle_trajectories
+from static_data_generation.trajectory_data_builder import (
+    generate_trajectories,
+    remove_idle_trajectories,
+)
 from data_visualization.Datavisualisierung import visualize_drivers
 
 
@@ -54,7 +57,6 @@ def start():
         StateValueTable.get_state_value_table().import_state_value_table_from_csv()
     else:
         StateValueNetworks.get_instance().import_weights()
-
 
     # 2. Run Q-Learning/DQ-Learning algorithm to train state value table/network
     for current_total_minutes in range(
@@ -87,19 +89,21 @@ def start():
         LOGGER.debug("Apply state-value changes")
         State.get_state().apply_state_change(matches)
 
-        if (
-            current_total_minutes
-            - TimeSeries.get_instance().start_time.to_total_minutes() % ProgramParams.MAX_IDLING_TIME
-            == 0
-        ):
+        if current_time.to_total_seconds() % ProgramParams.MAX_IDLING_TIME == 0:
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
-        
-        if (current_total_minutes % 60 == 0):
+
+        if current_total_minutes % 60 == 0:
             LOGGER.debug("Save current driver positions")
             for driver in Drivers.get_drivers():
-                status = "idling" if not driver.is_occupied() else ("relocation" if driver.job.is_relocation else "occupied")
-                DataCollector.append_driver_data(current_time, driver.id, status, driver.current_position)
+                status = (
+                    "idling"
+                    if not driver.is_occupied()
+                    else ("relocation" if driver.job.is_relocation else "occupied")
+                )
+                DataCollector.append_driver_data(
+                    current_time, driver.id, status, driver.current_position
+                )
 
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
@@ -116,7 +120,8 @@ def start():
         StateValueTable.get_state_value_table().export_state_value_table_to_csv()
     else:
         StateValueNetworks.get_instance().export_weights()
-    LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")    
+    LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
+
 
 while True:
     user_input = input(
@@ -134,7 +139,6 @@ while True:
             else:
                 print("This option is not allowed. Please try again.")
         break
-
 
     elif user_input == "2":
         while True:
