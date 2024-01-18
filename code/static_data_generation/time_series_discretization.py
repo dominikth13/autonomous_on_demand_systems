@@ -1,4 +1,5 @@
 import csv
+import datetime
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -47,10 +48,12 @@ class TimeSeriesDiscretization:
 
     def prepare_data() -> list[pd.DataFrame]:
         dfs = []
-        for i in range(3,10):
-            df = pd.read_csv(f"code/data/orders_2015-07-0{i}.csv")
+        start = datetime.datetime(2015, 7, 9)
+        for i in range(7):
+            df = pd.read_csv(f"code/data/orders_{start.strftime('%Y-%m-%d')}.csv")
             df['pickup_time'] = pd.to_datetime(df['pickup_time'])
-            df2 = pd.read_csv(f"code/data/orders_2015-07-{i+7}.csv")
+            sec = start + datetime.timedelta(7)
+            df2 = pd.read_csv(f"code/data/orders_{sec.strftime('%Y-%m-%d')}.csv")
             df2['pickup_time'] = pd.to_datetime(df['pickup_time'])
             df = pd.concat([df, df2], ignore_index=True)
             df['minutes_since_midnight'] = df['pickup_time'].apply(lambda x: x.hour * 60 + x.minute)
@@ -59,4 +62,5 @@ class TimeSeriesDiscretization:
 
             df_count = df.groupby('half_hour_interval').size().reset_index(name='number_of_orders')
             dfs.append(df_count)
+            start += datetime.timedelta(1)
         return dfs

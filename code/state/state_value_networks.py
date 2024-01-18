@@ -120,6 +120,60 @@ class StateValueNetworks:
         torch.save(
             self.target_net.state_dict(), "code/training_data/target_net_state_dict.pth"
         )
-    def load_offline_policy_weights(self) -> None:
-        # TODO implement
-        pass
+
+    def load_offline_policy_weights(self, current_total_minutes: int) -> None:
+        daystr = ""
+        wd = ProgramParams.SIMULATION_DATE.weekday()
+        if wd < 5:
+            daystr = "wd"
+        elif wd == 5:
+            daystr = "sat"
+        else:
+            daystr = "sun"
+
+        ope_net = NeuroNet()
+        ope_target_net = NeuroNet()
+        ope_optimizer = optim.Adam(self.main_net.parameters(), lr=3 * math.exp(-4))
+        ope_net.load_state_dict(
+            torch.load(f"code/training_data/ope_{daystr}_{current_total_minutes}.pth")
+        )
+        ope_target_net.load_state_dict(
+            torch.load(
+                f"code/training_data/ope_target_{daystr}_{current_total_minutes}.pth"
+            )
+        )
+        ope_optimizer.load_state_dict(
+            torch.load(
+                f"code/training_data/ope_opt_{daystr}_{current_total_minutes}.pth"
+            )
+        )
+        ope_state = ope_net.state_dict()
+        ope_target_state = ope_target_net.state_dict()
+        ope_optimizer_state = ope_optimizer.state_dict()
+        main_state = self.main_net.state_dict()
+        target_state = self.target_net.state_dict()
+        optimizer_state = self.optimizer.state_dict()
+
+        new_target_state = {}
+        new_main_state = {}
+        new_optimizer_state = {}
+
+        for key in main_state:
+            new_main_state[key] = (
+                ProgramParams.OMEGA * main_state[key]
+                + (1 - ProgramParams.OMEGA) * ope_state[key]
+            )
+        for key in target_state:
+            new_target_state[key] = (
+                ProgramParams.OMEGA * target_state[key]
+                + (1 - ProgramParams.OMEGA) * ope_target_state[key]
+            )
+        for key in optimizer_state:
+            new_optimizer_state[key] = (
+                ProgramParams.OMEGA * optimizer_state[key]
+                + (1 - ProgramParams.OMEGA) * ope_optimizer_state[key]
+            )
+
+        self.main_net.load_state_dict(new_main_state)
+        self.target_net.load_state_dict(new_target_state)
+        self.optimizer.load_state_dict(new_optimizer_state)

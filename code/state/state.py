@@ -16,6 +16,10 @@ from order import Order
 class State:
     _state: State = None
 
+    # Resets the state
+    def reset() -> None:
+        State._state = None
+
     def get_state() -> State:
         if State._state == None:
             State._state = State()

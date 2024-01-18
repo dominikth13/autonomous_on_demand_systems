@@ -14,7 +14,7 @@ def train_ope() -> None:
     state_value_net = NeuroNet()
     target_net = NeuroNet()
 
-    if True:
+    if False:
         state_value_net.load_state_dict(torch.load("code/training_data/ope_state_value_net_state_dict.pth"))
         target_net.load_state_dict(torch.load("code/training_data/ope_target_net_state_dict.pth"))
 
@@ -108,5 +108,18 @@ def train_ope() -> None:
         
     LOGGER.info('Finished Training')
 
-    torch.save(state_value_net.state_dict(), "code/training_data/ope_state_value_net_state_dict.pth")
-    torch.save(target_net.state_dict(), "code/training_data/ope_target_net_state_dict.pth")
+    torch.save(state_value_net.state_dict(), "code/training_data/ope_wd_150.pth")
+    torch.save(target_net.state_dict(), "code/training_data/ope_target_wd_150.pth")
+    torch.save(state_value_net.state_dict(), "code/training_data/ope_wd_300.pth")
+    torch.save(target_net.state_dict(), "code/training_data/ope_target_wd_300.pth")
+    torch.save(state_value_net.state_dict(), "code/training_data/ope_wd_450.pth")
+    torch.save(target_net.state_dict(), "code/training_data/ope_target_wd_450.pth")
+    torch.save(state_value_net.state_dict(), "code/training_data/ope_wd_1050.pth")
+    torch.save(target_net.state_dict(), "code/training_data/ope_target_wd_1050.pth")
+    torch.save(state_value_net.state_dict(), "code/training_data/ope_wd_1350.pth")
+    torch.save(target_net.state_dict(), "code/training_data/ope_target_wd_1350.pth")
+    torch.save(optimizer.state_dict(), "code/training_data/ope_opt_wd_150.pth")
+    torch.save(optimizer.state_dict(), "code/training_data/ope_opt_wd_300.pth")
+    torch.save(optimizer.state_dict(), "code/training_data/ope_opt_wd_450.pth")
+    torch.save(optimizer.state_dict(), "code/training_data/ope_opt_wd_1050.pth")
+    torch.save(optimizer.state_dict(), "code/training_data/ope_opt_wd_1350.pth")

@@ -21,6 +21,10 @@ class ProgramParams:
 
     LEARNING_RATE = 0.001  # im Paper Feng et al. 2022 ist es 0.005
 
+    # Hyperparameter that says how the online policy learning should be 
+    # influenced by offline policy learning
+    OMEGA = 0.2
+
     def DISCOUNT_FACTOR(duration_in_seconds: int) -> float:
         DISCOUNT_RATE = 0.95  # im Paper Feng et al. 2022 ist es 0.95
         LS = 0.9
@@ -33,19 +37,23 @@ class ProgramParams:
     PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120
 
     # Medium waiting time
-    # TODO: create waiting time for the entire day
     def PUBLIC_TRANSPORT_WAITING_TIME(time: Time):
-        five = Time(5, 0, 0)
-        six = Time(6, 0, 0)
-        seven = Time(7, 0, 0)
-        if time.is_before(five):
-            return 600
-        if time.is_before(six):
-            return 420
-        if time.is_before(seven):
-            return 240
-        return 120
+        rush_hours_morning = Time(6, 30, 0)
+        middays = Time(9, 30, 0)
+        rush_hours_afternoon = Time(15, 30, 0)
+        evenings = Time(20, 0, 0)
 
+        if time.is_before(rush_hours_morning):
+            return 600  # late nights waiting duration
+        if time.is_before(middays):
+            return 150  # rush hours morning waiting duration
+        if time.is_before(rush_hours_afternoon):
+            return 300  # middays waiting duration
+        if time.is_before(evenings):
+            return 150  # rush hours afternoon waiting duration
+        return 450  # evenings waiting duration
+        # Quelle: https://www.introducingnewyork.com/subway
+        # https://www.humiliationstudies.org/documents/NYsubwaymap.pdf
     # Time it takes until the simulation updates in seconds
     SIMULATION_UPDATE_RATE = 60
 
@@ -60,14 +68,14 @@ class ProgramParams:
     AMOUNT_OF_DRIVERS = 100
 
     # Radius for relocation in 100 meters
-    RELOCATION_RADIUS = 2
+    RELOCATION_RADIUS = 20
 
     # Inilization of the static_data
     STATION_DURATION = 80  # Fahrzeit für eine Station
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime.date(2015, 7, 1)
+    SIMULATION_DATE = datetime(2015, 7, 1)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()
@@ -76,9 +84,9 @@ class ProgramParams:
             1: [150, 300, 450, 1050, 1350],
             2: [150, 300, 450, 1050, 1350],
             3: [150, 300, 450, 1050, 1350],
-            4: [150, 300, 450, 600, 750],
-            5: [150, 300, 600, 750, 1350],
-            6: [150, 300, 450, 600, 750],
+            4: [150, 300, 450, 1050, 1350],
+            5: [150, 300, 450, 750, 1050],
+            6: [150, 300, 450, 600, 1350],
         }
         return wd_to_bkps[wd]
 

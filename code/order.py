@@ -14,6 +14,10 @@ ID_PROVIDER = IdProvider()
 class Order:
     _orders_by_time = None
 
+    # Resets the orders
+    def reset() -> None:
+        Order._orders_by_time = None
+
     def get_orders_by_time() -> dict[Time, list[Order]]:
         if Order._orders_by_time == None:
             Order._orders_by_time = {
