@@ -80,17 +80,6 @@ class Grid:
 
             if self.cells[mid][0].center.lat < location.lat:
                 if self.cells[mid + 1][0].center.lat >= location.lat:
-                    if (
-                        self.cells[mid][0].is_empty()
-                        or self.cells[mid + 1][0].is_empty()
-                    ):
-                        first_selection = (
-                            self.cells[mid]
-                            if self.cells[mid + 1][0].is_empty()
-                            else self.cells[mid + 1]
-                        )
-                        break
-
                     first_selection = (
                         self.cells[mid]
                         if abs(self.cells[mid][0].center.lat - location.lat)
@@ -102,21 +91,11 @@ class Grid:
                     low = mid + 1
             else:
                 if self.cells[mid - 1][0].center.lat <= location.lat:
-                    if (
-                        self.cells[mid][0].is_empty()
-                        or self.cells[mid - 1][0].is_empty()
-                    ):
-                        first_selection = (
-                            self.cells[mid]
-                            if self.cells[mid - 1][0].is_empty()
-                            else self.cells[mid - 1]
-                        )
-                        break
                     first_selection = (
                         self.cells[mid]
                         if abs(self.cells[mid][0].center.lat - location.lat)
                         <= abs(self.cells[mid - 1][0].center.lat - location.lat)
-                        else self.cells[mid + 1]
+                        else self.cells[mid - 1]
                     )
                     break
                 else:
