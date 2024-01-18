@@ -67,6 +67,10 @@ def start():
         current_time = Time.of_total_minutes(current_total_minutes)
         LOGGER.info(f"Simulate time {current_time}")
 
+        if ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
+            if current_total_minutes in ProgramParams.TIME_SERIES_BREAKPOINTS():
+                StateValueNetworks.get_instance().load_offline_policy_weights()
+
         LOGGER.debug(f"Dispatch orders")
         orders = Order.get_orders_by_time()[current_time]
         for order in orders:

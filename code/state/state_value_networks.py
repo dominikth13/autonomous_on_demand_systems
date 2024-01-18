@@ -120,3 +120,6 @@ class StateValueNetworks:
         torch.save(
             self.target_net.state_dict(), "code/training_data/target_net_state_dict.pth"
         )
+    def load_offline_policy_weights(self) -> None:
+        # TODO implement
+        pass
