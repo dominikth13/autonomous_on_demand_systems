@@ -6,6 +6,7 @@ from data_output.data_collector import DataCollector
 from grid.grid import Grid
 from driver.drivers import Drivers
 from interval.time_series import TimeSeries
+from logger import LOGGER
 from program.program_params import Mode, ProgramParams
 from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
@@ -81,6 +82,10 @@ class State:
                     int(pair.get_total_vehicle_travel_time_in_seconds()),
                     driver_final_destination,
                 )
+
+                if Grid.get_instance().find_zone(driver_final_destination).id == 9999:
+                    LOGGER.warn(f"Driver {driver.id} goes to forbidden zone by order {pair.action.route.order.id}")
+
                 if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
                     self.action_tuples.append(
                         (
