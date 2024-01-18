@@ -176,4 +176,6 @@ class StateValueNetworks:
 
         self.main_net.load_state_dict(new_main_state)
         self.target_net.load_state_dict(new_target_state)
-        self.optimizer.load_state_dict(new_optimizer_state)
+        self.optimizer = optim.Adam(
+            self.main_net.parameters(), lr=3 * math.exp(-4)
+        )
