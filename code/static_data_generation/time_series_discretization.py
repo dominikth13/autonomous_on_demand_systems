@@ -1,4 +1,6 @@
+import csv
 from matplotlib import pyplot as plt
+import numpy as np
 import pandas as pd
 import ruptures as rpt
 
@@ -14,16 +16,18 @@ class TimeSeriesDiscretization:
         fig, ax = plt.subplots(2, 4, figsize=(1280/96, 720/96), dpi=96)
         ax = ax.ravel()
         i = 0
+        weekdays = ["Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]
+        weekdays_bkps = {day: [] for day in weekdays}
         for df in dfs:
-            LOGGER.debug("Fit the discretization model")
+            LOGGER.debug("Fit the discretization model for ")
             algo = rpt.Dynp(model="l2", min_size=2)
             algo.fit(df['number_of_orders'].values)
-
             n_bkps = 5
             LOGGER.debug(f"Predict model with {n_bkps} change points")
             result = algo.predict(n_bkps=n_bkps)
             ax[i].plot(df['half_hour_interval'], df['number_of_orders'])
             for bkp in result[:-1]:  # Letztes Element in 'result' ist die Länge der Datenreihe, nicht ein Breakpoint
+                weekdays_bkps[weekdays[i]].append(bkp)
                 ax[i].axvline(x=df['half_hour_interval'].iloc[bkp], color='k', linestyle='--')
             ax[i].set_title(f"Dynp model with {n_bkps} breakpoints")
             i += 1
@@ -31,12 +35,24 @@ class TimeSeriesDiscretization:
         plt.tight_layout()
         plt.savefig('code/data_visualization/discretized_time_series.png', dpi=600)
         plt.show()
-    
+
+        csv_file_path = "code/data_output/time_series_break_points.csv"
+        with open(csv_file_path, mode="w") as file:
+            writer = csv.writer(file)
+            writer.writerow(weekdays)
+            matrix = [[] for w in weekdays_bkps]
+            for i, w in enumerate(weekdays_bkps):
+                matrix[i] = list(map(lambda x: x*30, weekdays_bkps[w]))
+            writer.writerows(np.array(matrix).transpose())
+
     def prepare_data() -> list[pd.DataFrame]:
         dfs = []
-        for i in range(1,8):
+        for i in range(3,10):
             df = pd.read_csv(f"code/data/orders_2015-07-0{i}.csv")
             df['pickup_time'] = pd.to_datetime(df['pickup_time'])
+            df2 = pd.read_csv(f"code/data/orders_2015-07-{i+7}.csv")
+            df2['pickup_time'] = pd.to_datetime(df['pickup_time'])
+            df = pd.concat([df, df2], ignore_index=True)
             df['minutes_since_midnight'] = df['pickup_time'].apply(lambda x: x.hour * 60 + x.minute)
 
             df['half_hour_interval'] = df['minutes_since_midnight'] // 30 #* 30
