@@ -3,15 +3,16 @@ from shapely.geometry import MultiPoint
 from geopandas import GeoSeries, GeoDataFrame
 import matplotlib.pyplot as plt
 
-def visualize_drivers():
+from driver.drivers import Drivers
+
+def visualize_drivers(output_file_name: str):
     # Daten laden
     grid_cells_path = 'code/data/grid_cells.csv'
     subway_data_path = 'code/data/continuous_subway_data.csv'
-    drivers_data_path = 'code/data/drivers.csv'
 
     grid_cells_df = pd.read_csv(grid_cells_path)
     subway_data_df = pd.read_csv(subway_data_path)
-    drivers_data_df = pd.read_csv(drivers_data_path)
+    drivers_data_df = pd.DataFrame(list(map(lambda x: {"lat": x.current_position.lat, "lon": x.current_position.lon}, Drivers.get_drivers())))
 
     # Funktion zur Berechnung der Grenzen einer Zone
     def compute_zone_boundaries(zone_id, df):
@@ -47,7 +48,7 @@ def visualize_drivers():
     plt.title("Karte mit Zonengrenzen, Stationen und Fahrern")
     plt.xlabel("Längengrad")
     plt.ylabel("Breitengrad")
-    plt.savefig('code/data_visualization/Karte.png', dpi=600)
+    plt.savefig(f'code/data_visualization/{output_file_name}', dpi=600)
     # Karte anzeigen
     plt.show()
 
