@@ -9,6 +9,7 @@ from utils import IdProvider
 
 ID_PROVIDER = IdProvider()
 
+
 class Grid:
     _grid = None
 
@@ -17,12 +18,12 @@ class Grid:
             Grid._grid = Grid()
         return Grid._grid
 
-    def __init__(
-        self
-    ):
+    def __init__(self):
         self.zones_dict: dict[int, Zone] = {zone.id: zone for zone in Zone.get_zones()}
-        self.cells_dict: dict[int, list[GridCell]] = {zone_id: [] for zone_id in self.zones_dict.keys()}
-        
+        self.cells_dict: dict[int, list[GridCell]] = {
+            zone_id: [] for zone_id in self.zones_dict.keys()
+        }
+
         LOGGER.debug("Starting to create grid cells")
         cells_by_lat_long = {}
         # TODO sort cells based on lat and long
@@ -37,18 +38,24 @@ class Grid:
                 if lat not in cells_by_lat_long:
                     cells_by_lat_long[lat] = {}
 
-                cells_by_lat_long[lat][long] = GridCell(Location(lat, long), self.zones_dict[zone_id])
+                cells_by_lat_long[lat][long] = GridCell(
+                    Location(lat, long), self.zones_dict[zone_id]
+                )
                 self.cells_dict[zone_id].append(cells_by_lat_long[lat][long])
 
         # cells is a two dimensional sorted array sorted by lat in the outer and long in the inner dimension
-        self.cells: list[list[GridCell]] = [[None for long in cells_by_lat_long[lat]] for lat in cells_by_lat_long]
+        self.cells: list[list[GridCell]] = [
+            [None for long in cells_by_lat_long[lat]] for lat in cells_by_lat_long
+        ]
         self.cells_to_indices = {}
         sorted_lat = sorted(cells_by_lat_long)
         for i in range(len(sorted_lat)):
             sorted_long = sorted(cells_by_lat_long[sorted_lat[i]])
             for j in range(len(sorted_long)):
                 self.cells[i][j] = cells_by_lat_long[sorted_lat[i]][sorted_long[j]]
-                self.cells_to_indices[cells_by_lat_long[sorted_lat[i]][sorted_long[j]].id] = (i,j)
+                self.cells_to_indices[
+                    cells_by_lat_long[sorted_lat[i]][sorted_long[j]].id
+                ] = (i, j)
         LOGGER.debug("Finished to create grid cells")
 
     # Find the fitting zone to a coordinate location
@@ -73,6 +80,17 @@ class Grid:
 
             if self.cells[mid][0].center.lat < location.lat:
                 if self.cells[mid + 1][0].center.lat >= location.lat:
+                    if (
+                        self.cells[mid][0].zone.is_empty()
+                        or self.cells[mid + 1][0].zone.is_empty()
+                    ):
+                        first_selection = (
+                            self.cells[mid]
+                            if self.cells[mid + 1][0].zone.is_empty()
+                            else self.cells[mid + 1]
+                        )
+                        break
+
                     first_selection = (
                         self.cells[mid]
                         if abs(self.cells[mid][0].center.lat - location.lat)
@@ -84,6 +102,16 @@ class Grid:
                     low = mid + 1
             else:
                 if self.cells[mid - 1][0].center.lat <= location.lat:
+                    if (
+                        self.cells[mid][0].zone.is_empty()
+                        or self.cells[mid - 1][0].zone.is_empty()
+                    ):
+                        first_selection = (
+                            self.cells[mid]
+                            if self.cells[mid - 1][0].zone.is_empty()
+                            else self.cells[mid - 1]
+                        )
+                        break
                     first_selection = (
                         self.cells[mid]
                         if abs(self.cells[mid][0].center.lat - location.lat)
@@ -112,6 +140,16 @@ class Grid:
 
             if first_selection[mid].center.lon < location.lon:
                 if first_selection[mid + 1].center.lon >= location.lon:
+                    if (
+                        first_selection[mid].zone.is_empty()
+                        or first_selection[mid + 1].zone.is_empty()
+                    ):
+                        final_cell = (
+                            first_selection[mid]
+                            if first_selection[mid + 1].zone.is_empty()
+                            else first_selection[mid + 1]
+                        )
+                        break
                     final_cell = (
                         first_selection[mid]
                         if abs(first_selection[mid].center.lon - location.lon)
@@ -123,6 +161,16 @@ class Grid:
                     low = mid + 1
             else:
                 if first_selection[mid - 1].center.lon <= location.lon:
+                    if (
+                        first_selection[mid].zone.is_empty()
+                        or first_selection[mid - 1].zone.is_empty()
+                    ):
+                        final_cell = (
+                            first_selection[mid]
+                            if first_selection[mid - 1].zone.is_empty()
+                            else first_selection[mid - 1]
+                        )
+                        break
                     final_cell = (
                         first_selection[mid]
                         if abs(first_selection[mid].center.lon - location.lon)
@@ -137,10 +185,10 @@ class Grid:
             raise Exception(f"Longitude {location.lon} not in range")
 
         return final_cell
-    
+
     def find_n_adjacent_cells(self, cell: GridCell, n: int) -> set(GridCell):
         cell_set = set()
-        (i,j) = self.cells_to_indices[cell.id]
+        (i, j) = self.cells_to_indices[cell.id]
         min_i = i - n if i - n > 0 else 0
         max_i = i + n if i + n < len(self.cells) else len(self.cells) - 1
         min_j = j - n if j - n > 0 else 0

@@ -9,3 +9,6 @@ class GridCell:
         self.id = ID_PROVIDER.get_id()
         self.center = center
         self.zone = zone
+
+    def is_empty(self) -> bool:
+        return self.id == 9999
