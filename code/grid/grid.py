@@ -81,12 +81,12 @@ class Grid:
             if self.cells[mid][0].center.lat < location.lat:
                 if self.cells[mid + 1][0].center.lat >= location.lat:
                     if (
-                        self.cells[mid][0].zone.is_empty()
-                        or self.cells[mid + 1][0].zone.is_empty()
+                        self.cells[mid][0].is_empty()
+                        or self.cells[mid + 1][0].is_empty()
                     ):
                         first_selection = (
                             self.cells[mid]
-                            if self.cells[mid + 1][0].zone.is_empty()
+                            if self.cells[mid + 1][0].is_empty()
                             else self.cells[mid + 1]
                         )
                         break
@@ -103,12 +103,12 @@ class Grid:
             else:
                 if self.cells[mid - 1][0].center.lat <= location.lat:
                     if (
-                        self.cells[mid][0].zone.is_empty()
-                        or self.cells[mid - 1][0].zone.is_empty()
+                        self.cells[mid][0].is_empty()
+                        or self.cells[mid - 1][0].is_empty()
                     ):
                         first_selection = (
                             self.cells[mid]
-                            if self.cells[mid - 1][0].zone.is_empty()
+                            if self.cells[mid - 1][0].is_empty()
                             else self.cells[mid - 1]
                         )
                         break
@@ -141,12 +141,12 @@ class Grid:
             if first_selection[mid].center.lon < location.lon:
                 if first_selection[mid + 1].center.lon >= location.lon:
                     if (
-                        first_selection[mid].zone.is_empty()
-                        or first_selection[mid + 1].zone.is_empty()
+                        first_selection[mid].is_empty()
+                        or first_selection[mid + 1].is_empty()
                     ):
                         final_cell = (
                             first_selection[mid]
-                            if first_selection[mid + 1].zone.is_empty()
+                            if first_selection[mid + 1].is_empty()
                             else first_selection[mid + 1]
                         )
                         break
@@ -162,12 +162,12 @@ class Grid:
             else:
                 if first_selection[mid - 1].center.lon <= location.lon:
                     if (
-                        first_selection[mid].zone.is_empty()
-                        or first_selection[mid - 1].zone.is_empty()
+                        first_selection[mid].is_empty()
+                        or first_selection[mid - 1].is_empty()
                     ):
                         final_cell = (
                             first_selection[mid]
-                            if first_selection[mid - 1].zone.is_empty()
+                            if first_selection[mid - 1].is_empty()
                             else first_selection[mid - 1]
                         )
                         break
