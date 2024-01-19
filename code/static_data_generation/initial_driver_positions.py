@@ -26,7 +26,7 @@ def initialize_driver_positions() -> None:
     drivers = []
     for order in sampled_orders:
         cell = grid.find_cell(order.start)
-        cells = list(grid.find_n_adjacent_cells(cell, 2))
+        cells = list(filter(lambda x: not x.is_empty(), grid.find_n_adjacent_cells(cell, 2)))
         driver_cell = random.Random(counter).choice(cells)
         drivers.append(Driver(driver_cell.center))
         counter += 1
@@ -48,10 +48,16 @@ def initialize_driver_positions_for_trajectories() -> None:
     # Here we spawn a driver in each cell to check how this cell would perform for different orders
     grid = Grid.get_instance()
     drivers = []
-    for cell in grid.cells_to_indices.keys():
-        if cell.is_empty():
+    for i in range(len(grid.cells)):
+        if i % 5 != 0:
             continue
-        drivers.append(Driver(cell.center))
+        for j in range(len(grid.cells[i])):
+            if j % 5 != 0:
+                continue
+            cell = grid.cells[i][j]
+            if cell.is_empty():
+                continue
+            drivers.append(Driver(cell.center))
     
     csv_file_path = "code/data/drivers.csv"
     with open(csv_file_path, mode="w") as file:

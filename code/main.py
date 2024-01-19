@@ -8,7 +8,6 @@ from algorithm.algorithm import (
     solve_optimization_problem,
 )
 from data_output.data_collector import DataCollector
-from deep_reinforcement_learning.deep_rl_training import train
 from deep_reinforcement_learning.offline_policy_evaluation import train_ope
 from driver.drivers import Drivers
 from grid.grid import Grid
@@ -51,7 +50,7 @@ def start_q_learning():
     LOGGER.info("Initialize vehicles")
     Drivers.get_drivers()
 
-    StateValueTable.get_state_value_table().import_state_value_table_from_csv()
+    #StateValueTable.get_state_value_table().import_state_value_table_from_csv()
 
     # 2. Run Q-Learning algorithm to train state value table
     for current_total_minutes in range(
@@ -257,7 +256,7 @@ while True:
                 remove_idle_trajectories()
                 break
             elif user_input == "4":
-                initialize_driver_positions()
+                initialize_driver_positions_for_trajectories()
                 break
             elif user_input == "5":
                 TimeSeriesDiscretization.discretize_day()

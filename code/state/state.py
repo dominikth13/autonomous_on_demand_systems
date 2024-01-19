@@ -84,7 +84,9 @@ class State:
                 )
 
                 if Grid.get_instance().find_zone(driver_final_destination).id == 9999:
-                    LOGGER.warn(f"Driver {driver.id} goes to forbidden zone by order {pair.action.route.order.id}")
+                    LOGGER.warn(
+                        f"Driver {driver.id} goes to forbidden zone by order {pair.action.route.order.id}"
+                    )
 
                 if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
                     self.action_tuples.append(
@@ -129,8 +131,8 @@ class State:
         DataCollector.append_orders_data(
             self.current_time,
             amount_of_unserved_orders
-            / (amount_of_unserved_orders + len(order_time_reduction_quota)) 
-            if (amount_of_unserved_orders + len(order_time_reduction_quota)) >0 
+            / (amount_of_unserved_orders + len(order_time_reduction_quota))
+            if (amount_of_unserved_orders + len(order_time_reduction_quota)) > 0
             else 0,
             len(order_time_reduction_quota),
         )
@@ -192,8 +194,13 @@ class State:
             if driver.idle_time >= ProgramParams.MAX_IDLING_TIME:
                 # Calculate probability distribution
                 current_cell = Grid.get_instance().find_cell(driver.current_position)
-                cells = Grid.get_instance().find_n_adjacent_cells(
-                    current_cell, ProgramParams.RELOCATION_RADIUS
+                cells = list(
+                    filter(
+                        lambda x: not x.is_empty(),
+                        Grid.get_instance().find_n_adjacent_cells(
+                            cell, ProgramParams.RELOCATION_RADIUS
+                        ),
+                    )
                 )
                 cells_to_weight = {}
 
@@ -230,7 +237,9 @@ class State:
                     probability_list.append(cells_to_weight[cell] / total_weight)
 
                 # Get the relocation target based on weighted stochastic choices
-                relocation_cell = random.choices(cell_list, weights=probability_list, k=1)[0]
+                relocation_cell = random.choices(
+                    cell_list, weights=probability_list, k=1
+                )[0]
 
                 # Create relocation job
                 driving_time = int(
