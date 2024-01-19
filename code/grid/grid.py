@@ -47,14 +47,14 @@ class Grid:
         self.cells: list[list[GridCell]] = [
             [None for long in cells_by_lat_long[lat]] for lat in cells_by_lat_long
         ]
-        self.cells_to_indices = {}
+        self.cells_to_indices: dict[GridCell, tuple[int, int]] = {}
         sorted_lat = sorted(cells_by_lat_long)
         for i in range(len(sorted_lat)):
             sorted_long = sorted(cells_by_lat_long[sorted_lat[i]])
             for j in range(len(sorted_long)):
                 self.cells[i][j] = cells_by_lat_long[sorted_lat[i]][sorted_long[j]]
                 self.cells_to_indices[
-                    cells_by_lat_long[sorted_lat[i]][sorted_long[j]].id
+                    cells_by_lat_long[sorted_lat[i]][sorted_long[j]]
                 ] = (i, j)
         LOGGER.debug("Finished to create grid cells")
 
@@ -167,7 +167,7 @@ class Grid:
 
     def find_n_adjacent_cells(self, cell: GridCell, n: int) -> set(GridCell):
         cell_set = set()
-        (i, j) = self.cells_to_indices[cell.id]
+        (i, j) = self.cells_to_indices[cell]
         min_i = i - n if i - n > 0 else 0
         max_i = i + n if i + n < len(self.cells) else len(self.cells) - 1
         min_j = j - n if j - n > 0 else 0

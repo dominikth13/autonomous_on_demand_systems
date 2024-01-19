@@ -23,7 +23,7 @@ class Order:
             Order._orders_by_time = {
                 Time(hour, minute): [] for minute in range(60) for hour in range(24)
             }
-            #change the path to other orders like orders_2015-07-01.csv 
+            # change the path to other orders like orders_2015-07-01.csv
             df = pd.read_csv(ProgramParams.ORDERS_FILE_PATH)
             counter = 0
             for _, row in df.iterrows():
@@ -85,18 +85,23 @@ class Order:
                 connection = fastest_connection_network.get_fastest_connection(
                     origin, destination
                 )
-                total_walking_time = (
+                walking_time = (
                     self.start.distance_to(origin.position)
                     + destination.position.distance_to(self.end)
                 ) / ProgramParams.WALKING_SPEED
-
+                # include entry, exit and waiting time
+                other_time = (
+                    2 * ProgramParams.PUBLIC_TRANSPORT_ENTRY_EXIT_TIME
+                    + ProgramParams.PUBLIC_TRANSPORT_WAITING_TIME(self.dispatch_time)
+                )
+                total_additional_time = walking_time + other_time
                 if (
                     fastest_connection == None
-                    or fastest_connection[1] > total_walking_time + connection[1]
+                    or fastest_connection[1] > total_additional_time + connection[1]
                 ):
                     fastest_connection = (
                         connection[0],
-                        connection[1] + total_walking_time,
+                        connection[1] + total_additional_time,
                     )
 
         self.direct_connection = fastest_connection

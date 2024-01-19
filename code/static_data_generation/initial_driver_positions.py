@@ -44,3 +44,25 @@ def initialize_driver_positions() -> None:
                 ]
             )
 
+def initialize_driver_positions_for_trajectories() -> None:
+    # Here we spawn a driver in each cell to check how this cell would perform for different orders
+    grid = Grid.get_instance()
+    drivers = []
+    for cell in grid.cells_to_indices.keys():
+        if cell.is_empty():
+            continue
+        drivers.append(Driver(cell.center))
+    
+    csv_file_path = "code/data/drivers.csv"
+    with open(csv_file_path, mode="w") as file:
+        writer = csv.writer(file)
+        writer.writerow(["driver_id", "lat", "lon"])
+        for driver in drivers:
+            writer.writerow(
+                [
+                    driver.id,
+                    driver.current_position.lat,
+                    driver.current_position.lon,
+                ]
+            )
+

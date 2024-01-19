@@ -21,7 +21,6 @@ class Route:
         walking_time: float,
         other_time: float,
         total_time: float,
-        time_reduction: float,
     ) -> None:
         self.id = ID_PROVIDER.get_id()
         self.order = order
@@ -40,7 +39,7 @@ class Route:
             )
         )
         # How many seconds the route saves for the customer
-        self.time_reduction = time_reduction
+        self.time_reduction = order.direct_connection[1] - total_time
 
     def is_regular_route(self) -> bool:
         return self.stations == []
@@ -59,5 +58,4 @@ def regular_route(order: Order) -> Route:
         0,
         0,
         vehicle_time,
-        vehicle_time - order.direct_connection[1],
     )

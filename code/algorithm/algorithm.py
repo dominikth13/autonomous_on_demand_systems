@@ -28,7 +28,7 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
         start = order.start
         end = order.end
 
-        if default_route.total_time > ProgramParams.L1:
+        if order.direct_connection[1] > ProgramParams.L1:
             # 1. Get the closest start and end station for each line
             from public_transport.station import Station
 
@@ -48,20 +48,26 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                     )
 
                     # Distance (time in second)
-                    vehicle_time = start.distance_to(origin.position) / ProgramParams.VEHICLE_SPEED
-                    walking_time = destination.position.distance_to(end) / ProgramParams.WALKING_SPEED
+                    vehicle_time = (
+                        start.distance_to(origin.position) / ProgramParams.VEHICLE_SPEED
+                    )
+                    walking_time = (
+                        destination.position.distance_to(end)
+                        / ProgramParams.WALKING_SPEED
+                    )
                     transit_time = connection[1]
                     stations = connection[0]
                     # include entry, exit and waiting time
                     other_time = (
                         2 * ProgramParams.PUBLIC_TRANSPORT_ENTRY_EXIT_TIME
                         + ProgramParams.PUBLIC_TRANSPORT_WAITING_TIME(
-                            State.get_state().current_interval.start
+                            order.dispatch_time
                         )
                     )
                     total_time = vehicle_time + walking_time + transit_time + other_time
 
-                    if total_time < default_route.total_time + ProgramParams.L2:
+                    # Since we want people to use public transport, here we check against the direct_connection without any bus
+                    if total_time < order.direct_connection[1] + ProgramParams.L2:
                         routes_per_order[order].append(
                             Route(
                                 order,
@@ -73,7 +79,6 @@ def generate_routes(orders: list[Order]) -> dict[Order, list[Route]]:
                                 walking_time,
                                 other_time,
                                 total_time,
-                                order.direct_connection[1] - total_time,
                             )
                         )
     return routes_per_order
@@ -162,12 +167,26 @@ def solve_optimization_problem(
 ) -> list[DriverActionPair]:
     # solve_as_min_cost_flow_problem(driver_action_pairs)
     driver_action_pairs = or_tools_min_cost_flow(driver_action_pairs)
-    occupied_drivers = len(list(filter(lambda x: x.driver.is_occupied(), driver_action_pairs)))
-    relocated_drivers = len(list(filter(lambda x: x.driver.is_occupied() and x.driver.job.is_relocation, driver_action_pairs)))
-    idling_drivers = len(list(filter(lambda x: x.action.is_idling(), driver_action_pairs))) - occupied_drivers
+    occupied_drivers = len(
+        list(filter(lambda x: x.driver.is_occupied(), driver_action_pairs))
+    )
+    relocated_drivers = len(
+        list(
+            filter(
+                lambda x: x.driver.is_occupied() and x.driver.job.is_relocation,
+                driver_action_pairs,
+            )
+        )
+    )
+    idling_drivers = (
+        len(list(filter(lambda x: x.action.is_idling(), driver_action_pairs)))
+        - occupied_drivers
+    )
     matched_drivers = len(driver_action_pairs) - idling_drivers - occupied_drivers
     occupied_drivers = occupied_drivers - relocated_drivers
-    LOGGER.debug(f"Matched drivers: {matched_drivers}, Occupied drivers: {occupied_drivers}, Relocated drivers: {relocated_drivers}, Idling drivers: {idling_drivers}")
+    LOGGER.debug(
+        f"Matched drivers: {matched_drivers}, Occupied drivers: {occupied_drivers}, Relocated drivers: {relocated_drivers}, Idling drivers: {idling_drivers}"
+    )
     DataCollector.append_workload(State.get_state().current_time, occupied_drivers)
     DataCollector.append_relocation(State.get_state().current_time, relocated_drivers)
     return driver_action_pairs

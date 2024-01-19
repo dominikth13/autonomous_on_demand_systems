@@ -24,7 +24,7 @@ from state.state_value_table import StateValueTable
 import pandas as pd
 from program.program_params import Mode, ProgramParams
 from static_data_generation.grid_builder import create_cell_grid
-from static_data_generation.initial_driver_positions import initialize_driver_positions
+from static_data_generation.initial_driver_positions import initialize_driver_positions, initialize_driver_positions_for_trajectories
 from static_data_generation.time_series_discretization import TimeSeriesDiscretization
 from static_data_generation.trajectory_data_builder import (
     generate_trajectories,
@@ -271,7 +271,7 @@ while True:
                 "Which script do you want to start? (Visualize driver positions -> 1) "
             )
             if user_input == "1":
-                visualize_drivers()
+                visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
                 break
             else:
                 print("This option is not allowed. Please try again.")

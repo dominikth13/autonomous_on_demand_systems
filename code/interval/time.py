@@ -12,12 +12,12 @@ class Time:
     def of_total_minutes(minutes: int) -> Time:
         while minutes >= 1440:
             minutes -= 1440
-        return Time(minutes // 60, minutes % 60, 0)
+        return Time(minutes // 60, (minutes % 60) // 1, 0)
     
     def of_total_seconds(seconds: int) -> Time:
-        if seconds >= 86400:
+        while seconds >= 86400:
             seconds -= 86400
-        return Time(seconds // 3600, (seconds % 3600) // 60, seconds % 60)
+        return Time(seconds // 3600, (seconds % 3600) // 60, (seconds % 60) // 1)
 
     # Calculate time difference(distance) in seconds
     def distance_to(self, other: Time) -> int:

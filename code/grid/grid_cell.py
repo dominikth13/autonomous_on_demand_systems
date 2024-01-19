@@ -11,4 +11,4 @@ class GridCell:
         self.zone = zone
 
     def is_empty(self) -> bool:
-        return self.id == 9999
+        return self.zone.id == 9999
