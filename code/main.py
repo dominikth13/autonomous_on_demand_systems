@@ -99,7 +99,7 @@ def start_q_learning():
                 DataCollector.append_driver_data(
                     current_time, driver.id, status, driver.current_position
                 )
-
+            #visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_{current_total_minutes}_eod.png")
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
 

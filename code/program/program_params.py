@@ -5,10 +5,10 @@ from interval.time import Time
 
 class ProgramParams:
     # Minimal trip time for routes to be eligible for combined routes in seconds
-    L1 = 600
+    L1 = 0
 
     # Maximum difference between direct route time and combined route time in seconds
-    L2 = 1200
+    L2 = 1800
 
     # Static vehicle speed in m/s -> assume these small busses driving in Berlin
     VEHICLE_SPEED = 6.33  # FIX, wie im Paper Feng et al. 2022
@@ -19,7 +19,7 @@ class ProgramParams:
     # Pick-up distance threshold (how far away driver consider new orders) in meter
     PICK_UP_DISTANCE_THRESHOLD = 5000  # im Paper 950 Meter
 
-    LEARNING_RATE = 0.001  # im Paper Feng et al. 2022 ist es 0.005
+    LEARNING_RATE = 0.005  # im Paper Feng et al. 2022 ist es 0.005
 
     # Hyperparameter that says how the online policy learning should be 
     # influenced by offline policy learning
@@ -94,7 +94,7 @@ class ProgramParams:
     ORDERS_FILE_PATH = f"code/data/orders_{SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
 
     # If algorithm should do relocation
-    FEATURE_RELOCATION_ENABLED = False
+    FEATURE_RELOCATION_ENABLED = True
 
 
 class Mode(Enum):

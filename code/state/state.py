@@ -11,7 +11,7 @@ from program.program_params import Mode, ProgramParams
 from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
 from order import Order
-
+from grid.grid_cell import GridCell
 
 # Define here how the grid and intervals should look like
 class State:
@@ -192,9 +192,9 @@ class State:
             if driver.idle_time >= ProgramParams.MAX_IDLING_TIME:
                 # Calculate probability distribution
                 current_cell = Grid.get_instance().find_cell(driver.current_position)
-                cells = Grid.get_instance().find_n_adjacent_cells(
+                cells = list(filter(lambda x: not x.is_empty(), Grid.get_instance().find_n_adjacent_cells(
                     current_cell, ProgramParams.RELOCATION_RADIUS
-                )
+                )))
                 cells_to_weight = {}
 
                 for cell in cells:

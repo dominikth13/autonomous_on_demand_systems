@@ -1,7 +1,7 @@
 import csv
 from interval.time import Time
 from location.location import Location
-
+from program.program_params import ProgramParams
 
 class DataCollector:
     # [(total_seconds, num_of_occupied_driver)]
@@ -82,7 +82,7 @@ class DataCollector:
             for w in DataCollector.orders_data:
                 writer.writerow([w[0], w[1], w[2]])
 
-        csv_file_path = "code/data_output/time_reduction_quota.csv"
+        csv_file_path = (f"code/data_output/time_reduction_quota_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv")
         with open(csv_file_path, mode="w") as file:
             writer = csv.writer(file)
             writer.writerow(["total_seconds", "quota_of_saved_time_for_all_served_orders"])
