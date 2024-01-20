@@ -42,19 +42,20 @@ class StateValueNetworks:
     def get_main_state_value(self, location: Location, time: Time) -> float:
         return float(
             self.main_net(
-                torch.Tensor([location.lat, location.lon, time.to_total_seconds()])
+                torch.Tensor([location.lat, location.lon])
             ).item()
         )
 
     def get_target_state_value(self, location: Location, time: Time) -> float:
         return float(
             self.target_net(
-                torch.Tensor([location.lat, location.lon, time.to_total_seconds()])
+                torch.Tensor([location.lat, location.lon])
             ).item()
         )
 
     # We want a list of action tuples here since the error function is calculated in each iteration for all changes
     def adjust_state_values(self, action_tuples: list[tuple]) -> None:
+        from state.state import State
         trajectories = []
         for tup in action_tuples:
             trajectories.append(
@@ -69,7 +70,7 @@ class StateValueNetworks:
                 }
             )
         LOGGER.debug("Adjust weights for deep state value networks")
-        if self.iteration % ProgramParams.MAIN_AND_TARGET_NET_SYNC_ITERATIONS == 0:
+        if State.get_state().current_time.to_total_minutes() % ProgramParams.MAIN_AND_TARGET_NET_SYNC_ITERATIONS == 0:
             LOGGER.debug("Transfer weights from main to target network")
             self.target_net.load_state_dict(self.main_net.state_dict())
 
@@ -81,7 +82,6 @@ class StateValueNetworks:
                     [
                         trajectory["current_lat"],
                         trajectory["current_lon"],
-                        trajectory["current_time"],
                     ]
                 )
             )
@@ -90,7 +90,6 @@ class StateValueNetworks:
                     [
                         trajectory["target_lat"],
                         trajectory["target_lon"],
-                        trajectory["target_time"],
                     ]
                 )
             )
@@ -100,7 +99,7 @@ class StateValueNetworks:
         # Backward and optimize
         self.optimizer.zero_grad()
         # Compute loss
-        loss = self.loss_fn(state_values)
+        loss = self.loss_fn(self.main_net, state_values)
         LOGGER.debug(f"Temporal difference error: {float(loss)}")
         loss.backward()
         self.optimizer.step()
@@ -133,7 +132,6 @@ class StateValueNetworks:
 
         ope_net = NeuroNet()
         ope_target_net = NeuroNet()
-        ope_optimizer = optim.Adam(self.main_net.parameters(), lr=3 * math.exp(-4))
         ope_net.load_state_dict(
             torch.load(f"code/training_data/ope_{daystr}_{current_total_minutes}.pth")
         )
@@ -142,21 +140,14 @@ class StateValueNetworks:
                 f"code/training_data/ope_target_{daystr}_{current_total_minutes}.pth"
             )
         )
-        ope_optimizer.load_state_dict(
-            torch.load(
-                f"code/training_data/ope_opt_{daystr}_{current_total_minutes}.pth"
-            )
-        )
+
         ope_state = ope_net.state_dict()
         ope_target_state = ope_target_net.state_dict()
-        ope_optimizer_state = ope_optimizer.state_dict()
         main_state = self.main_net.state_dict()
         target_state = self.target_net.state_dict()
-        optimizer_state = self.optimizer.state_dict()
 
         new_target_state = {}
         new_main_state = {}
-        new_optimizer_state = {}
 
         for key in main_state:
             new_main_state[key] = (
@@ -167,11 +158,6 @@ class StateValueNetworks:
             new_target_state[key] = (
                 ProgramParams.OMEGA * target_state[key]
                 + (1 - ProgramParams.OMEGA) * ope_target_state[key]
-            )
-        for key in optimizer_state:
-            new_optimizer_state[key] = (
-                ProgramParams.OMEGA * optimizer_state[key]
-                + (1 - ProgramParams.OMEGA) * ope_optimizer_state[key]
             )
 
         self.main_net.load_state_dict(new_main_state)

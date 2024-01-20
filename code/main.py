@@ -131,7 +131,7 @@ def start_drl():
     LOGGER.info("Initialize vehicles")
     Drivers.get_drivers()
 
-    StateValueNetworks.get_instance().import_weights()
+    #StateValueNetworks.get_instance().import_weights()
 
     # 2. Run DQ-Learning algorithm to train state value network
     for current_total_minutes in range(
@@ -173,6 +173,7 @@ def start_drl():
             State.get_state().relocate()
 
         if current_total_minutes % 60 == 0:
+            visualize_drivers(f"drivers_{current_total_minutes}.png")
             LOGGER.debug("Save current driver positions")
             for driver in Drivers.get_drivers():
                 status = (
@@ -256,7 +257,7 @@ while True:
                 remove_idle_trajectories()
                 break
             elif user_input == "4":
-                initialize_driver_positions_for_trajectories()
+                initialize_driver_positions()
                 break
             elif user_input == "5":
                 TimeSeriesDiscretization.discretize_day()

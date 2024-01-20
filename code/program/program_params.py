@@ -17,7 +17,8 @@ class ProgramParams:
     WALKING_SPEED = 1  # FIX, wie im Paper Feng et al. 2022
 
     # Pick-up distance threshold (how far away driver consider new orders) in meter
-    PICK_UP_DISTANCE_THRESHOLD = 5000  # im Paper 950 Meter
+    # Equal to 5 minutes
+    PICK_UP_DISTANCE_THRESHOLD = 1900  # im Paper 950 Meter
 
     LEARNING_RATE = 0.001  # im Paper Feng et al. 2022 ist es 0.005
 
@@ -63,7 +64,7 @@ class ProgramParams:
     EXECUTION_MODE = None
 
     # Number of iterations until the weights of main net are copied to target net
-    MAIN_AND_TARGET_NET_SYNC_ITERATIONS = 100
+    MAIN_AND_TARGET_NET_SYNC_ITERATIONS = 60
 
     AMOUNT_OF_DRIVERS = 100
 
@@ -75,7 +76,7 @@ class ProgramParams:
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime(2015, 7, 1)
+    SIMULATION_DATE = datetime(2015, 7, 18)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()
@@ -94,7 +95,7 @@ class ProgramParams:
     ORDERS_FILE_PATH = f"code/data/orders_{SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
 
     # If algorithm should do relocation
-    FEATURE_RELOCATION_ENABLED = False
+    FEATURE_RELOCATION_ENABLED = True
 
 
 class Mode(Enum):

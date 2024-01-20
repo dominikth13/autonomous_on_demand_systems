@@ -121,7 +121,7 @@ def train_for(
             # Backward and optimize
             optimizer.zero_grad()
             # Compute loss
-            loss = loss_fn(state_values)
+            loss = loss_fn(state_value_net, state_values)
             loss.backward()
             optimizer.step()
 
@@ -154,7 +154,7 @@ def train_for(
                 state_values.append((trajectory, output_current, output_target))
 
             # Compute loss
-            losses.append(loss_fn(state_values).item())
+            losses.append(loss_fn(state_value_net, state_values).item())
 
         LOGGER.info(f"Medium difference error: {float(mean(losses))}")
         all_losses.append(float(mean(losses)))

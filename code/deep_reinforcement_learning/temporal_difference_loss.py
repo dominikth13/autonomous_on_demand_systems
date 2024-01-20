@@ -32,16 +32,18 @@ class TemporalDifferenceLoss(nn.Module):
     def lipschitz_regularizer(model, trajectories_and_state_values):
         reg_terms = []
         for x in trajectories_and_state_values:
-            # Berechnen des Outputs für einen Eingabesatz
-            start_state_value = x[1]
-            inputs = torch.Tensor([x[0]["current_lat"], x[0]["current_lat"]])
-            # Berechnen des Gradienten der Ausgabe in Bezug auf die Eingabe
-            gradients = torch.autograd.grad(outputs=start_state_value, inputs=inputs, 
-                                            create_graph=True, retain_graph=True, only_inputs=True)[0]
+            with torch.enable_grad():
+                # Berechnen des Outputs für einen Eingabesatz
+                input = torch.Tensor([x[0]["current_lat"], x[0]["current_lon"]])
+                input.requires_grad = True
+                start_state_value = model(input)
+                # Berechnen des Gradienten der Ausgabe in Bezug auf die Eingabe
+                gradients = torch.autograd.grad(outputs=start_state_value, inputs=input, 
+                                                create_graph=True,allow_unused=True, retain_graph=True, only_inputs=True)[0]
 
-            # Berechnen und speichern der Norm des Gradienten
-            grad_norm = gradients.norm()
-            reg_terms.append(grad_norm)
+                # Berechnen und speichern der Norm des Gradienten
+                grad_norm = gradients.norm()
+                reg_terms.append(grad_norm)
 
         # Mitteln der Regularisierungsterme über den gesamten Batch
         avg_reg_term = torch.mean(torch.stack(reg_terms))

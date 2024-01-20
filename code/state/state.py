@@ -198,7 +198,7 @@ class State:
                     filter(
                         lambda x: not x.is_empty(),
                         Grid.get_instance().find_n_adjacent_cells(
-                            cell, ProgramParams.RELOCATION_RADIUS
+                            current_cell, ProgramParams.RELOCATION_RADIUS
                         ),
                     )
                 )
