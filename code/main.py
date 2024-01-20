@@ -29,7 +29,7 @@ from static_data_generation.trajectory_data_builder import (
     generate_trajectories,
     remove_idle_trajectories,
 )
-from data_visualization.Datavisualisierung import visualize_drivers
+from data_visualization.Datavisualisierung import visualize_drivers, visualize_orders
 
 
 def start_q_learning():
@@ -358,10 +358,13 @@ while True:
     elif user_input == "5":
         while True:
             user_input = input(
-                "Which script do you want to start? (Visualize driver positions -> 1) "
+                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2) "
             )
             if user_input == "1":
                 visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
+                break
+            elif user_input == "2":
+                visualize_orders(f"orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
                 break
             else:
                 print("This option is not allowed. Please try again.")
@@ -369,13 +372,4 @@ while True:
 
     else:
         print("This option is not allowed. Please try again.")
-# INFO:algorithm:Simulate time 03:00:00
-# Laufzeit filtered_orders: 0.0 Sekunden
-# Laufzeit orders: 620.99849152565 Sekunden
-# Laufzeit add_orders: 0.029900312423706055 Sekunden
-# Laufzeit generate Routes: 345.75252294540405 Sekunden
-# Laufzeit generate_driver_action_pairs: 794.6348361968994 Sekunden
-# Laufzeit solve optimization_problem: 31.162750244140625 Sekunden
-# Laufzeit rest: 0.7596573829650879 Sekunden
-# INFO:algorithm:Simulate time 03:01:00
-# Laufzeit filtered_orders: 0.0 Sekunden
+
