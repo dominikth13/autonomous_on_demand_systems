@@ -304,6 +304,7 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
     hours = (State.get_state().current_time.to_total_minutes() - TimeSeries.get_instance().start_time.to_total_minutes()) / 60
     hours = hours if hours > 0.1 else 0.1
     LOGGER.debug(f"Sum of timesafe per car, per hour, in minutes: {ProgramStats.SUM_OF_TIMESAFE / len(driver_list) / hours / 60}")
+    return matches
 
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import floyd_warshall
