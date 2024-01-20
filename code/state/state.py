@@ -11,7 +11,7 @@ from program.program_params import Mode, ProgramParams
 from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
 from order import Order
-
+from grid.grid_cell import GridCell
 
 # Define here how the grid and intervals should look like
 class State:

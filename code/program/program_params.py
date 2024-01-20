@@ -5,10 +5,10 @@ from interval.time import Time
 
 class ProgramParams:
     # Minimal trip time for routes to be eligible for combined routes in seconds
-    L1 = 600
+    L1 = 0
 
     # Maximum difference between direct route time and combined route time in seconds
-    L2 = 1200
+    L2 = 1800
 
     # Static vehicle speed in m/s -> assume these small busses driving in Berlin
     VEHICLE_SPEED = 6.33  # FIX, wie im Paper Feng et al. 2022
@@ -20,7 +20,7 @@ class ProgramParams:
     # Equal to 5 minutes
     PICK_UP_DISTANCE_THRESHOLD = 1900  # im Paper 950 Meter
 
-    LEARNING_RATE = 0.001  # im Paper Feng et al. 2022 ist es 0.005
+    LEARNING_RATE = 0.005  # im Paper Feng et al. 2022 ist es 0.005
 
     # Hyperparameter that says how the online policy learning should be 
     # influenced by offline policy learning
