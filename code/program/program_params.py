@@ -101,3 +101,5 @@ class ProgramParams:
 class Mode(Enum):
     TABULAR = "Tabular"
     DEEP_NEURAL_NETWORKS = "Deep Neural Networks"
+    # Just solve the optimization problem without knowing state values
+    BASELINE_PERFORMANCE = "Baseline Performance"

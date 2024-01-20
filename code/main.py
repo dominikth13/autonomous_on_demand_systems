@@ -200,9 +200,86 @@ def start_drl():
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
 
 
+def start_baseline_performance():
+    # 1. Initialize environment data
+    start_time = time.time()
+    LOGGER.info("Initialize Grid")
+    Grid.get_instance()
+    LOGGER.info("Initialize time series")
+    TimeSeries.get_instance()
+    LOGGER.info("Initialize state")
+    State.get_state()
+    LOGGER.info("Initialize fastest connection network")
+    FastestStationConnectionNetwork.get_instance()
+    LOGGER.info("Initialize orders")
+    Order.get_orders_by_time()
+    LOGGER.info("Initialize vehicles")
+    Drivers.get_drivers()
+
+    # 2. Run DQ-Learning algorithm to train state value network
+    for current_total_minutes in range(
+        TimeSeries.get_instance().start_time.to_total_minutes(),
+        TimeSeries.get_instance().end_time.to_total_minutes() + 1,
+    ):
+        current_time = Time.of_total_minutes(current_total_minutes)
+        LOGGER.info(f"Simulate time {current_time}")
+
+        LOGGER.debug(f"Dispatch orders")
+        orders = Order.get_orders_by_time()[current_time]
+        for order in orders:
+            order.dispatch()
+        # Add orders to state
+        State.get_state().add_orders(orders)
+
+        # Generate routes
+        LOGGER.debug("Generate routes")
+        order_routes_dict = generate_routes(orders)
+
+        # Generate Action-Driver pairs with all available routes and drivers
+        LOGGER.debug("Generate driver-action-pairs")
+        driver_action_pairs = generate_driver_action_pairs(order_routes_dict)
+
+        # Find Action-Driver matches based on a min-cost-flow problem
+        LOGGER.debug("Generate driver-action matches")
+        matches = solve_optimization_problem(driver_action_pairs)
+
+        # Apply state changes based on Action-Driver matches and existing driver jobs
+        LOGGER.debug("Apply state-value changes")
+        State.get_state().apply_state_change(matches)
+
+        if ProgramParams.FEATURE_RELOCATION_ENABLED and current_time.to_total_seconds() % ProgramParams.MAX_IDLING_TIME == 0:
+            LOGGER.debug("Relocate long time idle drivers")
+            State.get_state().relocate()
+
+        if current_total_minutes % 60 == 0:
+            visualize_drivers(f"drivers_{current_total_minutes}.png")
+            LOGGER.debug("Save current driver positions")
+            for driver in Drivers.get_drivers():
+                status = (
+                    "idling"
+                    if not driver.is_occupied()
+                    else ("relocation" if driver.job.is_relocation else "occupied")
+                )
+                DataCollector.append_driver_data(
+                    current_time, driver.id, status, driver.current_position
+                )
+
+        # Update the expiry durations of still open orders
+        State.get_state().update_order_expiry_duration()
+
+        # Increment to next interval
+        State.get_state().increment_time_interval(current_time)
+
+    LOGGER.info("Exporting final driver positions")
+    Drivers.export_drivers()
+    LOGGER.info("Exporting data")
+    DataCollector.export_all_data()
+    LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
+
+
 while True:
     user_input = input(
-        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Static Data Generation -> 3, Visualization -> 4) "
+        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Baseline Performance -> 3, Static Data Generation -> 4, Visualization -> 5) "
     )
     if user_input == "1":
         ProgramParams.EXECUTION_MODE = Mode.TABULAR
@@ -244,6 +321,19 @@ while True:
 
     elif user_input == "3":
         while True:
+            ProgramParams.EXECUTION_MODE = Mode.BASELINE_PERFORMANCE
+            user_input = input(
+                "Which script do you want to start? (Run Baseline Performance -> 1) "
+            )
+            if user_input == "1":
+                start_baseline_performance()
+                break
+            else:
+                print("This option is not allowed. Please try again.")
+        break
+
+    elif user_input == "4":
+        while True:
             user_input = input(
                 "Which script do you want to start? (Grid Cell Creation -> 1, Generate Trajectories -> 2, Remove Idle Trajectories -> 3, Initialize Drivers -> 4, Discretize days -> 5) "
             )
@@ -265,7 +355,7 @@ while True:
             else:
                 print("This option is not allowed. Please try again.")
         break
-    elif user_input == "4":
+    elif user_input == "5":
         while True:
             user_input = input(
                 "Which script do you want to start? (Visualize driver positions -> 1) "

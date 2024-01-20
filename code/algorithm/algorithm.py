@@ -131,12 +131,15 @@ def generate_driver_action_pairs(
                             arrival_interval,
                         )
                     )
-                else:
+                elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     state_value = (
                         StateValueNetworks.get_instance().get_target_state_value(
                             pair.action.route.vehicle_destination, arrival_time
                         )
                     )
+                else:
+                    # Baseline Performance
+                    state_value = 0
                 weight = (
                     pair.action.route.time_reduction
                     + ProgramParams.DISCOUNT_FACTOR(

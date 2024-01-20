@@ -57,7 +57,7 @@ class State:
                             ),
                         )
                     )
-                else:
+                elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     self.action_tuples.append(
                         (
                             0,
@@ -102,7 +102,7 @@ class State:
                             ),
                         )
                     )
-                else:
+                elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     self.action_tuples.append(
                         (
                             action.route.time_reduction,
@@ -159,7 +159,7 @@ class State:
                     next_zone=tup[3],
                     next_interval=tup[4],
                 )
-        else:
+        elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
             StateValueNetworks.get_instance().adjust_state_values(self.action_tuples)
 
         self.action_tuples = []
@@ -218,16 +218,17 @@ class State:
                                 ),
                             )
                         )
-                    else:
+                    elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                         state_value = (
                             StateValueNetworks.get_instance().get_target_state_value(
                                 cell.center, self.current_time.add_seconds(driving_time)
                             )
                         )
+                    else:
+                        state_value = random.randint(0,100)
 
-                    cells_to_weight[cell] = math.exp(
-                        ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
-                    )
+                    state_value = state_value if state_value > 0 else 0
+                    cells_to_weight[cell] = ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
 
                 total_weight = sum(cells_to_weight.values())
                 cell_list = []
@@ -248,27 +249,3 @@ class State:
                 )
                 driver.set_new_relocation_job(driving_time, relocation_cell.center)
                 driver.idle_time = 0
-
-                # Maybe this is needed but I'm not sure now
-                # if EXECUTION_MODE == Mode.TABULAR:
-                #     self.action_tuples.append(
-                #         (
-                #             0,
-                #             Grid.get_instance().find_zone(driver.current_position),
-                #             self.current_interval,
-                #             relocation_cell.zone,
-                #             TimeSeries.get_instance().find_interval(
-                #                 self.current_time.add_seconds(driving_time)
-                #             ),
-                #         )
-                #     )
-                # else:
-                #     self.action_tuples.append(
-                #         (
-                #             0,
-                #             driver.current_position,
-                #             self.current_time,
-                #             relocation_cell.center,
-                #             self.current_time.add_seconds(driving_time),
-                #         )
-                #     )
