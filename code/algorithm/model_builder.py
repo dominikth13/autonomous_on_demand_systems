@@ -10,6 +10,8 @@ from logger import LOGGER
 
 import networkx as nx
 
+from state.state import State
+
 # Not used because of computation complexity
 def build_bipartite_matching_problem(
     driver_action_pairs: list[DriverActionPair],
@@ -287,12 +289,6 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
     # LOGGER.debug(" Arc    Flow / Capacity Cost")
     solution_flows = smcf.flows(all_arcs)
     costs = solution_flows
-    ProgramStats.SUM_OF_TIMESAFE += smcf.optimal_cost()
-    LOGGER.debug(f"Sum of timesafe: {ProgramStats.SUM_OF_TIMESAFE}")
-
-    hours = (TimeSeries.get_instance().end_time.to_total_minutes() + 1  - TimeSeries.get_instance().start_time.to_total_minutes())/ 60 
-    LOGGER.debug(f"Time hours: {hours}")
-    LOGGER.debug(f"Sum of timesafe per car, per hour, in minutes: {ProgramStats.SUM_OF_TIMESAFE / len(driver_list) / 60/ hours}")
 
 
     # for arc, flow, cost in zip(all_arcs, solution_flows, costs):
@@ -301,7 +297,12 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
 
     solution_flows = smcf.flows(all_arcs)
     
-    return list(filter(lambda pair: solution_flows[pair_to_index[pair]] == 1, driver_action_pairs))
+    matches = list(filter(lambda pair: solution_flows[pair_to_index[pair]] == 1, driver_action_pairs))
+    ProgramStats.SUM_OF_TIMESAFE += sum(list(map(lambda pair: pair.action.route.time_reduction, filter(lambda pair: pair.action.is_route(), matches))))
+    LOGGER.debug(f"Sum of timesafe: {ProgramStats.SUM_OF_TIMESAFE}")
+
+    hours = (State.get_state().current_time.to_total_minutes() - TimeSeries.get_instance().start_time.to_total_minutes()) / 60 
+    LOGGER.debug(f"Sum of timesafe per car, per hour, in minutes: {ProgramStats.SUM_OF_TIMESAFE / len(driver_list) / hours / 60}")
 
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import floyd_warshall
