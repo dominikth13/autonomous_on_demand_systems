@@ -250,22 +250,28 @@ class State:
                     else:
                         state_value = random.randint(0, 100)
 
-                    state_value = state_value if state_value > 0 else 0
-                    cells_to_weight[cell] = (
-                        ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
-                    )
+                    state_value = state_value + 1 if state_value > 0 else 0
+                    if state_value > 1:
+                        cells_to_weight[cell] = (
+                            ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
+                        )
 
-                total_weight = sum(cells_to_weight.values())
-                cell_list = []
-                probability_list = []
-                for cell in cells:
-                    cell_list.append(cell)
-                    probability_list.append(cells_to_weight[cell] / total_weight)
+
 
                 # Get the relocation target based on weighted stochastic choices
-                relocation_cell = random.choices(
-                    cell_list, weights=probability_list, k=1
-                )[0]
+                if len(cells_to_weight) > 0:
+                    total_weight = sum(cells_to_weight.values())
+                    cell_list = []
+                    probability_list = []
+                    for cell in cells_to_weight:
+                        cell_list.append(cell)
+                        probability_list.append(cells_to_weight[cell] / total_weight)
+                        relocation_cell = random.choices(
+                            cell_list, weights=probability_list, k=1
+                        )[0]
+                else:
+                    # When we can't switch just stay
+                    continue
 
                 # Create relocation job
                 driving_time = int(
