@@ -97,7 +97,12 @@ def generate_driver_action_pairs(
 
     # 1. Generate DriverActionPair for each pair that is valid (distance), add DriverIdlingPair for each driver
     for driver in Drivers.get_drivers():
-        driver_to_idling_dict[driver] = DriverActionPair(driver, idling, 0)
+        if ProgramParams.FEATURE_ADD_IDLING_COST_TO_TARGET:
+            # We add a cost term of -60 to every idling action
+            weight = -60
+        else:
+            weight = 0
+        driver_to_idling_dict[driver] = DriverActionPair(driver, idling, weight)
         if driver.is_occupied():
             # If driver is occupied he cannot take any new order
             continue

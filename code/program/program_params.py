@@ -97,6 +97,10 @@ class ProgramParams:
     # If algorithm should do relocation
     FEATURE_RELOCATION_ENABLED = True
 
+    FEATURE_ORDERS_AS_WIN = False
+
+    FEATURE_ADD_IDLING_COST_TO_TARGET = False
+
 
 class Mode(Enum):
     TABULAR = "Tabular"
