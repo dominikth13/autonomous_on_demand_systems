@@ -31,23 +31,20 @@ def generate_trajectories() -> None:
         order.dispatch()
 
     LOGGER.debug("Generate routes")
-    order_to_routes_dict: dict[Order, list[Route]] = {
+    order_to_route_dict: dict[Order, list[Route]] = {
         order: generate_routes([order])[order] for order in orders
     }
     LOGGER.debug("Filter routes")
-    for order in order_to_routes_dict.keys():
+    for order in order_to_route_dict.keys():
         sorted_routes = list(
             sorted(
-                order_to_routes_dict[order],
+                order_to_route_dict[order],
                 key=lambda x: x.time_reduction,
             )
         )
-        # For each driver order pair only return best, worst and medium pair
+        # For each driver order pair only return best pair
         best = sorted_routes[-1]
-        worst = sorted_routes[0]
-        medium = sorted_routes[len(sorted_routes) // 2]
-        selected_pairs = [best, worst, medium]
-        order_to_routes_dict[order] = selected_pairs
+        order_to_route_dict[order] = best
 
     driver_to_orders_to_routes_dict: dict[
         Driver, dict[Order, list[DriverActionPair]]
@@ -71,10 +68,10 @@ def generate_trajectories() -> None:
                 # If driver is currently to far away for this order he ignores it
                 continue
             driver_to_orders_to_routes_dict[driver][order] = []
-            for route in order_to_routes_dict[order]:
-                driver_to_orders_to_routes_dict[driver][order].append(
-                    DriverActionPair(driver, Action(route), 0)
-                )
+            route = order_to_route_dict[order]
+            driver_to_orders_to_routes_dict[driver][order].append(
+                DriverActionPair(driver, Action(route), 0)
+            )
 
             for pair in driver_to_orders_to_routes_dict[driver][order]:
                 reward = pair.action.route.time_reduction

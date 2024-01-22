@@ -15,7 +15,7 @@ from logger import LOGGER
 def import_trajectories(train_mode: str, time_series_breakpoints: list[int]) -> dict[int, dict[int, dict[str, float]]]:
     csv_file_names = []
     if train_mode == "wd":
-        csv_file_names = ["trajectories_thu_week_28.csv", "trajectories_fri_week_28.csv"]
+        csv_file_names = ["trajectories_wed_week_27.csv"]
     elif train_mode == "sat":
         csv_file_names = ["trajectories_sat_week_28.csv"]
     elif train_mode == "sun":

@@ -76,18 +76,18 @@ class ProgramParams:
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime(2015, 7, 18)
+    SIMULATION_DATE = datetime(2015, 7, 6)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()
         wd_to_bkps = {
-            0: [150, 300, 450, 1050, 1350],
-            1: [150, 300, 450, 1050, 1350],
-            2: [150, 300, 450, 1050, 1350],
-            3: [150, 300, 450, 1050, 1350],
-            4: [150, 300, 450, 1050, 1350],
-            5: [150, 300, 450, 750, 1050],
-            6: [150, 300, 450, 600, 1350],
+            0: [0, 150, 300, 450, 1050, 1350],
+            1: [0, 150, 300, 450, 1050, 1350],
+            2: [0, 150, 300, 450, 1050, 1350],
+            3: [0, 150, 300, 450, 1050, 1350],
+            4: [0, 150, 300, 450, 1050, 1350],
+            5: [0, 150, 300, 450, 750, 1050],
+            6: [0, 150, 300, 450, 600, 1350],
         }
         return wd_to_bkps[wd]
 

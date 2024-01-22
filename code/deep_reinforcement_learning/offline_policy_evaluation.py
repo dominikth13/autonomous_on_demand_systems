@@ -15,7 +15,7 @@ from program.program_params import ProgramParams
 
 def train_ope() -> None:
     # wd, sat or sun
-    TRAINING_MODE = "sat"
+    TRAINING_MODE = "wd"
     time_series_breakpoints = {
         "wd": [0, 150, 300, 450, 1050, 1350],
         "sat": [0, 150, 300, 450, 750, 1050],
@@ -45,7 +45,7 @@ def train_ope() -> None:
             writer.writerow(
                 [
                     bp,
-                    all_losses[bp]
+                    all_losses[i]
                 ]
             )
 

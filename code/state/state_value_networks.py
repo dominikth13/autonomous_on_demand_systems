@@ -29,7 +29,6 @@ class StateValueNetworks:
         self.main_net = NeuroNet()
         self.target_net = NeuroNet()
         self.main_net.train()
-        self.target_net.train()
 
         self.loss_fn = TemporalDifferenceLoss()
         # Optimizer
@@ -165,3 +164,4 @@ class StateValueNetworks:
         self.optimizer = optim.Adam(
             self.main_net.parameters(), lr=3 * math.exp(-4)
         )
+        self.main_net.train()
