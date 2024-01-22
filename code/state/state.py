@@ -92,21 +92,27 @@ class State:
 
                 if ProgramParams.FEATURE_ORDERS_AS_WIN:
                     # We calculate the reward as the product of time reduction and amount of orders in this zone in the last 30 minutes
-                    start_minutes = self.current_time.to_total_minutes() - 30 if self.current_time.to_total_minutes() - 30 > 0 else 0
-                    amount_of_orders = list(
-                        filter(
-                            lambda x: x.zone.id == route.order.zone.id,
-                            [
-                                Order.get_orders_by_time(
-                                    Time.of_total_minutes(total_minute)
-                                )
-                                for total_minute in range(
-                                    start_minutes,
-                                    self.current_time.to_total_minutes(),
-                                )
-                            ],
+                    start_minutes = (
+                        self.current_time.to_total_minutes() - 30
+                        if self.current_time.to_total_minutes() - 30 > 0
+                        else 0
+                    )
+                    amount_of_orders = len(
+                        list(
+                            filter(
+                                lambda x: x.zone.id == route.order.zone.id,
+                                [
+                                    Order.get_orders_by_time(
+                                        Time.of_total_minutes(total_minute)
+                                    )
+                                    for total_minute in range(
+                                        start_minutes,
+                                        self.current_time.to_total_minutes(),
+                                    )
+                                ],
+                            )
                         )
-                    ).count()
+                    )
                     reward = action.route.time_reduction * amount_of_orders
                 else:
                     reward = action.route.time_reduction
@@ -255,8 +261,6 @@ class State:
                         cells_to_weight[cell] = (
                             ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
                         )
-
-
 
                 # Get the relocation target based on weighted stochastic choices
                 if len(cells_to_weight) > 0:
