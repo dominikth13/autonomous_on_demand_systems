@@ -76,7 +76,7 @@ class ProgramParams:
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime(2015, 7, 6)
+    SIMULATION_DATE = datetime(2015, 7, 1)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()

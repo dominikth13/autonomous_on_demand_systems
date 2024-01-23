@@ -8,6 +8,7 @@ from algorithm.algorithm import generate_routes
 from deep_reinforcement_learning.deep_rl_training import import_trajectories
 from driver.driver import Driver
 from driver.drivers import Drivers
+from grid.grid import Grid
 from interval.time import Time
 from logger import LOGGER
 from order import Order
@@ -75,12 +76,12 @@ def generate_trajectories() -> None:
 
             for pair in driver_to_orders_to_routes_dict[driver][order]:
                 reward = pair.action.route.time_reduction
-                target_position = pair.action.route.vehicle_destination
+                target_zone = pair.action.route.vehicle_destination_cell.zone
                 target_time = pair.action.route.order.dispatch_time.add_seconds(
                     pair.get_total_vehicle_travel_time_in_seconds()
                 ).to_total_seconds()
                 current_time = pair.action.route.order.dispatch_time.to_total_seconds()
-                current_position = pair.driver.current_position
+                current_zone = Grid.get_instance().find_zone(pair.driver.current_position)
 
                 if target_time - current_time == 0:
                     continue
@@ -89,9 +90,9 @@ def generate_trajectories() -> None:
                     (
                         reward,
                         target_time,
-                        target_position,
+                        target_zone,
                         current_time,
-                        current_position,
+                        current_zone
                     )
                 )
 
@@ -117,11 +118,9 @@ def generate_trajectories() -> None:
             [
                 "reward",
                 "target_time",
-                "target_lat",
-                "target_lon",
+                "target_zone",
                 "current_time",
-                "current_lat",
-                "current_lon",
+                "current_zone"
             ]
         )
         for trajectory in data:
@@ -129,11 +128,9 @@ def generate_trajectories() -> None:
                 [
                     trajectory[0],
                     trajectory[1],
-                    trajectory[2].lat,
-                    trajectory[2].lon,
+                    trajectory[2].id,
                     trajectory[3],
-                    trajectory[4].lat,
-                    trajectory[4].lon,
+                    trajectory[4].id
                 ]
             )
 
@@ -151,11 +148,9 @@ def remove_idle_trajectories():
             [
                 "reward",
                 "target_time",
-                "target_lat",
-                "target_lon",
+                "target_zone",
                 "current_time",
-                "current_lat",
-                "current_lon",
+                "current_zone"
             ]
         )
         for trajectory in valid_trajectories:
@@ -163,10 +158,8 @@ def remove_idle_trajectories():
                 [
                     trajectory["reward"],
                     trajectory["target_time"],
-                    trajectory["target_lat"],
-                    trajectory["target_lon"],
+                    trajectory["target_zone"],
                     trajectory["current_time"],
-                    trajectory["current_lat"],
-                    trajectory["current_lon"],
+                    trajectory["current_zone"]
                 ]
             )
