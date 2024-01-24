@@ -2,6 +2,7 @@ from action.driver_action_pair import DriverActionPair
 from algorithm.model_builder import or_tools_min_cost_flow
 from data_output.data_collector import DataCollector
 from driver.drivers import Drivers
+from grid.grid import Grid
 from interval.time_series import TimeSeries
 from logger import LOGGER
 from program.program_params import Mode, ProgramParams
@@ -99,9 +100,26 @@ def generate_driver_action_pairs(
     for driver in Drivers.get_drivers():
         if ProgramParams.FEATURE_ADD_IDLING_COST_TO_TARGET:
             # We add a cost term of -60 to every idling action
-            weight = -60
+            reward = -60
         else:
-            weight = 0
+            reward = 0
+        if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
+            state_value = StateValueTable.get_state_value_table().get_state_value(
+                Grid.get_instance().find_zone(driver.current_position),
+                TimeSeries.get_instance().find_interval(
+                    State.get_state().current_time.add_seconds(
+                        ProgramParams.SIMULATION_UPDATE_RATE
+                    )
+                ),
+            )
+        elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
+            state_value = StateValueNetworks.get_instance().get_target_state_value(
+                Grid.get_instance().find_zone(driver.current_position),
+                State.get_state().current_time.add_seconds(
+                    ProgramParams.SIMULATION_UPDATE_RATE
+                ),
+            )
+        weight = reward + state_value
         driver_to_idling_dict[driver] = DriverActionPair(driver, idling, weight)
         if driver.is_occupied():
             # If driver is occupied he cannot take any new order
@@ -139,7 +157,8 @@ def generate_driver_action_pairs(
                 elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     state_value = (
                         StateValueNetworks.get_instance().get_target_state_value(
-                            pair.action.route.vehicle_destination_cell.zone, arrival_time
+                            pair.action.route.vehicle_destination_cell.zone,
+                            arrival_time,
                         )
                     )
                 else:

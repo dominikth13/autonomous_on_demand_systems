@@ -16,7 +16,7 @@ class ProgramParams:
     # Minimal trip time for routes to be eligible for combined routes in seconds
     L1 = 0
 
-    # Maximum difference between direct route time and combined route time in seconds
+    # Maximum difference between route without vehicles time and route with vehicles time in seconds
     L2 = 1800
 
     # Static vehicle speed in m/s -> assume these small busses driving in Berlin
@@ -85,7 +85,7 @@ class ProgramParams:
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime(2023, 7, 1)
+    SIMULATION_DATE = datetime(2015, 7, 1)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()
@@ -100,7 +100,7 @@ class ProgramParams:
         }
         return wd_to_bkps[wd]
 
-    DATA_SET = DataSet.FOR_HIRE
+    DATA_SET = DataSet.YELLOW_CAB
 
     # File paths to orders
     def ORDERS_FILE_PATH() :
@@ -111,4 +111,4 @@ class ProgramParams:
 
     FEATURE_ORDERS_AS_WIN = False
 
-    FEATURE_ADD_IDLING_COST_TO_TARGET = False
+    FEATURE_ADD_IDLING_COST_TO_TARGET = True
