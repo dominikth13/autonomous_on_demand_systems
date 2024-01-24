@@ -139,7 +139,7 @@ def generate_driver_action_pairs(
                 elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     state_value = (
                         StateValueNetworks.get_instance().get_target_state_value(
-                            pair.action.route.vehicle_destination, arrival_time
+                            pair.action.route.vehicle_destination_cell.zone, arrival_time
                         )
                     )
                 else:

@@ -7,6 +7,7 @@ from deep_reinforcement_learning.neuro_net import NeuroNet
 from deep_reinforcement_learning.temporal_difference_loss import TemporalDifferenceLoss
 from interval.time import Time
 from location.location import Location
+from location.zone import Zone
 from logger import LOGGER
 from program.program_params import ProgramParams
 
@@ -38,17 +39,17 @@ class StateValueNetworks:
 
         self.iteration = 1
 
-    def get_main_state_value(self, location: Location, time: Time) -> float:
+    def get_main_state_value(self, zone: Zone, time: Time) -> float:
         return float(
             self.main_net(
-                torch.Tensor([location.lat, location.lon])
+                torch.Tensor([zone.id])
             ).item()
         )
 
-    def get_target_state_value(self, location: Location, time: Time) -> float:
+    def get_target_state_value(self, zone: Zone, time: Time) -> float:
         return float(
             self.target_net(
-                torch.Tensor([location.lat, location.lon])
+                torch.Tensor([zone.id])
             ).item()
         )
 
@@ -60,11 +61,9 @@ class StateValueNetworks:
             trajectories.append(
                 {
                     "reward": tup[0],
-                    "current_lat": tup[1].lat,
-                    "current_lon": tup[1].lon,
+                    "current_zone": tup[1].id,
                     "current_time": tup[2].to_total_seconds(),
-                    "target_lat": tup[3].lat,
-                    "target_lon": tup[3].lon,
+                    "target_zone": tup[3].id,
                     "target_time": tup[4].to_total_seconds(),
                 }
             )
@@ -79,16 +78,14 @@ class StateValueNetworks:
             output_main = self.main_net(
                 torch.Tensor(
                     [
-                        trajectory["current_lat"],
-                        trajectory["current_lon"],
+                        trajectory["current_zone"],
                     ]
                 )
             )
             output_target = self.target_net(
                 torch.Tensor(
                     [
-                        trajectory["target_lat"],
-                        trajectory["target_lon"],
+                        trajectory["target_zone"],
                     ]
                 )
             )

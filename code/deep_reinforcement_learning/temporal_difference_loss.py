@@ -34,7 +34,7 @@ class TemporalDifferenceLoss(nn.Module):
         for x in trajectories_and_state_values:
             with torch.enable_grad():
                 # Berechnen des Outputs für einen Eingabesatz
-                input = torch.Tensor([x[0]["current_lat"], x[0]["current_lon"]])
+                input = torch.Tensor([x[0]["current_zone"]])
                 input.requires_grad = True
                 start_state_value = model(input)
                 # Berechnen des Gradienten der Ausgabe in Bezug auf die Eingabe

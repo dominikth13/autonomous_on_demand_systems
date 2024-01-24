@@ -63,9 +63,9 @@ class State:
                     self.action_tuples.append(
                         (
                             pair.weight,
-                            driver.current_position,
+                            Grid.get_instance().find_zone(driver.current_position),
                             self.current_time,
-                            driver.current_position,
+                            Grid.get_instance().find_zone(driver.current_position),
                             self.current_time.add_minutes(1),
                         )
                     )
@@ -135,9 +135,9 @@ class State:
                     self.action_tuples.append(
                         (
                             reward,
-                            driver.current_position,
+                            Grid.get_instance().find_zone(driver.current_position),
                             self.current_time,
-                            action.route.vehicle_destination,
+                            action.route.vehicle_destination_cell.zone,
                             self.current_time.add_seconds(
                                 pair.get_total_vehicle_travel_time_in_seconds()
                             ),
@@ -250,7 +250,7 @@ class State:
                     elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                         state_value = (
                             StateValueNetworks.get_instance().get_target_state_value(
-                                cell.center, self.current_time.add_seconds(driving_time)
+                                cell.zone, self.current_time.add_seconds(driving_time)
                             )
                         )
                     else:

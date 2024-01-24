@@ -31,23 +31,11 @@ def train_ope() -> None:
 
     LOGGER.info("Finished Training")
 
-    with open(
-        f"code/training_data/training_{TRAINING_MODE}.csv", "w"
-    ) as file:
+    with open(f"code/training_data/training_{TRAINING_MODE}.csv", "w") as file:
         writer = csv.writer(file)
-        writer.writerow(
-            [
-                "break_point",
-                "losses"
-            ]
-        )
+        writer.writerow(["break_point", "losses"])
         for i, bp in enumerate(time_series_breakpoints[TRAINING_MODE]):
-            writer.writerow(
-                [
-                    bp,
-                    all_losses[i]
-                ]
-            )
+            writer.writerow([bp, all_losses[i]])
 
 
 def train_for(
@@ -102,16 +90,14 @@ def train_for(
                 output_current = state_value_net(
                     torch.Tensor(
                         [
-                            trajectory["current_lat"],
-                            trajectory["current_lon"],
+                            trajectory["current_zone"],
                         ]
                     )
                 )
                 output_target = target_net(
                     torch.Tensor(
                         [
-                            trajectory["target_lat"],
-                            trajectory["target_lon"],
+                            trajectory["target_zone"],
                         ]
                     )
                 )
@@ -138,16 +124,14 @@ def train_for(
                 output_current = state_value_net(
                     torch.Tensor(
                         [
-                            trajectory["current_lat"],
-                            trajectory["current_lon"],
+                            trajectory["current_zone"],
                         ]
                     )
                 )
                 output_target = target_net(
                     torch.Tensor(
                         [
-                            trajectory["target_lat"],
-                            trajectory["target_lon"],
+                            trajectory["target_zone"],
                         ]
                     )
                 )

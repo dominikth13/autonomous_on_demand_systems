@@ -2,6 +2,15 @@ from datetime import datetime
 from enum import Enum
 from interval.time import Time
 
+class Mode(Enum):
+    TABULAR = "Tabular"
+    DEEP_NEURAL_NETWORKS = "Deep Neural Networks"
+    # Just solve the optimization problem without knowing state values
+    BASELINE_PERFORMANCE = "Baseline Performance"
+
+class DataSet(Enum):
+    YELLOW_CAB = "yellow_cab"
+    FOR_HIRE = "for_hire"
 
 class ProgramParams:
     # Minimal trip time for routes to be eligible for combined routes in seconds
@@ -76,7 +85,7 @@ class ProgramParams:
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime(2015, 7, 1)
+    SIMULATION_DATE = datetime(2023, 7, 1)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()
@@ -91,8 +100,11 @@ class ProgramParams:
         }
         return wd_to_bkps[wd]
 
+    DATA_SET = DataSet.FOR_HIRE
+
     # File paths to orders
-    ORDERS_FILE_PATH = f"code/data/orders_{SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
+    def ORDERS_FILE_PATH() :
+        return f"code/data/{ProgramParams.DATA_SET.value}/orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
 
     # If algorithm should do relocation
     FEATURE_RELOCATION_ENABLED = True
@@ -100,10 +112,3 @@ class ProgramParams:
     FEATURE_ORDERS_AS_WIN = False
 
     FEATURE_ADD_IDLING_COST_TO_TARGET = False
-
-
-class Mode(Enum):
-    TABULAR = "Tabular"
-    DEEP_NEURAL_NETWORKS = "Deep Neural Networks"
-    # Just solve the optimization problem without knowing state values
-    BASELINE_PERFORMANCE = "Baseline Performance"
