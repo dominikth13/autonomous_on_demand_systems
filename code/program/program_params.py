@@ -29,7 +29,7 @@ class ProgramParams:
     # Equal to 5 minutes
     PICK_UP_DISTANCE_THRESHOLD = 1900  # im Paper 950 Meter
 
-    LEARNING_RATE = 0.005  # im Paper Feng et al. 2022 ist es 0.005
+    LEARNING_RATE = 0.5  # im Paper Feng et al. 2022 ist es 0.005
 
     # Hyperparameter that says how the online policy learning should be 
     # influenced by offline policy learning
@@ -85,7 +85,7 @@ class ProgramParams:
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime(2015, 7, 1)
+    SIMULATION_DATE = datetime(2015, 7, 2)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()

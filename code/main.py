@@ -50,7 +50,7 @@ def start_q_learning():
     LOGGER.info("Initialize vehicles")
     Drivers.get_drivers()
 
-    #StateValueTable.get_state_value_table().import_state_value_table_from_csv()
+    StateValueTable.get_state_value_table().import_state_value_table_from_csv()
 
     # 2. Run Q-Learning algorithm to train state value table
     for current_total_minutes in range(
