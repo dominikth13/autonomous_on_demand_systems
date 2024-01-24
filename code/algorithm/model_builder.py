@@ -237,9 +237,9 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
         end_nodes[pair_to_index[pair]] = action_to_index[pair.action]
         capacities[pair_to_index[pair]] = 1
         if pair.weight >= 0:
-            weights[pair_to_index[pair]] = math.sqrt(abs(pair.weight)) * (-1)
+            weights[pair_to_index[pair]] = math.log(1 + abs(pair.weight)) * (-1)
         else:
-            weights[pair_to_index[pair]] = math.sqrt(abs(pair.weight))
+            weights[pair_to_index[pair]] = math.log( 1 + abs(pair.weight))
     
     for tup in route_order_to_index:
         start_nodes[route_order_to_index[tup]] = action_to_index[tup[0]]
