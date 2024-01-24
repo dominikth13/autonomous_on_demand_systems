@@ -81,7 +81,9 @@ class State:
 
                 # Schedule new driver job and update it for the next state
                 driver.set_new_job(
-                    int(pair.get_total_vehicle_travel_time_in_seconds()),
+                    pair.get_total_vehicle_travel_time_in_seconds(),
+                    pair.get_pickup_travel_time_in_seconds(),
+                    pair.action.route.origin,
                     driver_final_destination,
                 )
 
