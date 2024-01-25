@@ -84,14 +84,14 @@ class DataCollector:
         )
 
     def export_all_data():
-        csv_file_path = f"code/dataoutput/workload{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
+        csv_file_path = f"code/data_output/workload{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
         with open(csv_file_path, mode="w") as file:
             writer = csv.writer(file)
             writer.writerow(["total_seconds", "num_of_occupied_driver"])
             for w in DataCollector.workload:
                 writer.writerow([w[0], w[1]])
 
-        csv_file_path = f"code/dataoutput/relocation{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
+        csv_file_path = f"code/data_output/relocation{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
         with open(csv_file_path, mode="w") as file:
             writer = csv.writer(file)
             writer.writerow(["total_seconds", "num_of_relocated_drivers"])
