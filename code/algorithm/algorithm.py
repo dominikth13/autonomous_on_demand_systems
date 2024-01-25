@@ -119,6 +119,9 @@ def generate_driver_action_pairs(
                     ProgramParams.SIMULATION_UPDATE_RATE
                 ),
             )
+        else:
+            state_value = 0
+        
         weight = reward + state_value
         driver_to_idling_dict[driver] = DriverActionPair(driver, idling, weight)
         if driver.is_occupied():

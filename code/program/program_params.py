@@ -107,7 +107,7 @@ class ProgramParams:
         return f"code/data/{ProgramParams.DATA_SET.value}/orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
 
     # If algorithm should do relocation
-    FEATURE_RELOCATION_ENABLED = True
+    FEATURE_RELOCATION_ENABLED = False
 
     FEATURE_ORDERS_AS_WIN = False
 
