@@ -343,9 +343,17 @@ while True:
         while True:
             ProgramParams.EXECUTION_MODE = Mode.BASELINE_PERFORMANCE
             user_input = input(
-                "Which script do you want to start? (Run Baseline Performance -> 1) "
+                "Which script do you want to start? (Run Baseline Performance for 7 days -> 1, Run Baseline Performance -> 2) "
             )
             if user_input == "1":
+                # Train the algorithm On-Policy
+                for i in range(7):
+                    start_baseline_performance()
+                    Order.reset()
+                    State.reset()
+                    ProgramParams.SIMULATION_DATE += timedelta(1)
+                break
+            if user_input == "2":
                 start_baseline_performance()
                 break
             else:
