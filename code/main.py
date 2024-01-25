@@ -191,7 +191,7 @@ def start_drl():
             State.get_state().relocate()
 
         if current_total_minutes % 60 == 0:
-            visualize_drivers(f"drivers_{current_total_minutes}.png")
+            #visualize_drivers(f"drivers_{current_total_minutes}.png")
             LOGGER.debug("Save current driver positions")
             for driver in Drivers.get_drivers():
                 status = (
@@ -271,7 +271,7 @@ def start_baseline_performance():
             State.get_state().relocate()
 
         if current_total_minutes % 60 == 0:
-            visualize_drivers(f"drivers_{current_total_minutes}.png")
+            #visualize_drivers(f"drivers_{current_total_minutes}.png")
             LOGGER.debug("Save current driver positions")
             for driver in Drivers.get_drivers():
                 status = (
