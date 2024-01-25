@@ -1,4 +1,6 @@
 import csv
+
+
 from datetime import timedelta
 import random
 import time
@@ -87,17 +89,28 @@ def start_q_learning():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
+        
+        LOGGER.debug("Save current driver positions")
+        for driver in Drivers.get_drivers():
+            status = (
+                "idling"
+                if not driver.is_occupied()
+                else ("relocation" if driver.job.is_relocation else "occupied")
+            )
+            DataCollector.append_driver_data(
+                current_time, driver.id, status, driver.current_position
+            )
+            DataCollector.append_zone_id(
+                current_time, Grid.get_instance().find_cell(driver.current_position).id
+            )
         if current_total_minutes % 60 == 0:
-            LOGGER.debug("Save current driver positions")
-            for driver in Drivers.get_drivers():
-                status = (
-                    "idling"
-                    if not driver.is_occupied()
-                    else ("relocation" if driver.job.is_relocation else "occupied")
-                )
-                DataCollector.append_driver_data(
-                    current_time, driver.id, status, driver.current_position
-                )
+            break
+                
+
+                    
+            
+            
+                    
             #visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_{current_total_minutes}_eod.png")
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
@@ -172,17 +185,27 @@ def start_drl():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
+      #  if current_total_minutes % 60 == 0:
+      #      visualize_drivers(f"drivers_{current_total_minutes}.png")
+       #     LOGGER.debug("Save current driver positions")
+       #     for driver in Drivers.get_drivers():
+       #         status = (
+       #             "idling"
+       #             if not driver.is_occupied()
+      #              else ("relocation" if driver.job.is_relocation else "occupied")
+       #         )
+       #         DataCollector.append_driver_data(
+       #             current_time, driver.id, status, driver.current_position
+       #         )
+
         if current_total_minutes % 60 == 0:
-            visualize_drivers(f"drivers_{current_total_minutes}.png")
-            LOGGER.debug("Save current driver positions")
+            
+            
             for driver in Drivers.get_drivers():
-                status = (
-                    "idling"
-                    if not driver.is_occupied()
-                    else ("relocation" if driver.job.is_relocation else "occupied")
-                )
-                DataCollector.append_driver_data(
-                    current_time, driver.id, status, driver.current_position
+                
+
+                DataCollector.append_cell_id(
+                    current_time, (Grid.find_cell(location=driver.current_position)).id
                 )
 
         # Update the expiry durations of still open orders

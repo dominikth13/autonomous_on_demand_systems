@@ -66,7 +66,7 @@ class ProgramParams:
     # Number of iterations until the weights of main net are copied to target net
     MAIN_AND_TARGET_NET_SYNC_ITERATIONS = 60
 
-    AMOUNT_OF_DRIVERS = 100
+    AMOUNT_OF_DRIVERS = 10
 
     # Radius for relocation in 100 meters
     RELOCATION_RADIUS = 20
@@ -95,7 +95,7 @@ class ProgramParams:
     ORDERS_FILE_PATH = f"code/data/orders_{SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
 
     # If algorithm should do relocation
-    FEATURE_RELOCATION_ENABLED = True
+    FEATURE_RELOCATION_ENABLED = False
 
 
 class Mode(Enum):

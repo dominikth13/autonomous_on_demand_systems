@@ -10,7 +10,7 @@ class TimeSeries:
 
     def get_instance() -> TimeSeries:
         if TimeSeries._time_series == None:
-            TimeSeries._time_series = TimeSeries(Time(0, 0, 0), Time(23, 59, 59), 300)
+            TimeSeries._time_series = TimeSeries(Time(13, 1, 0), Time(23, 59, 59), 300)
         return TimeSeries._time_series
 
     def __init__(self, start: Time, end: Time, intervalLengthInSeconds: int) -> None:

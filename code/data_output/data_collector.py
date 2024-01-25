@@ -20,6 +20,8 @@ class DataCollector:
     # [(total_seconds, quota_of_saved_time_for_all_served_orders)]
     time_reduction_quota = []
 
+    zone_id_list = []
+
     def append_workload(current_time: Time, num_of_occupied_driver: int):
         DataCollector.workload.append(
             (current_time.to_total_seconds(), num_of_occupied_driver)
@@ -51,6 +53,11 @@ class DataCollector:
     ):
         DataCollector.time_reduction_quota.append(
             (current_time.to_total_seconds(), quota_of_saved_time_for_all_served_orders)
+        )
+
+    def append_zone_id(current_time: Time, zone_id: int):
+        DataCollector.zone_id_list.append(
+            (current_time.to_total_seconds(), zone_id)
         )
 
     def export_all_data():
@@ -87,4 +94,11 @@ class DataCollector:
             writer = csv.writer(file)
             writer.writerow(["total_seconds", "quota_of_saved_time_for_all_served_orders"])
             for w in DataCollector.time_reduction_quota:
+                writer.writerow([w[0], w[1]])
+
+        csv_file_path = "code/data_output/cell_id.csv"
+        with open(csv_file_path, mode="w") as file:
+            writer = csv.writer(file)
+            writer.writerow(["total_seconds", "cell_id"])
+            for w in DataCollector.zone_id_list:
                 writer.writerow([w[0], w[1]])
