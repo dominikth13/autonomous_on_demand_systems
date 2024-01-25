@@ -139,7 +139,7 @@ class DataCollector:
                 ]
             )
             for w in DataCollector.driver_data:
-                writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8]])
+                writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7]])
     
     def clear():
         DataCollector.driver_data.clear()
