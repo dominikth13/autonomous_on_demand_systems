@@ -114,7 +114,7 @@ class DataCollector:
             for w in DataCollector.orders_data:
                 writer.writerow([w[0], w[1], w[2]])
 
-        csv_file_path = f"code/data_output/time_reductionquota{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
+        csv_file_path = f"code/data_output/average_time_reduction{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
         with open(csv_file_path, mode="w") as file:
             writer = csv.writer(file)
             writer.writerow(
@@ -140,3 +140,11 @@ class DataCollector:
             )
             for w in DataCollector.driver_data:
                 writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8]])
+    
+    def clear():
+        DataCollector.driver_data.clear()
+        DataCollector.orders_data.clear()
+        DataCollector.relocation.clear()
+        DataCollector.workload.clear()
+        DataCollector.trip_data.clear()
+        DataCollector.time_reduction_quota.clear()

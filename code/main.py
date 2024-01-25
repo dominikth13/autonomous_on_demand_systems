@@ -113,6 +113,8 @@ def start_q_learning():
     StateValueTable.get_state_value_table().export_state_value_table_to_csv()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
 
+    DataCollector.clear()
+
 def start_drl():
     # 1. Initialize environment data
     start_time = time.time()
@@ -215,6 +217,7 @@ def start_drl():
     StateValueNetworks.get_instance().export_weights()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
 
+    DataCollector.clear()
 
 def start_baseline_performance():
     # 1. Initialize environment data
@@ -292,6 +295,7 @@ def start_baseline_performance():
     DataCollector.export_all_data()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
 
+    DataCollector.clear()
 
 while True:
     user_input = input(
