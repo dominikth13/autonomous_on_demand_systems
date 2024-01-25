@@ -50,7 +50,7 @@ def visualize_drivers(output_file_name: str):
     plt.ylabel("Breitengrad")
     plt.savefig(f'code/data_visualization/{output_file_name}', dpi=600)
     # Karte anzeigen
-    plt.show()
+    #plt.show()
 
 
 def visualize_orders(output_file_name: str):
@@ -111,4 +111,4 @@ def visualize_orders(output_file_name: str):
     plt.savefig(f'code/data_visualization/{output_file_name}', dpi=600)
 
     # Karte anzeigen
-    plt.show()
+    #plt.show()

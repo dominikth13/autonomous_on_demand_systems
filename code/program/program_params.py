@@ -29,7 +29,7 @@ class ProgramParams:
     # Equal to 5 minutes
     PICK_UP_DISTANCE_THRESHOLD = 1900  # im Paper 950 Meter
 
-    LEARNING_RATE = 0.5  # im Paper Feng et al. 2022 ist es 0.005
+    LEARNING_RATE = 0.01  # im Paper Feng et al. 2022 ist es 0.005
 
     # Hyperparameter that says how the online policy learning should be 
     # influenced by offline policy learning
@@ -112,3 +112,5 @@ class ProgramParams:
     FEATURE_ORDERS_AS_WIN = False
 
     FEATURE_ADD_IDLING_COST_TO_TARGET = True
+
+    IDLING_COST = 5
