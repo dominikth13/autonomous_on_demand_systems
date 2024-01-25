@@ -2,6 +2,15 @@ from datetime import datetime
 from enum import Enum
 from interval.time import Time
 
+class Mode(Enum):
+    TABULAR = "Tabular"
+    DEEP_NEURAL_NETWORKS = "Deep Neural Networks"
+    # Just solve the optimization problem without knowing state values
+    BASELINE_PERFORMANCE = "Baseline Performance"
+
+class DataSet(Enum):
+    YELLOW_CAB = "yellow_cab"
+    FOR_HIRE = "for_hire"
 
 class ProgramParams:
     # Minimal trip time for routes to be eligible for combined routes in seconds
@@ -76,30 +85,30 @@ class ProgramParams:
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
 
-    SIMULATION_DATE = datetime(2015, 7, 18)
+    SIMULATION_DATE = datetime(2023, 7, 1)
 
     def TIME_SERIES_BREAKPOINTS() -> list[int]:
         wd = ProgramParams.SIMULATION_DATE.weekday()
         wd_to_bkps = {
-            0: [150, 300, 450, 1050, 1350],
-            1: [150, 300, 450, 1050, 1350],
-            2: [150, 300, 450, 1050, 1350],
-            3: [150, 300, 450, 1050, 1350],
-            4: [150, 300, 450, 1050, 1350],
-            5: [150, 300, 450, 750, 1050],
-            6: [150, 300, 450, 600, 1350],
+            0: [0, 150, 300, 450, 1050, 1350],
+            1: [0, 150, 300, 450, 1050, 1350],
+            2: [0, 150, 300, 450, 1050, 1350],
+            3: [0, 150, 300, 450, 1050, 1350],
+            4: [0, 150, 300, 450, 1050, 1350],
+            5: [0, 150, 300, 450, 750, 1050],
+            6: [0, 150, 300, 450, 600, 1350],
         }
         return wd_to_bkps[wd]
 
+    DATA_SET = DataSet.FOR_HIRE
+
     # File paths to orders
-    ORDERS_FILE_PATH = f"code/data/orders_{SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
+    def ORDERS_FILE_PATH() :
+        return f"code/data/{ProgramParams.DATA_SET.value}/orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
 
     # If algorithm should do relocation
     FEATURE_RELOCATION_ENABLED = False
 
+    FEATURE_ORDERS_AS_WIN = False
 
-class Mode(Enum):
-    TABULAR = "Tabular"
-    DEEP_NEURAL_NETWORKS = "Deep Neural Networks"
-    # Just solve the optimization problem without knowing state values
-    BASELINE_PERFORMANCE = "Baseline Performance"
+    FEATURE_ADD_IDLING_COST_TO_TARGET = False

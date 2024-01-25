@@ -48,16 +48,10 @@ def initialize_driver_positions_for_trajectories() -> None:
     # Here we spawn a driver in each cell to check how this cell would perform for different orders
     grid = Grid.get_instance()
     drivers = []
-    for i in range(len(grid.cells)):
-        if i % 5 != 0:
+    for zone in grid.zones_dict.values():
+        if zone.id == 9999:
             continue
-        for j in range(len(grid.cells[i])):
-            if j % 5 != 0:
-                continue
-            cell = grid.cells[i][j]
-            if cell.is_empty():
-                continue
-            drivers.append(Driver(cell.center))
+        drivers.append(Driver(zone.central_location))
     
     csv_file_path = "code/data/drivers.csv"
     with open(csv_file_path, mode="w") as file:

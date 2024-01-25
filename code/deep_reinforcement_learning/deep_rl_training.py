@@ -15,7 +15,7 @@ from logger import LOGGER
 def import_trajectories(train_mode: str, time_series_breakpoints: list[int]) -> dict[int, dict[int, dict[str, float]]]:
     csv_file_names = []
     if train_mode == "wd":
-        csv_file_names = ["trajectories_thu_week_28.csv", "trajectories_fri_week_28.csv"]
+        csv_file_names = ["trajectories_wed_week_27.csv"]
     elif train_mode == "sat":
         csv_file_names = ["trajectories_sat_week_28.csv"]
     elif train_mode == "sun":
@@ -36,11 +36,9 @@ def import_trajectories(train_mode: str, time_series_breakpoints: list[int]) -> 
                 trajectory = {}
                 trajectory["reward"] = float(row["reward"])
                 trajectory["target_time"] = int(row["target_time"])
-                trajectory["target_lat"] = float(row["target_lat"])
-                trajectory["target_lon"] = float(row["target_lon"])
+                trajectory["target_zone"] = int(row["target_zone"])
                 trajectory["current_time"] = int(row["current_time"])
-                trajectory["current_lat"] = float(row["current_lat"])
-                trajectory["current_lon"] = float(row["current_lon"])
+                trajectory["current_zone"] = int(row["current_zone"])
                 trajectories[bp_minutes][counter] = trajectory
 
     return trajectories

@@ -18,11 +18,11 @@ class Driver:
     def is_occupied(self) -> bool:
         return self.job != None
 
-    def set_new_job(self, total_driving_time: int, new_position: Location) -> None:
-        self.job = DriverJob(total_driving_time, new_position, False)
+    def set_new_job(self, total_driving_time: int, passenger_pickup_time: int, pickup_position: Location, new_position: Location) -> None:
+        self.job = DriverJob.of_trip(total_driving_time, passenger_pickup_time, self.current_position, pickup_position, new_position)
     
     def set_new_relocation_job(self, total_driving_time: int, new_position: Location) -> None:
-        self.job = DriverJob(total_driving_time, new_position, True)
+        self.job = DriverJob.of_relocation(total_driving_time, self.current_position, new_position)
 
     # Duration in seconds
     def update_job_status(self, duration: int) -> None:
@@ -31,9 +31,10 @@ class Driver:
             return
 
         self.idle_time = 0
-        if self.job.total_driving_time - duration < 0:
+        if self.job.open_trip_time - duration < 0:
             # Job is finished by next interval
-            self.current_position = self.job.new_position
+            self.current_position = self.job.final_position
             self.job = None
         else:
-            self.job.total_driving_time -= duration
+            self.job.open_trip_time -= duration
+            self.current_position = self.job.get_next_position()

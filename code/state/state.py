@@ -5,6 +5,7 @@ from action.driver_action_pair import DriverActionPair
 from data_output.data_collector import DataCollector
 from grid.grid import Grid
 from driver.drivers import Drivers
+from interval.time import Time
 from interval.time_series import TimeSeries
 from logger import LOGGER
 from program.program_params import Mode, ProgramParams
@@ -12,6 +13,7 @@ from state.state_value_networks import StateValueNetworks
 from state.state_value_table import StateValueTable
 from order import Order
 from grid.grid_cell import GridCell
+
 
 # Define here how the grid and intervals should look like
 class State:
@@ -48,7 +50,7 @@ class State:
                 if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
                     self.action_tuples.append(
                         (
-                            0,
+                            pair.weight,
                             Grid.get_instance().find_zone(driver.current_position),
                             self.current_interval,
                             Grid.get_instance().find_zone(driver.current_position),
@@ -60,10 +62,10 @@ class State:
                 elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     self.action_tuples.append(
                         (
-                            0,
-                            driver.current_position,
+                            pair.weight,
+                            Grid.get_instance().find_zone(driver.current_position),
                             self.current_time,
-                            driver.current_position,
+                            Grid.get_instance().find_zone(driver.current_position),
                             self.current_time.add_minutes(1),
                         )
                     )
@@ -79,7 +81,9 @@ class State:
 
                 # Schedule new driver job and update it for the next state
                 driver.set_new_job(
-                    int(pair.get_total_vehicle_travel_time_in_seconds()),
+                    pair.get_total_vehicle_travel_time_in_seconds(),
+                    pair.get_pickup_travel_time_in_seconds(),
+                    pair.action.route.origin,
                     driver_final_destination,
                 )
 
@@ -88,10 +92,37 @@ class State:
                         f"Driver {driver.id} goes to forbidden zone by order {pair.action.route.order.id}"
                     )
 
+                if ProgramParams.FEATURE_ORDERS_AS_WIN:
+                    # We calculate the reward as the product of time reduction and amount of orders in this zone in the last 30 minutes
+                    start_minutes = (
+                        self.current_time.to_total_minutes() - 30
+                        if self.current_time.to_total_minutes() - 30 > 0
+                        else 0
+                    )
+                    amount_of_orders = len(
+                        list(
+                            filter(
+                                lambda x: x.zone.id == route.order.zone.id,
+                                [
+                                    Order.get_orders_by_time(
+                                        Time.of_total_minutes(total_minute)
+                                    )
+                                    for total_minute in range(
+                                        start_minutes,
+                                        self.current_time.to_total_minutes(),
+                                    )
+                                ],
+                            )
+                        )
+                    )
+                    reward = action.route.time_reduction * amount_of_orders
+                else:
+                    reward = action.route.time_reduction
+
                 if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
                     self.action_tuples.append(
                         (
-                            action.route.time_reduction,
+                            reward,
                             Grid.get_instance().find_zone(driver.current_position),
                             self.current_interval,
                             action.route.vehicle_destination_cell.zone,
@@ -105,10 +136,10 @@ class State:
                 elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     self.action_tuples.append(
                         (
-                            action.route.time_reduction,
-                            driver.current_position,
+                            reward,
+                            Grid.get_instance().find_zone(driver.current_position),
                             self.current_time,
-                            action.route.vehicle_destination,
+                            action.route.vehicle_destination_cell.zone,
                             self.current_time.add_seconds(
                                 pair.get_total_vehicle_travel_time_in_seconds()
                             ),
@@ -221,26 +252,32 @@ class State:
                     elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                         state_value = (
                             StateValueNetworks.get_instance().get_target_state_value(
-                                cell.center, self.current_time.add_seconds(driving_time)
+                                cell.zone, self.current_time.add_seconds(driving_time)
                             )
                         )
                     else:
-                        state_value = random.randint(0,100)
+                        state_value = random.randint(0, 100)
 
-                    state_value = state_value if state_value > 0 else 0
-                    cells_to_weight[cell] = ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
-
-                total_weight = sum(cells_to_weight.values())
-                cell_list = []
-                probability_list = []
-                for cell in cells:
-                    cell_list.append(cell)
-                    probability_list.append(cells_to_weight[cell] / total_weight)
+                    state_value = state_value + 1 if state_value > 0 else 0
+                    if state_value > 1:
+                        cells_to_weight[cell] = (
+                            ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
+                        )
 
                 # Get the relocation target based on weighted stochastic choices
-                relocation_cell = random.choices(
-                    cell_list, weights=probability_list, k=1
-                )[0]
+                if len(cells_to_weight) > 0:
+                    total_weight = sum(cells_to_weight.values())
+                    cell_list = []
+                    probability_list = []
+                    for cell in cells_to_weight:
+                        cell_list.append(cell)
+                        probability_list.append(cells_to_weight[cell] / total_weight)
+                        relocation_cell = random.choices(
+                            cell_list, weights=probability_list, k=1
+                        )[0]
+                else:
+                    # When we can't switch just stay
+                    continue
 
                 # Create relocation job
                 driving_time = int(
