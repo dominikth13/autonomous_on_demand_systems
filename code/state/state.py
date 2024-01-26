@@ -147,12 +147,13 @@ class State:
                     )
 
                 # Save reduction quota
-                order_time_reduction_quota.append(
-                    (
-                        (action.route.time_reduction - route.order.direct_connection[1])
-                        / route.order.direct_connection[1]
+                if route.order.direct_connection[1] > 0:
+                    order_time_reduction_quota.append(
+                        (
+                            (action.route.time_reduction - route.order.direct_connection[1])
+                            / route.order.direct_connection[1]
+                        )
                     )
-                )
                 # Remove order from open orders set
                 del self.orders_dict[route.order.id]
 
