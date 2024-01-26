@@ -309,8 +309,10 @@ while True:
                 "Which script do you want to start? (Online Training -> 1, Start Q-Learning -> 2) "
             )
             if user_input == "1":
+                StateValueTable.get_state_value_table().raze_state_value_table()
+                initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(30):
+                for i in range(7):
                     
                     start_q_learning()
                     Order.reset()
