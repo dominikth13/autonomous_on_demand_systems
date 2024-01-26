@@ -235,7 +235,7 @@ class State:
                     )
                 )
                 cells_to_weight = {}
-
+                min_state_value = float("inf")
                 for cell in cells:
                     driving_time = int(
                         current_cell.center.distance_to(cell.center)
@@ -257,13 +257,19 @@ class State:
                             )
                         )
                     else:
-                        state_value = random.randint(0, 100)
-
-                    state_value = state_value + 1 if state_value > 0 else 0
-                    if state_value > 1:
-                        cells_to_weight[cell] = (
-                            ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
-                        )
+                        state_value = random.randint(1, 100)
+                    if min_state_value > state_value:
+                        min_state_value = state_value
+                    cells_to_weight[cell] = (
+                        state_value
+                    )
+                
+                for cell in cells_to_weight:
+                    # We don't want negative or 0 values
+                    state_value = cells_to_weight[cell] + abs(min_state_value) + 1
+                    cells_to_weight[cell] = (
+                        ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
+                    )
 
                 # Get the relocation target based on weighted stochastic choices
                 if len(cells_to_weight) > 0:
