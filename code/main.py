@@ -7,6 +7,7 @@ from algorithm.algorithm import (
     generate_routes,
     solve_optimization_problem,
 )
+from data_analysis.data_analysis import analyse_trip_data
 from data_output.data_collector import DataCollector
 from deep_reinforcement_learning.offline_policy_evaluation import train_ope
 from driver.drivers import Drivers
@@ -299,7 +300,7 @@ def start_baseline_performance():
 
 while True:
     user_input = input(
-        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Baseline Performance -> 3, Static Data Generation -> 4, Visualization -> 5) "
+        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Baseline Performance -> 3, Static Data Generation -> 4, Visualization -> 5, Data Analysis -> 6) "
     )
     if user_input == "1":
         ProgramParams.EXECUTION_MODE = Mode.TABULAR
@@ -394,6 +395,17 @@ while True:
                 break
             elif user_input == "2":
                 visualize_orders(f"orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
+                break
+            else:
+                print("This option is not allowed. Please try again.")
+        break
+    elif user_input == "6":
+        while True:
+            user_input = input(
+                "Which script do you want to start? (Analyse trip data -> 1) "
+            )
+            if user_input == "1":
+                analyse_trip_data()
                 break
             else:
                 print("This option is not allowed. Please try again.")
