@@ -9,6 +9,7 @@ from algorithm.algorithm import (
 )
 from data_analysis.data_analysis import analyse_trip_data
 from data_output.data_collector import DataCollector
+from data_visualization.Visualisierung_tripdata import visualize_trip_data
 from deep_reinforcement_learning.offline_policy_evaluation import train_ope
 from driver.drivers import Drivers
 from grid.grid import Grid
@@ -349,6 +350,7 @@ while True:
                 "Which script do you want to start? (Run Baseline Performance for 7 days -> 1, Run Baseline Performance -> 2) "
             )
             if user_input == "1":
+                initialize_driver_positions()
                 # Train the algorithm On-Policy
                 for i in range(7):
                     start_baseline_performance()
@@ -390,13 +392,16 @@ while True:
     elif user_input == "5":
         while True:
             user_input = input(
-                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2) "
+                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2, Visualize trip data -> 3) "
             )
             if user_input == "1":
                 visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
                 break
             elif user_input == "2":
                 visualize_orders(f"orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
+                break
+            elif user_input == "3":
+                visualize_trip_data()
                 break
             else:
                 print("This option is not allowed. Please try again.")
