@@ -2,6 +2,7 @@ from __future__ import annotations
 from interval.grid_interval import GridInterval
 from interval.time import Time
 from utils import IdProvider
+from program.program_params import Mode, ProgramParams
 
 ID_PROVIDER = IdProvider()
 
@@ -10,7 +11,7 @@ class TimeSeries:
 
     def get_instance() -> TimeSeries:
         if TimeSeries._time_series == None:
-            TimeSeries._time_series = TimeSeries(Time(0, 0, 0), Time(23, 59, 59), 1800)
+            TimeSeries._time_series = TimeSeries(Time(0, 0, 0), Time(23, 59, 59), ProgramParams.STATE_VALUE_TABLE_UPDATE_RATE)
         return TimeSeries._time_series
 
     def __init__(self, start: Time, end: Time, intervalLengthInSeconds: int) -> None:
