@@ -14,9 +14,9 @@ class DataSet(Enum):
 
 class ProgramParams:
 
-    SIMULATION_DATE = datetime(2015, 7, 6)
+    SIMULATION_DATE = datetime(2023, 7, 6)
 
-    DATA_SET = DataSet.YELLOW_CAB
+    DATA_SET = DataSet.FOR_HIRE
 
     # If algorithm should do relocation
     FEATURE_RELOCATION_ENABLED = False

@@ -116,17 +116,17 @@ def start_q_learning():
             DataCollector.append_zone_id(
                 current_time, Grid.get_instance().find_cell(driver.current_position).id
             )
-        if current_total_minutes % 60 == 0:
-            LOGGER.debug("Save current driver positions")
-            for driver in Drivers.get_drivers():
-                status = (
-                    "idling"
-                    if not driver.is_occupied()
-                    else ("relocation" if driver.job.is_relocation else "occupied")
-                )
-                DataCollector.append_driver_data(
-                    current_time, driver.id, status, driver.current_position
-                )
+        # if current_total_minutes % 60 == 0:
+        #     LOGGER.debug("Save current driver positions")
+        #     for driver in Drivers.get_drivers():
+        #         status = (
+        #             "idling"
+        #             if not driver.is_occupied()
+        #             else ("relocation" if driver.job.is_relocation else "occupied")
+        #         )
+        #         DataCollector.append_driver_data(
+        #             current_time, driver.id, status, driver.current_position
+        #         )
             #visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_{current_total_minutes}.png")
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
@@ -338,18 +338,18 @@ def start_baseline_performance():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
-        if current_total_minutes % 60 == 0:
-            #visualize_drivers(f"drivers_{current_total_minutes}.png")
-            LOGGER.debug("Save current driver positions")
-            for driver in Drivers.get_drivers():
-                status = (
-                    "idling"
-                    if not driver.is_occupied()
-                    else ("relocation" if driver.job.is_relocation else "occupied")
-                )
-                DataCollector.append_driver_data(
-                    current_time, driver.id, status, driver.current_position
-                )
+        # if current_total_minutes % 60 == 0:
+        #     #visualize_drivers(f"drivers_{current_total_minutes}.png")
+        #     LOGGER.debug("Save current driver positions")
+        #     for driver in Drivers.get_drivers():
+        #         status = (
+        #             "idling"
+        #             if not driver.is_occupied()
+        #             else ("relocation" if driver.job.is_relocation else "occupied")
+        #         )
+        #         DataCollector.append_driver_data(
+        #             current_time, driver.id, status, driver.current_position
+        #         )
 
         for driver in Drivers.get_drivers():
             status = (
@@ -395,7 +395,7 @@ while True:
                 StateValueTable.get_state_value_table().raze_state_value_table()
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(7):
+                for i in range(21):
                     
                     start_q_learning()
                     Order.reset()
@@ -434,7 +434,7 @@ while True:
             if user_input == "1":
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(7):
+                for i in range(21):
                     start_baseline_performance()
                     Order.reset()
                     State.reset()
