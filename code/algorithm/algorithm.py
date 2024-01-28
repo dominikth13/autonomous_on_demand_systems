@@ -2,6 +2,7 @@ from action.driver_action_pair import DriverActionPair
 from algorithm.model_builder import or_tools_min_cost_flow
 from data_output.data_collector import DataCollector
 from driver.drivers import Drivers
+from grid.grid import Grid
 from interval.time_series import TimeSeries
 from logger import LOGGER
 from program.program_params import Mode, ProgramParams
@@ -99,9 +100,29 @@ def generate_driver_action_pairs(
     for driver in Drivers.get_drivers():
         if ProgramParams.FEATURE_ADD_IDLING_COST_TO_TARGET:
             # We add a cost term of -60 to every idling action
-            weight = -60
+            reward = (-1)*ProgramParams.IDLING_COST
         else:
-            weight = 0
+            reward = 0
+        if ProgramParams.EXECUTION_MODE == Mode.TABULAR:
+            state_value = StateValueTable.get_state_value_table().get_state_value(
+                Grid.get_instance().find_zone(driver.current_position),
+                TimeSeries.get_instance().find_interval(
+                    State.get_state().current_time.add_seconds(
+                        ProgramParams.SIMULATION_UPDATE_RATE
+                    )
+                ),
+            )
+        elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
+            state_value = StateValueNetworks.get_instance().get_target_state_value(
+                Grid.get_instance().find_zone(driver.current_position),
+                State.get_state().current_time.add_seconds(
+                    ProgramParams.SIMULATION_UPDATE_RATE
+                ),
+            )
+        else:
+            state_value = 0
+        
+        weight = reward + state_value
         driver_to_idling_dict[driver] = DriverActionPair(driver, idling, weight)
         if driver.is_occupied():
             # If driver is occupied he cannot take any new order
@@ -139,7 +160,8 @@ def generate_driver_action_pairs(
                 elif ProgramParams.EXECUTION_MODE == Mode.DEEP_NEURAL_NETWORKS:
                     state_value = (
                         StateValueNetworks.get_instance().get_target_state_value(
-                            pair.action.route.vehicle_destination_cell.zone, arrival_time
+                            pair.action.route.vehicle_destination_cell.zone,
+                            arrival_time,
                         )
                     )
                 else:
@@ -197,4 +219,16 @@ def solve_optimization_problem(
     )
     DataCollector.append_workload(State.get_state().current_time, occupied_drivers)
     DataCollector.append_relocation(State.get_state().current_time, relocated_drivers)
+    for pair in driver_action_pairs:
+        if pair.action.is_idling():
+            continue
+        current_time = State.get_state().current_time
+        driver_zone = Grid.get_instance().find_zone(pair.driver.current_position)
+        passenger_pu_zone = pair.action.route.order.zone
+        passenger_do_zone = Grid.get_instance().find_zone(pair.get_vehicle_destination())
+        destination_zone = Grid.get_instance().find_zone(pair.action.route.destination)
+        vehicle_trip_time = pair.action.route.vehicle_time
+        time_reduction = pair.action.route.time_reduction
+        combi_route = not pair.action.route.is_regular_route()
+        DataCollector.append_trip(current_time, driver_zone, passenger_pu_zone, passenger_do_zone, destination_zone, vehicle_trip_time, time_reduction, combi_route)
     return driver_action_pairs

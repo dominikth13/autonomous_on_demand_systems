@@ -37,19 +37,21 @@ class Order:
                     pu_zone_id = int(row["PULocationID"])
                     do_zone_id = int(row["DOLocationID"])
                     order = Order(
-                            Time(hour, minute),
-                            random.Random(i)
-                            .choice(Grid.get_instance().cells_dict[pu_zone_id])
-                            .center,
-                            random.Random(i + 1)
-                            .choice(Grid.get_instance().cells_dict[do_zone_id])
-                            .center,
-                            Grid.get_instance().zones_dict[pu_zone_id]
-                        )
+                        Time(hour, minute),
+                        random.Random(i)
+                        .choice(Grid.get_instance().cells_dict[pu_zone_id])
+                        .center,
+                        random.Random(i + 1)
+                        .choice(Grid.get_instance().cells_dict[do_zone_id])
+                        .center,
+                        Grid.get_instance().zones_dict[pu_zone_id],
+                    )
                     Order._orders_by_time[Time(hour, minute)].append(order)
         return Order._orders_by_time
 
-    def __init__(self, dispatch_time: Time, start: Location, end: Location, zone: Zone) -> None:
+    def __init__(
+        self, dispatch_time: Time, start: Location, end: Location, zone: Zone
+    ) -> None:
         self.id = ID_PROVIDER.get_id()
         self.dispatch_time = dispatch_time
         self.start = start
@@ -62,7 +64,11 @@ class Order:
     def dispatch(self) -> None:
         self.expires = ProgramParams.ORDER_EXPIRY_DURATION
 
-        fastest_connection = None
+        # Init fastest connection with walking speed
+        fastest_connection = (
+            [],
+            self.start.distance_to(self.end) / ProgramParams.WALKING_SPEED,
+        )
         from public_transport.fastest_station_connection_network import (
             FastestStationConnectionNetwork,
         )
@@ -96,13 +102,10 @@ class Order:
                     + ProgramParams.PUBLIC_TRANSPORT_WAITING_TIME(self.dispatch_time)
                 )
                 total_additional_time = walking_time + other_time
-                if (
-                    fastest_connection == None
-                    or fastest_connection[1] > total_additional_time + connection[1]
-                ):
+                if fastest_connection[1] > total_additional_time + connection[1]:
                     fastest_connection = (
                         connection[0],
                         connection[1] + total_additional_time,
                     )
 
-        self.direct_connection = fastest_connection
+        self.direct_connection: tuple[list[Station], float] = fastest_connection

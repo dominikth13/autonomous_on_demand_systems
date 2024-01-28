@@ -71,7 +71,7 @@ class StateValueTable:
         if next_interval == None:
             next_interval = TimeSeries.get_instance().find_interval(next_time)
 
-        self.value_grid[current_interval][current_zone] = self.value_grid[
+        new_state_value = self.value_grid[
             current_interval
         ][current_zone] + ProgramParams.LEARNING_RATE * (
             reward
@@ -79,6 +79,13 @@ class StateValueTable:
             * self.value_grid[next_interval][next_zone]
             - self.value_grid[current_interval][current_zone]
         )
+
+        if new_state_value > ProgramParams.MAXIMUM_STATE_VALUE:
+            new_state_value = ProgramParams.MAXIMUM_STATE_VALUE
+        elif new_state_value < ProgramParams.MINIMUM_STATE_VALUE:
+            new_state_value = ProgramParams.MINIMUM_STATE_VALUE
+
+        self.value_grid[current_interval][current_zone] = new_state_value
 
     def get_state_value(self, zone: Zone, interval: GridInterval) -> float:
         return self.value_grid[interval][zone]
@@ -112,3 +119,8 @@ class StateValueTable:
                 zone = Grid.get_instance().zones_dict[int(float(row["zone_id"]))]
                 state_value = float(row["state_value"])
                 self.value_grid[interval][zone] = state_value
+
+    def raze_state_value_table(self):
+        with open("code/training_data/state_value_table.csv", "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(["start_time", "end_time", "zone_id", "state_value"])

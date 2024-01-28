@@ -9,7 +9,9 @@ from algorithm.algorithm import (
     generate_routes,
     solve_optimization_problem,
 )
+from data_analysis.data_analysis import analyse_trip_data
 from data_output.data_collector import DataCollector
+from data_visualization.Visualisierung_tripdata import visualize_trip_data
 from deep_reinforcement_learning.offline_policy_evaluation import train_ope
 from driver.drivers import Drivers
 from grid.grid import Grid
@@ -52,7 +54,7 @@ def start_q_learning():
     LOGGER.info("Initialize vehicles")
     Drivers.get_drivers()
 
-    #StateValueTable.get_state_value_table().import_state_value_table_from_csv()
+    StateValueTable.get_state_value_table().import_state_value_table_from_csv()
 
     # 2. Run Q-Learning algorithm to train state value table
     for current_total_minutes in range(
@@ -115,14 +117,17 @@ def start_q_learning():
                 current_time, Grid.get_instance().find_cell(driver.current_position).id
             )
         if current_total_minutes % 60 == 0:
-            break
-                
-
-                    
-            
-            
-                    
-            #visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_{current_total_minutes}_eod.png")
+            LOGGER.debug("Save current driver positions")
+            for driver in Drivers.get_drivers():
+                status = (
+                    "idling"
+                    if not driver.is_occupied()
+                    else ("relocation" if driver.job.is_relocation else "occupied")
+                )
+                DataCollector.append_driver_data(
+                    current_time, driver.id, status, driver.current_position
+                )
+            #visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_{current_total_minutes}.png")
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
 
@@ -136,6 +141,8 @@ def start_q_learning():
     LOGGER.info("Exporting training results")
     StateValueTable.get_state_value_table().export_state_value_table_to_csv()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
+
+    DataCollector.clear()
 
 def start_drl():
     # 1. Initialize environment data
@@ -246,7 +253,17 @@ def start_drl():
             )
         
         if current_total_minutes % 60 == 0:
-            break
+            #visualize_drivers(f"drivers_{current_total_minutes}.png")
+            LOGGER.debug("Save current driver positions")
+            for driver in Drivers.get_drivers():
+                status = (
+                    "idling"
+                    if not driver.is_occupied()
+                    else ("relocation" if driver.job.is_relocation else "occupied")
+                )
+                DataCollector.append_driver_data(
+                    current_time, driver.id, status, driver.current_position
+                )
 
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
@@ -262,6 +279,7 @@ def start_drl():
     StateValueNetworks.get_instance().export_weights()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
 
+    DataCollector.clear()
 
 def start_baseline_performance():
     # 1. Initialize environment data
@@ -320,6 +338,18 @@ def start_baseline_performance():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
+        if current_total_minutes % 60 == 0:
+            #visualize_drivers(f"drivers_{current_total_minutes}.png")
+            LOGGER.debug("Save current driver positions")
+            for driver in Drivers.get_drivers():
+                status = (
+                    "idling"
+                    if not driver.is_occupied()
+                    else ("relocation" if driver.job.is_relocation else "occupied")
+                )
+                DataCollector.append_driver_data(
+                    current_time, driver.id, status, driver.current_position
+                )
 
         for driver in Drivers.get_drivers():
             status = (
@@ -349,10 +379,11 @@ def start_baseline_performance():
     DataCollector.export_all_data()
     LOGGER.info(f"Algorithm took {time.time() - start_time} seconds to run.")
 
+    DataCollector.clear()
 
 while True:
     user_input = input(
-        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Baseline Performance -> 3, Static Data Generation -> 4, Visualization -> 5) "
+        "Which menu you want to enter? (Tabular Reinforcement Learning -> 1, Deep Reinforcement Learning -> 2, Baseline Performance -> 3, Static Data Generation -> 4, Visualization -> 5, Data Analysis -> 6) "
     )
     if user_input == "1":
         ProgramParams.EXECUTION_MODE = Mode.TABULAR
@@ -361,8 +392,10 @@ while True:
                 "Which script do you want to start? (Online Training -> 1, Start Q-Learning -> 2) "
             )
             if user_input == "1":
+                StateValueTable.get_state_value_table().raze_state_value_table()
+                initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(30):
+                for i in range(7):
                     
                     start_q_learning()
                     Order.reset()
@@ -396,9 +429,18 @@ while True:
         while True:
             ProgramParams.EXECUTION_MODE = Mode.BASELINE_PERFORMANCE
             user_input = input(
-                "Which script do you want to start? (Run Baseline Performance -> 1) "
+                "Which script do you want to start? (Run Baseline Performance for 7 days -> 1, Run Baseline Performance -> 2) "
             )
             if user_input == "1":
+                initialize_driver_positions()
+                # Train the algorithm On-Policy
+                for i in range(7):
+                    start_baseline_performance()
+                    Order.reset()
+                    State.reset()
+                    ProgramParams.SIMULATION_DATE += timedelta(1)
+                break
+            if user_input == "2":
                 start_baseline_performance()
                 break
             else:
@@ -432,13 +474,27 @@ while True:
     elif user_input == "5":
         while True:
             user_input = input(
-                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2) "
+                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2, Visualize trip data -> 3) "
             )
             if user_input == "1":
                 visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
                 break
             elif user_input == "2":
                 visualize_orders(f"orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
+                break
+            elif user_input == "3":
+                visualize_trip_data()
+                break
+            else:
+                print("This option is not allowed. Please try again.")
+        break
+    elif user_input == "6":
+        while True:
+            user_input = input(
+                "Which script do you want to start? (Analyse trip data -> 1) "
+            )
+            if user_input == "1":
+                analyse_trip_data()
                 break
             else:
                 print("This option is not allowed. Please try again.")
