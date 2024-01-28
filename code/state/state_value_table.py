@@ -119,3 +119,8 @@ class StateValueTable:
                 zone = Grid.get_instance().zones_dict[int(float(row["zone_id"]))]
                 state_value = float(row["state_value"])
                 self.value_grid[interval][zone] = state_value
+
+    def raze_state_value_table(self):
+        with open("code/training_data/state_value_table.csv", "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(["start_time", "end_time", "zone_id", "state_value"])
