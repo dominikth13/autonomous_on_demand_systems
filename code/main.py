@@ -1,4 +1,6 @@
 import csv
+
+
 from datetime import timedelta
 import random
 import time
@@ -66,8 +68,11 @@ def start_q_learning():
         orders = Order.get_orders_by_time()[current_time]
         for order in orders:
             order.dispatch()
+            
+
         # Add orders to state
         State.get_state().add_orders(orders)
+
 
         # Generate routes
         LOGGER.debug("Generate routes")
@@ -80,6 +85,14 @@ def start_q_learning():
         # Find Action-Driver matches based on a min-cost-flow problem
         LOGGER.debug("Generate driver-action matches")
         matches = solve_optimization_problem(driver_action_pairs)
+        
+        for match in matches:
+            if match.action.is_route():
+                matched_order = match.action.route.order
+                destination_vehicle = match.action.route.vehicle_destination
+                destination_time = match.action.route.vehicle_time
+                DataCollector.append_orders_dataa(current_time,matched_order,destination_vehicle,destination_time)
+            
 
         # Apply state changes based on Action-Driver matches and existing driver jobs
         LOGGER.debug("Apply state-value changes")
@@ -89,17 +102,31 @@ def start_q_learning():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
-        if current_total_minutes % 60 == 0:
-            LOGGER.debug("Save current driver positions")
-            for driver in Drivers.get_drivers():
-                status = (
-                    "idling"
-                    if not driver.is_occupied()
-                    else ("relocation" if driver.job.is_relocation else "occupied")
-                )
-                DataCollector.append_driver_data(
-                    current_time, driver.id, status, driver.current_position
-                )
+        
+        LOGGER.debug("Save current driver positions")
+        for driver in Drivers.get_drivers():
+            status = (
+                "idling"
+                if not driver.is_occupied()
+                else ("relocation" if driver.job.is_relocation else "occupied")
+            )
+            DataCollector.append_driver_data(
+                current_time, driver.id, status, driver.current_position
+            )
+            DataCollector.append_zone_id(
+                current_time, Grid.get_instance().find_cell(driver.current_position).id
+            )
+        # if current_total_minutes % 60 == 0:
+        #     LOGGER.debug("Save current driver positions")
+        #     for driver in Drivers.get_drivers():
+        #         status = (
+        #             "idling"
+        #             if not driver.is_occupied()
+        #             else ("relocation" if driver.job.is_relocation else "occupied")
+        #         )
+        #         DataCollector.append_driver_data(
+        #             current_time, driver.id, status, driver.current_position
+        #         )
             #visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_{current_total_minutes}.png")
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
@@ -152,7 +179,7 @@ def start_drl():
         writer.writerow(["zone_id", "lat", "lon", "total_minutes", "main_sv", "target_sv"])
         for w in entries:
             writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5]])
-    exit(1)
+    
     # 2. Run DQ-Learning algorithm to train state value network
     for current_total_minutes in range(
         TimeSeries.get_instance().start_time.to_total_minutes(),
@@ -184,6 +211,13 @@ def start_drl():
         LOGGER.debug("Generate driver-action matches")
         matches = solve_optimization_problem(driver_action_pairs)
 
+        for match in matches:
+            if match.action.is_route():
+                matched_order = match.action.route.order
+                destination_vehicle = match.action.route.vehicle_destination
+                destination_time = match.action.route.vehicle_time
+                DataCollector.append_orders_dataa(current_time,matched_order,destination_vehicle,destination_time)
+
         # Apply state changes based on Action-Driver matches and existing driver jobs
         LOGGER.debug("Apply state-value changes")
         State.get_state().apply_state_change(matches)
@@ -192,6 +226,32 @@ def start_drl():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
+      #  if current_total_minutes % 60 == 0:
+      #      visualize_drivers(f"drivers_{current_total_minutes}.png")
+       #     LOGGER.debug("Save current driver positions")
+       #     for driver in Drivers.get_drivers():
+       #         status = (
+       #             "idling"
+       #             if not driver.is_occupied()
+      #              else ("relocation" if driver.job.is_relocation else "occupied")
+       #         )
+       #         DataCollector.append_driver_data(
+       #             current_time, driver.id, status, driver.current_position
+       #         )
+
+        for driver in Drivers.get_drivers():
+            status = (
+                "idling"
+                if not driver.is_occupied()
+                else ("relocation" if driver.job.is_relocation else "occupied")
+            )
+            DataCollector.append_driver_data(
+                current_time, driver.id, status, driver.current_position
+            )
+            DataCollector.append_zone_id(
+                current_time, Grid.get_instance().find_cell(driver.current_position).id
+            )
+        
         if current_total_minutes % 60 == 0:
             #visualize_drivers(f"drivers_{current_total_minutes}.png")
             LOGGER.debug("Save current driver positions")
@@ -263,6 +323,12 @@ def start_baseline_performance():
         # Find Action-Driver matches based on a min-cost-flow problem
         LOGGER.debug("Generate driver-action matches")
         matches = solve_optimization_problem(driver_action_pairs)
+        for match in matches:
+            if match.action.is_route():
+                matched_order = match.action.route.order
+                destination_vehicle = match.action.route.vehicle_destination
+                destination_time = match.action.route.vehicle_time
+                DataCollector.append_orders_dataa(current_time,matched_order,destination_vehicle,destination_time)
 
         # Apply state changes based on Action-Driver matches and existing driver jobs
         LOGGER.debug("Apply state-value changes")
@@ -272,19 +338,35 @@ def start_baseline_performance():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
-        if current_total_minutes % 60 == 0:
-            #visualize_drivers(f"drivers_{current_total_minutes}.png")
-            LOGGER.debug("Save current driver positions")
-            for driver in Drivers.get_drivers():
-                status = (
-                    "idling"
-                    if not driver.is_occupied()
-                    else ("relocation" if driver.job.is_relocation else "occupied")
-                )
-                DataCollector.append_driver_data(
-                    current_time, driver.id, status, driver.current_position
-                )
+        # if current_total_minutes % 60 == 0:
+        #     #visualize_drivers(f"drivers_{current_total_minutes}.png")
+        #     LOGGER.debug("Save current driver positions")
+        #     for driver in Drivers.get_drivers():
+        #         status = (
+        #             "idling"
+        #             if not driver.is_occupied()
+        #             else ("relocation" if driver.job.is_relocation else "occupied")
+        #         )
+        #         DataCollector.append_driver_data(
+        #             current_time, driver.id, status, driver.current_position
+        #         )
 
+        for driver in Drivers.get_drivers():
+            status = (
+                "idling"
+                if not driver.is_occupied()
+                else ("relocation" if driver.job.is_relocation else "occupied")
+            )
+            DataCollector.append_driver_data(
+                current_time, driver.id, status, driver.current_position
+            )
+            DataCollector.append_zone_id(
+                current_time, Grid.get_instance().find_cell(driver.current_position).id
+            )
+        
+        if current_total_minutes % 60 == 0:
+            break
+      
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
 
@@ -313,7 +395,7 @@ while True:
                 StateValueTable.get_state_value_table().raze_state_value_table()
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(7):
+                for i in range(21):
                     
                     start_q_learning()
                     Order.reset()

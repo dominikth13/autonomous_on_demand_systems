@@ -14,24 +14,24 @@ class DataSet(Enum):
 
 class ProgramParams:
 
-    SIMULATION_DATE = datetime(2015, 7, 6)
+    SIMULATION_DATE = datetime(2023, 7, 6)
 
-    DATA_SET = DataSet.YELLOW_CAB
+    DATA_SET = DataSet.FOR_HIRE
 
     # If algorithm should do relocation
     FEATURE_RELOCATION_ENABLED = False
 
     FEATURE_ADD_IDLING_COST_TO_TARGET = True
 
-    IDLING_COST = 1
+    IDLING_COST = 5
 
     AMOUNT_OF_DRIVERS = 100
 
-    LEARNING_RATE = 0.005  # im Paper Feng et al. 2022 ist es 0.005
+    LEARNING_RATE = 0.01  # im Paper Feng et al. 2022 ist es 0.005
 
-    MAXIMUM_STATE_VALUE = 10000
+    MAXIMUM_STATE_VALUE = 1000
 
-    MINIMUM_STATE_VALUE = -10000
+    MINIMUM_STATE_VALUE = -1000
 
     # Time it takes for customers to enter or leave the public transport system in seconds
     PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120   
