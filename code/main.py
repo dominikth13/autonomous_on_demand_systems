@@ -352,7 +352,7 @@ while True:
             if user_input == "1":
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(7):
+                for i in range(21):
                     start_baseline_performance()
                     Order.reset()
                     State.reset()
