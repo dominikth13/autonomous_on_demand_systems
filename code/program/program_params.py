@@ -23,15 +23,15 @@ class ProgramParams:
 
     FEATURE_ADD_IDLING_COST_TO_TARGET = True
 
-    IDLING_COST = 1
+    IDLING_COST = 5
 
     AMOUNT_OF_DRIVERS = 100
 
-    LEARNING_RATE = 0.005  # im Paper Feng et al. 2022 ist es 0.005
+    LEARNING_RATE = 0.01  # im Paper Feng et al. 2022 ist es 0.005
 
-    MAXIMUM_STATE_VALUE = 10000
+    MAXIMUM_STATE_VALUE = 1000
 
-    MINIMUM_STATE_VALUE = -10000
+    MINIMUM_STATE_VALUE = -1000
 
     # Time it takes for customers to enter or leave the public transport system in seconds
     PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120   
