@@ -9,6 +9,19 @@ class Time:
         assert second >= 0 and second <= 59
         self.total_seconds = int(hour * 3600 + minute * 60 + second)
 
+    def convert_seconds(total_seconds):
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        if minutes // 10 < 1:
+            minutes = f'0' + str(minutes)
+        seconds = total_seconds % 60
+        if seconds // 10 < 1:
+            seconds = f'0' + str(seconds)
+        return f'{hours}:{minutes}:{seconds}'
+
+
+
+
     def of_total_minutes(minutes: int) -> Time:
         while minutes >= 1440:
             minutes -= 1440
