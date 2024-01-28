@@ -9,7 +9,7 @@ from algorithm.algorithm import (
 )
 from data_analysis.data_analysis import analyse_trip_data
 from data_output.data_collector import DataCollector
-from data_visualization.Visualisierung_tripdata import visualize_trip_data
+from data_visualization.Visualisierung_tripdata import visualize_trip_data, auswertung_Modell
 from deep_reinforcement_learning.offline_policy_evaluation import train_ope
 from driver.drivers import Drivers
 from grid.grid import Grid
@@ -392,7 +392,7 @@ while True:
     elif user_input == "5":
         while True:
             user_input = input(
-                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2, Visualize trip data -> 3) "
+                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2, Visualize trip data -> 3, Visualize 'evaluation prorgam params' -> 4) "
             )
             if user_input == "1":
                 visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
@@ -402,6 +402,9 @@ while True:
                 break
             elif user_input == "3":
                 visualize_trip_data()
+                break
+            elif user_input == "4":
+                auswertung_Modell()
                 break
             else:
                 print("This option is not allowed. Please try again.")
