@@ -364,8 +364,8 @@ def start_baseline_performance():
                 current_time, Grid.get_instance().find_cell(driver.current_position).id
             )
         
-        if current_total_minutes % 60 == 0:
-            break
+        # if current_total_minutes % 60 == 0:
+        #     break
       
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
