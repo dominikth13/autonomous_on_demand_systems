@@ -14,12 +14,12 @@ class DataSet(Enum):
 
 class ProgramParams:
 
-    SIMULATION_DATE = datetime(2023, 7, 6)
+    SIMULATION_DATE = datetime(2015, 7, 6)
 
-    DATA_SET = DataSet.FOR_HIRE
+    DATA_SET = DataSet.YELLOW_CAB
 
     # If algorithm should do relocation
-    FEATURE_RELOCATION_ENABLED = False
+    FEATURE_RELOCATION_ENABLED = True
 
     FEATURE_ADD_IDLING_COST_TO_TARGET = True
 
@@ -36,8 +36,8 @@ class ProgramParams:
     # Time it takes for customers to enter or leave the public transport system in seconds
     PUBLIC_TRANSPORT_ENTRY_EXIT_TIME = 120   
 
-    # Radius for relocation in 100 meters
-    RELOCATION_RADIUS = 20
+    # Radius for relocation in meters
+    RELOCATION_RADIUS = 10000
 
     # Number of iterations until the weights of main net are copied to target net
     MAIN_AND_TARGET_NET_SYNC_ITERATIONS = 60

@@ -10,8 +10,8 @@ class DataCollector:
     # [(total_seconds, num_of_occupied_driver)]
     workload = []
 
-    # [(total_seconds, num_of_relocated_drivers)]
-    relocation = []
+    # [(total_seconds, start_zone_id, end_zone_id, distance)]
+    relocation_trip_data = []
 
     # [(total_seconds, id, status, lat, lon)]
     # Will be saved each hour
@@ -26,7 +26,7 @@ class DataCollector:
     time_reduction_quota = []
 
     zone_id_list = []
-    # [(total_seconds, driver_start_zone_id, passenger_pickup_zone_id, passenger_dropoff_zone_id, destination_id, vehicle_trip_time, time_reduction, combi_route)]
+    # [(total_seconds, driver_start_zone_id, passenger_pickup_zone_id, passenger_dropoff_zone_id, destination_id, vehicle_trip_time, time_reduction, combi_route, total_vehicle_distance)]
     trip_data = []
 
     def append_workload(current_time: Time, num_of_occupied_driver: int):
@@ -34,9 +34,9 @@ class DataCollector:
             (current_time.to_total_seconds(), num_of_occupied_driver)
         )
 
-    def append_relocation(current_time: Time, num_of_relocated_drivers: int):
-        DataCollector.relocation.append(
-            (current_time.to_total_seconds(), num_of_relocated_drivers)
+    def append_relocation_trip_data(current_time: Time, start_zone: Zone, end_zone: Zone, distance: int):
+        DataCollector.relocation_trip_data.append(
+            (current_time.to_total_seconds(), start_zone.id, end_zone.id, distance)
         )
 
     def append_driver_data(
@@ -95,6 +95,7 @@ class DataCollector:
         total_vehicle_time: int,
         time_reduction: int,
         combi_route: bool,
+        total_vehicle_distance: int
     ):
         DataCollector.trip_data.append(
             (
@@ -106,6 +107,7 @@ class DataCollector:
                 total_vehicle_time,
                 time_reduction,
                 combi_route,
+                total_vehicle_distance
             )
         )
 
@@ -117,12 +119,12 @@ class DataCollector:
             for w in DataCollector.workload:
                 writer.writerow([w[0], w[1]])
 
-        csv_file_path = f"code/data_output/relocation{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
+        csv_file_path = f"code/data_output/relocation_trip_data{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
         with open(csv_file_path, mode="w") as file:
             writer = csv.writer(file)
-            writer.writerow(["total_seconds", "num_of_relocated_drivers"])
-            for w in DataCollector.relocation:
-                writer.writerow([w[0], w[1]])
+            writer.writerow(["total_seconds", "start_zone_id", "end_zone_id", "distance"])
+            for w in DataCollector.relocation_trip_data:
+                writer.writerow([w[0], w[1], w[2], w[3]])
 
         csv_file_path = f"code/data_output/driverdata{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.csv"
         with open(csv_file_path, mode="w") as file:
@@ -178,15 +180,16 @@ class DataCollector:
                     "vehicle_trip_time",
                     "time_reduction",
                     "combi_route",
+                    "total_vehicle_distance"
                 ]
             )
             for w in DataCollector.trip_data:
-                writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7]])
+                writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8]])
     
     def clear():
         DataCollector.driver_data.clear()
         DataCollector.orders_data.clear()
-        DataCollector.relocation.clear()
+        DataCollector.relocation_trip_data.clear()
         DataCollector.workload.clear()
         DataCollector.trip_data.clear()
         DataCollector.time_reduction_quota.clear()

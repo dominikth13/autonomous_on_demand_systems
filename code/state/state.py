@@ -150,7 +150,10 @@ class State:
                 if route.order.direct_connection[1] > 0:
                     order_time_reduction_quota.append(
                         (
-                            (action.route.time_reduction - route.order.direct_connection[1])
+                            (
+                                action.route.time_reduction
+                                - route.order.direct_connection[1]
+                            )
                             / route.order.direct_connection[1]
                         )
                     )
@@ -226,14 +229,22 @@ class State:
             if driver.idle_time >= ProgramParams.MAX_IDLING_TIME:
                 # Calculate probability distribution
                 current_cell = Grid.get_instance().find_cell(driver.current_position)
-                cells = list(
-                    filter(
-                        lambda x: not x.is_empty(),
-                        Grid.get_instance().find_n_adjacent_cells(
-                            current_cell, ProgramParams.RELOCATION_RADIUS
-                        ),
-                    )
+                zones = current_cell.zone.find_adjacent_zone_ids(
+                    ProgramParams.RELOCATION_RADIUS
                 )
+                cells = [current_cell]
+                for zone in zones:
+                    cells = list(
+                        filter(
+                            lambda x: not x.is_empty(),
+                            Grid.get_instance().cells_dict[zone],
+                        )
+                    )
+
+                    if len(cells) == 0:
+                        continue
+                    cells.append(random.choice(cells))
+
                 cells_to_weight = {}
                 min_state_value = float("inf")
                 for cell in cells:
@@ -260,10 +271,8 @@ class State:
                         state_value = random.randint(1, 100)
                     if min_state_value > state_value:
                         min_state_value = state_value
-                    cells_to_weight[cell] = (
-                        state_value
-                    )
-                
+                    cells_to_weight[cell] = state_value
+
                 for cell in cells_to_weight:
                     # We don't want negative or 0 values
                     state_value = cells_to_weight[cell] + abs(min_state_value) + 1
@@ -293,3 +302,9 @@ class State:
                 )
                 driver.set_new_relocation_job(driving_time, relocation_cell.center)
                 driver.idle_time = 0
+                DataCollector.append_relocation_trip_data(
+                    self.current_time,
+                    current_cell.zone,
+                    relocation_cell.zone,
+                    int(driver.current_position.distance_to(relocation_cell.center)),
+                )

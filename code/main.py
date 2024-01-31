@@ -11,7 +11,7 @@ from algorithm.algorithm import (
 )
 from data_analysis.data_analysis import analyse_trip_data
 from data_output.data_collector import DataCollector
-from data_visualization.Visualisierung_tripdata import visualize_trip_data, auswertung_Modell
+from data_visualization.Visualisierung_tripdata import visualize_trip_data
 from deep_reinforcement_learning.offline_policy_evaluation import train_ope
 from driver.drivers import Drivers
 from grid.grid import Grid
