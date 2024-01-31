@@ -39,9 +39,6 @@ class ProgramParams:
     # Radius for relocation in meters
     RELOCATION_RADIUS = 10000
 
-    # Number of iterations until the weights of main net are copied to target net
-    MAIN_AND_TARGET_NET_SYNC_ITERATIONS = 60
-
     # Pick-up distance threshold (how far away driver consider new orders) in meter
     # Equal to 5 minutes
     PICK_UP_DISTANCE_THRESHOLD = 1900  # im Paper 950 Meter
@@ -49,8 +46,14 @@ class ProgramParams:
     # Duration how long orders can be matched with drivers in seconds
     ORDER_EXPIRY_DURATION = 120
 
+    # How much direct trips should be discounted in the optimization
+    DIRECT_TRIP_DISCOUNT_FACTOR = 1
+
     ######################################################################################################
     ############### Deep Reinforcement Learning ###############
+
+    # Number of iterations until the weights of main net are copied to target net
+    MAIN_AND_TARGET_NET_SYNC_ITERATIONS = 60
 
     # Hyperparameter that says how the online policy learning should be 
     # influenced by offline policy learning

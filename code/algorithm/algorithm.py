@@ -176,6 +176,8 @@ def generate_driver_action_pairs(
                     )
                     * state_value
                 )
+                if pair.action.is_route() and pair.action.route.is_regular_route():
+                    weight = weight * ProgramParams.DIRECT_TRIP_DISCOUNT_FACTOR
                 pair.weight = weight
 
     # 3. Filter out all DriverRoutePairs which are not the one with highest edge value for each order and each driver
