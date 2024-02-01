@@ -77,7 +77,12 @@ class ProgramParams:
 
     def DISCOUNT_FACTOR(duration_in_seconds: int) -> float:
         DISCOUNT_RATE = 0.95  # im Paper Feng et al. 2022 ist es 0.95
-        LS = 0.9
+        LS = 60
+        return DISCOUNT_RATE ** (duration_in_seconds / LS)
+    
+    def DISCOUNT_FACTOR_RELOCATION(duration_in_seconds: int) -> float:
+        DISCOUNT_RATE = 0.95 
+        LS = 60
         return DISCOUNT_RATE ** (duration_in_seconds / LS)
     
 
