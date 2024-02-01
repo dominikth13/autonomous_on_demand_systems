@@ -234,16 +234,16 @@ class State:
                 )
                 cells = [current_cell]
                 for zone in zones:
-                    cells = list(
+                    zone_cells = list(
                         filter(
                             lambda x: not x.is_empty(),
                             Grid.get_instance().cells_dict[zone],
                         )
                     )
 
-                    if len(cells) == 0:
+                    if len(zone_cells) == 0:
                         continue
-                    cells.append(random.choice(cells))
+                    cells.append(random.choice(zone_cells))
 
                 cells_to_weight = {}
                 min_state_value = float("inf")
