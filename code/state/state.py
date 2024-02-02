@@ -234,16 +234,16 @@ class State:
                 )
                 cells = [current_cell]
                 for zone in zones:
-                    cells = list(
+                    zone_cells = list(
                         filter(
                             lambda x: not x.is_empty(),
                             Grid.get_instance().cells_dict[zone],
                         )
                     )
 
-                    if len(cells) == 0:
+                    if len(zone_cells) == 0:
                         continue
-                    cells.append(random.choice(cells))
+                    cells.append(random.choice(zone_cells))
 
                 cells_to_weight = {}
                 min_state_value = float("inf")
@@ -277,7 +277,7 @@ class State:
                     # We don't want negative or 0 values
                     state_value = cells_to_weight[cell] + abs(min_state_value) + 1
                     cells_to_weight[cell] = (
-                        ProgramParams.DISCOUNT_FACTOR(driving_time) * state_value
+                        ProgramParams.DISCOUNT_FACTOR_RELOCATION(driving_time) * state_value
                     )
 
                 # Get the relocation target based on weighted stochastic choices

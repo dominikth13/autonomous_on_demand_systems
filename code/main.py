@@ -486,7 +486,7 @@ while True:
                 visualize_trip_data()
                 break
             elif user_input == "4":
-                auswertung_Modell()
+                visualize_trip_data()
                 break
             else:
                 print("This option is not allowed. Please try again.")
