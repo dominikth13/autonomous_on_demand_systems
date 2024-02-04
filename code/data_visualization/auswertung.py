@@ -9,14 +9,19 @@ path = "code/data_output/tripdata2023-07-25.csv"
 pathrl = "code/data_output/relocation_trip_data2023-07-25.csv"
 pathdriver = "code/data_output/driverdata2023-07-25.csv"
 pathstate = "code/training_data/state_value_table.csv"
+pathoders = "code/data/for_hire/orders_2023-07-25.csv"
 data = pd.read_csv(path)
 datarl = pd.read_csv(pathrl)
 datadriver = pd.read_csv(pathdriver)
 datastate = pd.read_csv(pathstate)
+dataorders = pd.read_csv(pathoders)
 print(f'Anzahl der Routen: {len(data)}')
 print(f'Prozentualer Anteil Combirouten: {round(sum(data["combi_route"]/len(data)), 2)}')
 print(f'Durschnittliche Routenlänge: {round(sum(data["total_vehicle_distance"]/len(data)),2)}')
 print(f'Durchschnittliche Zeitersparnis: {round(sum(data["time_reduction"]/60/24/100), 2)}')
+gesamte_zeitersparnis =  round(sum(data["time_reduction"]/60), 2)
+print(f'Gesame Zeitersparnis in Minute: {gesamte_zeitersparnis}')
+print(f'Durchschnittliche Zeitersparnis pro Minute pro Order: {gesamte_zeitersparnis/len(dataorders)}')
 print(f'Anzahl an relocation: {len(datarl)}')
 print(f'Durchschnittliche Entfernung relocation: {round(sum(datarl["distance"]/len(datarl)), 2)}')
 

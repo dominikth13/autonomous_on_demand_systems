@@ -11,6 +11,31 @@ import os
 import datetime
 import re
 from datetime import datetime
+from scipy.stats import linregress
+from scipy import stats
+
+def calculate_moving_average(values, window_size):
+    """Berechnet den gleitenden Mittelwert mit einer spezifischen Fenstergröße."""
+    # Erweiterung der Werte am Anfang, um den gleitenden Mittelwert vom ersten Punkt an zu beginnen
+    extended_values = np.pad(values, (window_size-1, 0), mode='edge')
+    moving_average = np.convolve(extended_values, np.ones(window_size)/window_size, mode='valid')
+    return moving_average
+
+
+def calculate_linear_regression(values, window_size):
+    """
+    Führt eine lineare Regression über den gesamten Datensatz durch.
+    Der window_size-Parameter bleibt ungenutzt, da die lineare Regression 
+    typischerweise über den gesamten Datensatz angewendet wird.
+    """
+    # Erstellen eines Arrays mit Indizes als x-Werte für die lineare Regression
+    x = np.arange(len(values))
+    # Durchführen der linearen Regression
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, values)
+    # Berechnung der y-Werte der linearen Regression
+    regression_values = intercept + slope * x
+    return regression_values
+
 
 def average_number_of_drivers_per_day():
     tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
@@ -45,10 +70,16 @@ def average_number_of_drivers_per_day():
     ax1.set_ylabel("Durchschnittlich besetzte Fahrer")
     ax1.set_title("Durchschnittlich besetzte Fahrer pro Tag")
     ax1.set_xticklabels(dates, rotation=45)
-    ax1.set_ylim(0, 1000)
+    ax1.set_ylim(0, max(average_occupied_drivers) + 100)
+#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+#gleitender Mittelwert: calculate_moving_average
+#lineare Regression: calculate_linear_regression
+    moving_average = calculate_linear_regression(average_occupied_drivers, window_size = 3)
+    ax1.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    ax1.legend()
     plt.show()
 
-average_number_of_drivers_per_day()
+#average_number_of_drivers_per_day()
 
 
 def number_of_routes_per_day():
@@ -81,9 +112,15 @@ def number_of_routes_per_day():
     ax2.set_ylabel("Anzahl der Routen")
     ax2.set_title("Anzahl der Routen pro Tag")
     ax2.set_xticklabels(dates, rotation=45)
+#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+#gleitender Mittelwert: calculate_moving_average
+#lineare Regression: calculate_linear_regression
+    moving_average = calculate_linear_regression(routes_per_day, window_size = 3)
+    ax2.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    ax2.legend()
     plt.show()
 
-number_of_routes_per_day()
+#number_of_routes_per_day()
 
 def total_time_reduction_per_car_in_minutes():
     tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
@@ -122,9 +159,16 @@ def total_time_reduction_per_car_in_minutes():
     ax3.set_ylabel("Zeitersparnis pro Auto (Minuten)")
     ax3.set_title("Summierte Zeitersparnis pro Stunde pro Auto (Minuten)")
     ax3.set_xticklabels(dates, rotation=45)
+    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+#gleitender Mittelwert: calculate_moving_average
+#lineare Regression: calculate_linear_regression
+    moving_average = calculate_linear_regression(total_time_reduction_per_car_in_minutes, window_size = 3)
+    ax3.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    ax3.legend()
     plt.show()
 
-total_time_reduction_per_car_in_minutes()
+
+#total_time_reduction_per_car_in_minutes()
 
 def average_time_reduction_per_day(): 
     print("v4")
@@ -183,7 +227,15 @@ def average_time_reduction_per_day():
     ax4.set_ylabel("Durchschnittliche Zeitersparnis pro Order pro Tag")
     ax4.set_title("Durchschnittliche Zeitersparnis pro Order pro Tag")
     ax4.set_xticklabels(dates, rotation=45)
+#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+#gleitender Mittelwert: calculate_moving_average
+#lineare Regression: calculate_linear_regression
+    moving_average = calculate_moving_average(average_time_reduction_per_day, window_size=5)
+
+# Anpassen der 'dates', um den ersten Wert zu ignorieren
+    ax4.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
     plt.show()
+
 
 average_time_reduction_per_day()
 
@@ -293,7 +345,10 @@ def average_trip_distances_per_day_for_direct_routes():
     ax5.set_ylabel("Durchschnittliche Tripdistanzen pro Tag in km")
     ax5.set_title("Durchschnittliche Tripdistanzen pro Tag für Direktrouten")
     ax5.set_xticklabels(dates, rotation=45)
+
+
     plt.show()
+
 #average_trip_distances_per_day_for_direct_routes()
 
 
@@ -421,6 +476,12 @@ def average_trip_distances_per_day_for_combination_routes():
     ax6.set_ylabel("Durchschnittliche Tripdistanzen pro Tag in km")
     ax6.set_title("Durchschnittliche Tripdistanzen pro Tag für Kombinationsrouten")
     ax6.set_xticklabels(dates, rotation=45)
+#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+#gleitender Mittelwert: calculate_moving_average
+#lineare Regression: calculate_linear_regression
+    moving_average = calculate_linear_regression(average_time_reduction_per_day, window_size = 3)
+    ax6.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    ax6.legend()
     plt.show()
 #average_trip_distances_per_day_for_combination_routes()
 
@@ -457,6 +518,12 @@ def Zeitersparnis_Anzahl_der_Autos():
     
     plt.xticks(positions, labels=[str(k) for k in time_savings_avg.keys()])
     
+    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    #gleitender Mittelwert: calculate_moving_average
+    #lineare Regression: calculate_linear_regression
+    values = list(time_savings_avg.values())  # Umwandlung der Werte in eine Liste für die lineare Regression
+    regression_values = calculate_moving_average(values, window_size= 1)
+    plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
     plt.show()
 
 Zeitersparnis_Anzahl_der_Autos()
@@ -465,7 +532,7 @@ Zeitersparnis_Anzahl_der_Autos()
 ## fig 2.
 def Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos():
     base_path = "store/for_hire/rl_relocation/drivers"   # manuell eingegeben werden 
-    driver_counts = [10, 100, 1000]  
+    driver_counts = [10, 100, 1000, 2000, 5000]  
     quota_sums = {}
     file_counts = {}
 
@@ -494,10 +561,15 @@ def Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos():
     plt.ylabel('Ablehnungsqoute')
     plt.title('Ablehnungsqoute in unterschiedlicher Anzahl der Autos（for_hire/rl_relocation）')
     plt.xticks(positions, labels=[str(k) for k in avg_quota_per_driver.keys()])
+    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    #gleitender Mittelwert: calculate_moving_average
+    #lineare Regression: calculate_linear_regression
+    values = list(avg_quota_per_driver.values()) 
+    regression_values = calculate_moving_average(values, window_size= 1)
+    plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
     plt.show()
 
 Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos()
-
 
 
 ## fig 3.
@@ -513,14 +585,18 @@ def calculate_percentage(combi_route_counts, total_counts):
     return combi_route_percentages
 
 def process_directory(data_path, combi_route_counts, total_counts):
+    pattern = re.compile(r"tripdata\d{4}-\d{2}-\d{2}\.csv$")
+    
     for entry in os.listdir(data_path):
-        entry_path = os.path.join(data_path, entry)
-        if entry.endswith(".csv"):
+        if pattern.match(entry):  # Überprüft, ob der Dateiname dem Muster entspricht
+            entry_path = os.path.join(data_path, entry)
             df = pd.read_csv(entry_path)
-            combi_true_count = df[df['combi_route'] == True].shape[0]
-            modeling_method = os.path.basename(data_path)  
-            combi_route_counts[modeling_method] += combi_true_count
-            total_counts[modeling_method] += df.shape[0]
+            # Überprüfe, ob 'combi_route' in den Spaltennamen des DataFrame vorhanden ist, um KeyError zu vermeiden
+            if 'combi_route' in df.columns:
+                combi_true_count = df[df['combi_route'] == True].shape[0]
+                modeling_method = os.path.basename(data_path)  
+                combi_route_counts[modeling_method] += combi_true_count
+                total_counts[modeling_method] += df.shape[0]
 
 def Anzahl_der_Combirouten_in_Prozent():
     data_path = "store/for_hire"   # manuell eingegeben werden 
@@ -553,6 +629,13 @@ def Anzahl_der_Combirouten_in_Prozent():
     plt.ylabel('Prozentualer Anteil der Combirouten (%)')
     plt.title('Anzahl der Combirouten in Prozent')
     plt.xticks(rotation=45)
+    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    #gleitender Mittelwert: calculate_moving_average
+    #lineare Regression: calculate_linear_regression
+    values = list(combi_route_percentages.values())  # Umwandlung der Werte in eine Liste für die lineare Regression
+    regression_values = calculate_linear_regression(values, window_size= 1)
+    positions = range(len(labels))
+    plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
     plt.show()
 
 Anzahl_der_Combirouten_in_Prozent()
@@ -561,6 +644,7 @@ Anzahl_der_Combirouten_in_Prozent()
 
 ## fig 4.
 def process_directory_for_route_distribution(data_path, combi_route_counts, direct_route_counts, file_days):
+    pattern = r'^tripdata\d{4}-\d{2}-\d{2}'  # RegEx für Dateien, die mit 'tripdata' beginnen und ein Datum enthalten
     for method_dir in os.listdir(data_path):
         method_path = os.path.join(data_path, method_dir)
         if os.path.isdir(method_path):
@@ -569,14 +653,16 @@ def process_directory_for_route_distribution(data_path, combi_route_counts, dire
             file_days[method_dir] = 0
 
             for file_name in os.listdir(method_path):
-                if file_name.endswith(".csv"):
+                if file_name.endswith(".csv") and re.match(pattern, file_name):
                     df = pd.read_csv(os.path.join(method_path, file_name))
-                    combi_true_count = df[df['combi_route'] == True].shape[0]
-                    combi_false_count = df[df['combi_route'] == False].shape[0]
+                    if 'combi_route' in df.columns:  # Sicherstellen, dass die Spalte 'combi_route' existiert
+                        combi_true_count = df[df['combi_route'] == True].shape[0]
+                        combi_false_count = df[df['combi_route'] == False].shape[0]
 
-                    combi_route_counts[method_dir] += combi_true_count
-                    direct_route_counts[method_dir] += combi_false_count
-                    file_days[method_dir] += 1
+                        combi_route_counts[method_dir] += combi_true_count
+                        direct_route_counts[method_dir] += combi_false_count
+                        file_days[method_dir] += 1
+
 
 def Routen_Aufteilung_pro_Stunde():
     data_path = "store/for_hire"   # Manuell eingegebener Pfad
@@ -618,10 +704,11 @@ def Routen_Aufteilung_pro_Stunde():
 Routen_Aufteilung_pro_Stunde()
 
 
+
 ## fig 5.
 def Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl():
-    base_path = "store/for_hire/drl/drivers" # Manuell eingegebener Pfad
-    driver_counts = [10, 100, 1000]  
+    base_path = "store/for_hire/rl_relocation/drivers" # Manuell eingegebener Pfad
+    driver_counts = [10, 100, 1000, 2000, 5000]  
     combi_counts = {}
     file_days = {}
 
@@ -661,10 +748,10 @@ Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl()
 
 
 ## fig 6.
-def durchschnittlich_gefahrene_Distanz_Anzahl_der_Autos():
-    base_path = "store/for_hire/drl/drivers" # Manuell eingegebener Pfad
-    driver_counts = [10, 100, 1000]
-    status_speed_kmh = {'occupied': 6.33 * 3.6, 'idling': 0, 'relocation': 6.33 * 3.6}  
+def durchschnittliche_Zeit_Anzahl_der_Autos():
+    base_path = "store/for_hire/rl_relocation/drivers" # Manuell eingegebener Pfad
+    driver_counts = [10, 100, 1000, 2000, 5000]
+    status_speed_kmh = {'occupied': 1, 'idling': 1, 'relocation': 1}  
 
     status_time_proportion = {driver: {'occupied': [], 'idling': [], 'relocation': []} for driver in driver_counts}
 
@@ -695,8 +782,8 @@ def durchschnittlich_gefahrene_Distanz_Anzahl_der_Autos():
         ax.bar(ind + i * width, avg_distances, width, label=status.capitalize(), color=color)
 
     ax.set_xlabel('Anzahl der Autos')
-    ax.set_ylabel('Durchschnittlich gefahrene Distanz pro Stunde (km)')
-    ax.set_title('Durchschnittlich gefahrene Distanz nach Status')
+    ax.set_ylabel('Durchschnittlich Zeit in dem jeweiligen Status')
+    ax.set_title('Durchschnittliche Zeit in dem jeweiligen Status')
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(driver_counts)
     ax.legend()
@@ -704,14 +791,14 @@ def durchschnittlich_gefahrene_Distanz_Anzahl_der_Autos():
     plt.tight_layout()
     plt.show()
 
-durchschnittlich_gefahrene_Distanz_Anzahl_der_Autos()
+durchschnittliche_Zeit_Anzahl_der_Autos()
 
 
 ## fig 7.
 def durchschnittlich_gefahrene_Distan_modeling_method():
     base_path = "store/for_hire"   # Manuell eingegebener Pfad
     methods = ['baseline', 'rl', 'rl_relocation', 'drl']
-    status_speed = {'occupied': 6.33, 'idling': 0, 'relocation': 6.33}  
+    status_speed = {'occupied': 1, 'idling': 1, 'relocation': 1}  
 
 
     status_proportions = {method: {'occupied': [], 'idling': [], 'relocation': []} for method in methods}
