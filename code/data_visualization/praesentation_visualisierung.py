@@ -13,7 +13,7 @@ import re
 from datetime import datetime
 
 def average_number_of_drivers_per_day():
-    tripdata_path = "code/data_output"
+    tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
     tripdata_files = [
         f
         for f in os.listdir(tripdata_path)
@@ -45,7 +45,7 @@ def average_number_of_drivers_per_day():
     ax1.set_ylabel("Durchschnittlich besetzte Fahrer")
     ax1.set_title("Durchschnittlich besetzte Fahrer pro Tag")
     ax1.set_xticklabels(dates, rotation=45)
-    ax1.set_ylim(0, 100)
+    ax1.set_ylim(0, 1000)
     plt.show()
 
 average_number_of_drivers_per_day()
@@ -53,7 +53,7 @@ average_number_of_drivers_per_day()
 
 def number_of_routes_per_day():
     
-    tripdata_path = "code/data_output"
+    tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
     tripdata_files = [
         f
         for f in os.listdir(tripdata_path)
@@ -86,7 +86,7 @@ def number_of_routes_per_day():
 number_of_routes_per_day()
 
 def total_time_reduction_per_car_in_minutes():
-    tripdata_path = "code/data_output"
+    tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
     total_time_reduction = []
     total_time_reduction_per_car_in_minutes = []
 
@@ -111,7 +111,7 @@ def total_time_reduction_per_car_in_minutes():
     for total_time in total_time_reduction:
     # Teile die Gesamtzeitersparnis durch 100 (für die Anzahl der Autos) und dann durch 60 (für Minuten)
         if not pd.isna(total_time):
-            time_per_car_in_minutes = (total_time / 100) / 60 / 24
+            time_per_car_in_minutes = (total_time / 1000) / 60 / 24
         else:
             time_per_car_in_minutes = float("nan")
         total_time_reduction_per_car_in_minutes.append(time_per_car_in_minutes)
@@ -128,8 +128,8 @@ total_time_reduction_per_car_in_minutes()
 
 def average_time_reduction_per_day(): 
     print("v4")
-    orders_path = "code/data/yellow_cab"
-    tripdata_path = "code/data_output"
+    orders_path = "code/data/for_hire"
+    tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
     total_time_reduction = []
     average_time_reduction_per_day = []
     total_time_reduction_per_car_in_minutes = []
@@ -170,7 +170,7 @@ def average_time_reduction_per_day():
     for total_time in total_time_reduction:
         # Teile die Gesamtzeitersparnis durch 100 (für die Anzahl der Autos) und dann durch 60 (für Minuten)
         if not pd.isna(total_time):
-            time_per_car_in_minutes = (total_time / 100) / 60 / 24
+            time_per_car_in_minutes = (total_time / 1000) / 60 / 24
         else:
             time_per_car_in_minutes = float("nan")
         total_time_reduction_per_car_in_minutes.append(time_per_car_in_minutes)
@@ -189,8 +189,8 @@ average_time_reduction_per_day()
 
 def average_trip_distances_per_day_for_direct_routes():
     print("v5")
-    orders_path = "code/data/yellow_cab"
-    tripdata_path = "code/data_output"
+    orders_path = "code/data/for_hire"
+    tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
     total_time_reduction = []
     routes_per_day = []
     routes_per_day = []
@@ -294,14 +294,14 @@ def average_trip_distances_per_day_for_direct_routes():
     ax5.set_title("Durchschnittliche Tripdistanzen pro Tag für Direktrouten")
     ax5.set_xticklabels(dates, rotation=45)
     plt.show()
-average_trip_distances_per_day_for_direct_routes()
+#average_trip_distances_per_day_for_direct_routes()
 
 
 def average_trip_distances_per_day_for_combination_routes():
     print("v6")
 
-    orders_path = "code/data/yellow_cab"
-    tripdata_path = "code/data_output"
+    orders_path = "code/data/for_hire"
+    tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
     total_time_reduction = []
     routes_per_day = []
     routes_per_day = []
@@ -422,7 +422,7 @@ def average_trip_distances_per_day_for_combination_routes():
     ax6.set_title("Durchschnittliche Tripdistanzen pro Tag für Kombinationsrouten")
     ax6.set_xticklabels(dates, rotation=45)
     plt.show()
-average_trip_distances_per_day_for_combination_routes()
+#average_trip_distances_per_day_for_combination_routes()
 
 
 ## fig 1.
