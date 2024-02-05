@@ -77,7 +77,9 @@ def average_number_of_drivers_per_day():
     moving_average = calculate_linear_regression(average_occupied_drivers, window_size = 3)
     ax1.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
     ax1.legend()
+    plt.savefig("store/plots/average_number_of_drivers_per_day.png")
     plt.show()
+    
 
 #average_number_of_drivers_per_day()
 
@@ -118,6 +120,7 @@ def number_of_routes_per_day():
     moving_average = calculate_linear_regression(routes_per_day, window_size = 3)
     ax2.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
     ax2.legend()
+    plt.savefig("store/plots/number_of_routes_per_day.png")
     plt.show()
 
 #number_of_routes_per_day()
@@ -154,7 +157,7 @@ def total_time_reduction_per_car_in_minutes():
         total_time_reduction_per_car_in_minutes.append(time_per_car_in_minutes)
 
     fig, ax3 = plt.subplots(1, 1, figsize=(15, 12))
-    ax3.bar(dates, total_time_reduction_per_car_in_minutes, color="red")
+    ax3.bar(dates, total_time_reduction_per_car_in_minutes, color="blue")
     ax3.set_xlabel("Datum")
     ax3.set_ylabel("Zeitersparnis pro Auto (Minuten)")
     ax3.set_title("Summierte Zeitersparnis pro Stunde pro Auto (Minuten)")
@@ -165,6 +168,7 @@ def total_time_reduction_per_car_in_minutes():
     moving_average = calculate_linear_regression(total_time_reduction_per_car_in_minutes, window_size = 3)
     ax3.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
     ax3.legend()
+    plt.savefig("store/plots/total_time_reduction_per_car_in_minutes.png")
     plt.show()
 
 
@@ -234,10 +238,10 @@ def average_time_reduction_per_day():
 
 # Anpassen der 'dates', um den ersten Wert zu ignorieren
     ax4.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    plt.savefig("store/plots/average_time_reduction_per_day.png")
     plt.show()
 
-
-average_time_reduction_per_day()
+#average_time_reduction_per_day()
 
 def average_trip_distances_per_day_for_direct_routes():
     print("v5")
@@ -346,7 +350,7 @@ def average_trip_distances_per_day_for_direct_routes():
     ax5.set_title("Durchschnittliche Tripdistanzen pro Tag für Direktrouten")
     ax5.set_xticklabels(dates, rotation=45)
 
-
+    plt.savefig("store/plots/average_trip_distances_per_day_for_direct_routes.png")
     plt.show()
 
 #average_trip_distances_per_day_for_direct_routes()
@@ -476,14 +480,9 @@ def average_trip_distances_per_day_for_combination_routes():
     ax6.set_ylabel("Durchschnittliche Tripdistanzen pro Tag in km")
     ax6.set_title("Durchschnittliche Tripdistanzen pro Tag für Kombinationsrouten")
     ax6.set_xticklabels(dates, rotation=45)
-#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-#gleitender Mittelwert: calculate_moving_average
-#lineare Regression: calculate_linear_regression
-    moving_average = calculate_linear_regression(average_time_reduction_per_day, window_size = 3)
-    ax6.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
-    ax6.legend()
+    plt.savefig("store/plots/average_trip_distances_per_day_for_combination_routes.png")
     plt.show()
-#average_trip_distances_per_day_for_combination_routes()
+average_trip_distances_per_day_for_combination_routes()
 
 
 ## fig 1.
@@ -524,6 +523,7 @@ def Zeitersparnis_Anzahl_der_Autos():
     values = list(time_savings_avg.values())  # Umwandlung der Werte in eine Liste für die lineare Regression
     regression_values = calculate_moving_average(values, window_size= 1)
     plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
+    plt.savefig("store/plots/Zeitersparnis_Anzahl_der_Autos.png")
     plt.show()
 
 Zeitersparnis_Anzahl_der_Autos()
@@ -567,6 +567,7 @@ def Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos():
     values = list(avg_quota_per_driver.values()) 
     regression_values = calculate_moving_average(values, window_size= 1)
     plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
+    plt.savefig("store/plots/Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos.png")
     plt.show()
 
 Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos()
@@ -636,6 +637,7 @@ def Anzahl_der_Combirouten_in_Prozent():
     regression_values = calculate_linear_regression(values, window_size= 1)
     positions = range(len(labels))
     plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
+    plt.savefig("store/plots/Anzahl_der_Combirouten_in_Prozent.png")
     plt.show()
 
 Anzahl_der_Combirouten_in_Prozent()
@@ -699,6 +701,7 @@ def Routen_Aufteilung_pro_Stunde():
     ax.set_xticklabels(labels)
     ax.legend()
     fig.tight_layout()
+    plt.savefig("store/plots/Routen_Aufteilung_pro_Stunde.png")
     plt.show()
 
 Routen_Aufteilung_pro_Stunde()
@@ -742,6 +745,7 @@ def Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl():
     plt.ylabel('Anzahl der Combirouten pro Stunde')
     plt.title('Anzahl der Combirouten pro Stunde in unterschiedlicher Anzahl von Autos')
     plt.xticks([str(count) for count in driver_counts])
+    plt.savefig("store/plots/Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl.png")
     plt.show()
 
 Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl()
@@ -789,6 +793,7 @@ def durchschnittliche_Zeit_Anzahl_der_Autos():
     ax.legend()
 
     plt.tight_layout()
+    plt.savefig("store/plots/durchschnittliche_Zeit_Anzahl_der_Autos.png")
     plt.show()
 
 durchschnittliche_Zeit_Anzahl_der_Autos()
@@ -837,6 +842,55 @@ def durchschnittlich_gefahrene_Distan_modeling_method():
     ax.legend()
 
     plt.tight_layout()
+    plt.savefig("store/plots/durchschnittlich_gefahrene_Distan_modeling_method.png")
     plt.show()
 
 durchschnittlich_gefahrene_Distan_modeling_method()
+
+
+
+
+## fig. 8
+
+def compare_time_savings():
+    anzahl_autos = 100    # you can change to the current number of cars
+    base_paths = {
+        "baseline": "store/for_hire/baseline",
+        "rl": "store/for_hire/rl"
+    }
+    time_savings = {"baseline": {}, "rl": {}}
+
+    for model, base_path in base_paths.items():
+        for file_name in os.listdir(base_path):
+            match = re.match(r"tripdata(\d{4}-\d{2}-\d{2})\.csv", file_name)
+            if match:
+                date = match.group(1)
+                df = pd.read_csv(os.path.join(base_path, file_name))
+
+                if 'time_reduction' in df.columns:
+                    total_time_reduction_seconds = df['time_reduction'].sum() 
+                 
+                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 3600) / anzahl_autos
+                    time_savings[model][date] = avg_time_savings_per_hour_per_car
+
+
+    dates = sorted(set(time_savings["baseline"].keys()) | set(time_savings["rl"].keys()))
+    baseline_savings = [time_savings["baseline"].get(date, 0) for date in dates]
+    rl_savings = [time_savings["rl"].get(date, 0) for date in dates]
+
+
+    plt.figure(figsize=(15, 6))
+    x = np.arange(len(dates))
+    plt.bar(x - 0.2, baseline_savings, width=0.4, label='Baseline', color='blue')
+    plt.bar(x + 0.2, rl_savings, width=0.4, label='RL', color='orange')
+    
+    plt.xlabel('Datum')
+    plt.ylabel('Zeitersparnis (Stunden)')
+    plt.title('Zeitersparnis pro Auto pro Stunde (nach Modell und Datum)')
+    plt.xticks(x, dates, rotation=45)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("store/plots/compare_time_savings.png")
+    plt.show()
+
+compare_time_savings()
