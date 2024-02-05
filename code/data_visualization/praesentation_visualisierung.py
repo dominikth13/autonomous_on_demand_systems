@@ -850,9 +850,25 @@ def durchschnittlich_gefahrene_Distan_modeling_method():
 
 ## fig. 8
 ## fig. 8-1
+def calculate_moving_average(values, window_size):
+    """Berechnet den gleitenden Mittelwert mit einer spezifischen Fenstergröße."""
+    # Erweiterung der Werte am Anfang, um den gleitenden Mittelwert vom ersten Punkt an zu beginnen
+    extended_values = np.pad(values, (window_size-1, 0), mode='edge')
+    moving_average = np.convolve(extended_values, np.ones(window_size)/window_size, mode='valid')
+    return moving_average
+
+
+def custom_rolling_avg(values, window_size):
+    # Manuelle Berechnung des gleitenden Mittelwerts für die Ränder
+    avg = np.empty_like(values, dtype=float)
+    for i in range(len(values)):
+        start = max(0, i - window_size + 1)
+        end = i + 1
+        avg[i] = np.mean(values[start:end])
+    return avg
 
 def compare_time_savings_rl_bl():
-    anzahl_autos = 100    # you can change to the current number of cars
+    anzahl_autos = 2000
     base_paths = {
         "baseline": "store/for_hire/baseline",
         "rl": "store/for_hire/rl"
@@ -865,39 +881,38 @@ def compare_time_savings_rl_bl():
             if match:
                 date = match.group(1)
                 df = pd.read_csv(os.path.join(base_path, file_name))
-
                 if 'time_reduction' in df.columns:
-                    total_time_reduction_seconds = df['time_reduction'].sum() 
-                 
-                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 3600) / anzahl_autos
+                    total_time_reduction_seconds = df['time_reduction'].sum()
+                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 60 / 24) / anzahl_autos
                     time_savings[model][date] = avg_time_savings_per_hour_per_car
 
     dates = sorted(set(time_savings["baseline"].keys()) | set(time_savings["rl"].keys()))
     baseline_savings = [time_savings["baseline"].get(date, 0) for date in dates]
     rl_savings = [time_savings["rl"].get(date, 0) for date in dates]
 
+    window_size = 5
 
-    window_size = 5  
-    baseline_rolling_avg = np.convolve(baseline_savings, np.ones(window_size)/window_size, mode='valid')
-    rl_rolling_avg = np.convolve(rl_savings, np.ones(window_size)/window_size, mode='valid')
+    # Verwenden der angepassten Funktion für den gleitenden Mittelwert
+    baseline_rolling_avg = custom_rolling_avg(np.array(baseline_savings), window_size)
+    rl_rolling_avg = custom_rolling_avg(np.array(rl_savings), window_size)
 
-    plt.figure(figsize=(15, 6))
-    x = np.arange(len(baseline_rolling_avg))  
+    plt.figure(figsize=(10, 6))
+    x = np.arange(len(dates))  # Direkte Verwendung der vollen Länge von 'dates'
 
     color_baseline = 'blue'
     color_rl = 'orange'
 
-    plt.bar(x + 0.2, rl_savings[window_size-1:], width=0.4, label='RL', color=color_rl)
-    plt.bar(x - 0.2, baseline_savings[window_size-1:], width=0.4, label='Baseline', color=color_baseline)
+    plt.bar(x + 0.2, rl_savings, width=0.4, label='RL', color=color_rl)
+    plt.bar(x - 0.2, baseline_savings, width=0.4, label='Baseline', color=color_baseline)
 
- 
     plt.plot(x, rl_rolling_avg, label='RL (Gleitender Mittelwert)', color='orangered', marker='o', linestyle='-', markersize=5)
     plt.plot(x, baseline_rolling_avg, label='Baseline (Gleitender Mittelwert)', color='darkblue', marker='o', linestyle='-', markersize=5)
 
+    plt.ylim([0, 130])
     plt.xlabel('Datum')
-    plt.ylabel('Zeitersparnis (Stunden)')
-    plt.title('Zeitersparnis pro Auto pro Stunde ( RL vs Baseline)')
-    plt.xticks(x, dates[window_size-1:], rotation=45)
+    plt.ylabel('Zeitersparnis (Minuten)')
+    plt.title('Zeitersparnis pro Auto pro Stunde (RL vs Baseline)')
+    plt.xticks(x, dates, rotation=45)
     plt.legend()
     plt.tight_layout()
     plt.savefig("store/plots/compare_time_savings_rl_bl.png")
@@ -906,10 +921,11 @@ def compare_time_savings_rl_bl():
 compare_time_savings_rl_bl()
 
 
+
 ## fig. 8-2
 
 def compare_time_savings_rl_drl():
-    anzahl_autos = 100    # you can change to the current number of cars
+    anzahl_autos = 2000    # you can change to the current number of cars
     base_paths = {
         "drl": "store/for_hire/drl",
         "rl": "store/for_hire/rl"
@@ -924,35 +940,39 @@ def compare_time_savings_rl_drl():
                 df = pd.read_csv(os.path.join(base_path, file_name))
 
                 if 'time_reduction' in df.columns:
-                    total_time_reduction_seconds = df['time_reduction'].sum() 
-                 
-                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 3600) / anzahl_autos
+                    total_time_reduction_seconds = df['time_reduction'].sum()
+                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 60 /24) / anzahl_autos
                     time_savings[model][date] = avg_time_savings_per_hour_per_car
 
     dates = sorted(set(time_savings["drl"].keys()) | set(time_savings["rl"].keys()))
-    baseline_savings = [time_savings["drl"].get(date, 0) for date in dates]
+    drl_savings = [time_savings["drl"].get(date, 0) for date in dates]
     rl_savings = [time_savings["rl"].get(date, 0) for date in dates]
 
-    window_size = 5  
-    baseline_rolling_avg = np.convolve(baseline_savings, np.ones(window_size)/window_size, mode='valid')
-    rl_rolling_avg = np.convolve(rl_savings, np.ones(window_size)/window_size, mode='valid')
+    window_size = 5
 
-    plt.figure(figsize=(15, 6))
-    x = np.arange(len(baseline_rolling_avg))  
+    # Berechnung des gleitenden Mittelwerts unter Verwendung von 'mode='same'', um gleiche Länge zu gewährleisten
+    #drl_rolling_avg = np.convolve(drl_savings, np.ones(window_size)/window_size, mode='same')
+    #rl_rolling_avg = np.convolve(rl_savings, np.ones(window_size)/window_size, mode='same')
+    # Verwenden der angepassten Funktion für den gleitenden Mittelwert
+    drl_rolling_avg = custom_rolling_avg(np.array(drl_savings), window_size)
+    rl_rolling_avg = custom_rolling_avg(np.array(rl_savings), window_size)
+    plt.figure(figsize=(10, 6))
+    x = np.arange(len(dates))  # Verwendung der vollen Länge von 'dates'
 
-    color_baseline = 'green' 
-    color_rl = 'orange'     
+    color_drl = 'green'
+    color_rl = 'orange'
 
-    plt.bar(x + 0.2, rl_savings[window_size-1:], width=0.4, label='RL', color=color_rl)
-    plt.bar(x - 0.2, baseline_savings[window_size-1:], width=0.4, label='DRL', color=color_baseline)
+    plt.bar(x + 0.2, rl_savings, width=0.4, label='RL', color=color_rl)
+    plt.bar(x - 0.2, drl_savings, width=0.4, label='DRL', color=color_drl)
 
     plt.plot(x, rl_rolling_avg, label='RL (Gleitender Mittelwert)', color='orangered', marker='o', linestyle='-', markersize=5)
-    plt.plot(x, baseline_rolling_avg, label='DRL (Gleitender Mittelwert)', color='darkgreen', marker='o', linestyle='-', markersize=5)
+    plt.plot(x, drl_rolling_avg, label='DRL (Gleitender Mittelwert)', color='darkgreen', marker='o', linestyle='-', markersize=5)
 
+    plt.ylim([0, 130])
     plt.xlabel('Datum')
-    plt.ylabel('Zeitersparnis (Stunden)')
+    plt.ylabel('Zeitersparnis (Minuten)')
     plt.title('Zeitersparnis pro Auto pro Stunde (RL vs DRL)')
-    plt.xticks(x, dates[window_size-1:], rotation=45)
+    plt.xticks(x, dates, rotation=45)
     plt.legend()
     plt.tight_layout()
     plt.savefig("store/plots/compare_time_savings_rl_drl.png")
@@ -963,7 +983,7 @@ compare_time_savings_rl_drl()
 
 ## fig. 8-3
 def compare_time_savings_rl_rlre():
-    anzahl_autos = 100    # you can change to the current number of cars
+    anzahl_autos = 2000  # you can change to the current number of cars
     base_paths = {
         "rl_relocation": "store/for_hire/rl_relocation",
         "rl": "store/for_hire/rl"
@@ -978,35 +998,34 @@ def compare_time_savings_rl_rlre():
                 df = pd.read_csv(os.path.join(base_path, file_name))
 
                 if 'time_reduction' in df.columns:
-                    total_time_reduction_seconds = df['time_reduction'].sum() 
-                 
-                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 3600) / anzahl_autos
+                    total_time_reduction_seconds = df['time_reduction'].sum()
+                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 60 /24) / anzahl_autos
                     time_savings[model][date] = avg_time_savings_per_hour_per_car
 
     dates = sorted(set(time_savings["rl_relocation"].keys()) | set(time_savings["rl"].keys()))
-    baseline_savings = [time_savings["rl_relocation"].get(date, 0) for date in dates]
+    rlre_savings = [time_savings["rl_relocation"].get(date, 0) for date in dates]
     rl_savings = [time_savings["rl"].get(date, 0) for date in dates]
 
-    window_size = 5  
-    baseline_rolling_avg = np.convolve(baseline_savings, np.ones(window_size)/window_size, mode='valid')
-    rl_rolling_avg = np.convolve(rl_savings, np.ones(window_size)/window_size, mode='valid')
+    window_size = 5
+    rlre_rolling_avg = custom_rolling_avg(np.array(rlre_savings), window_size)
+    rl_rolling_avg = custom_rolling_avg(np.array(rl_savings), window_size)
+    plt.figure(figsize=(10, 6))
+    x = np.arange(len(dates))  # Use full length of 'dates'
 
-    plt.figure(figsize=(15, 6))
-    x = np.arange(len(baseline_rolling_avg))  
+    color_rlre = 'red'
+    color_rl = 'orange'
 
-    color_baseline = 'red'  
-    color_rl = 'orange'    
-
-    plt.bar(x + 0.2, rl_savings[window_size-1:], width=0.4, label='RL', color=color_rl)
-    plt.bar(x - 0.2, baseline_savings[window_size-1:], width=0.4, label='RL mit Relocation', color=color_baseline)
+    plt.bar(x + 0.2, rl_savings, width=0.4, label='RL', color=color_rl)
+    plt.bar(x - 0.2, rlre_savings, width=0.4, label='RL mit Relocation', color=color_rlre)
 
     plt.plot(x, rl_rolling_avg, label='RL (Gleitender Mittelwert)', color='orangered', marker='o', linestyle='-', markersize=5)
-    plt.plot(x, baseline_rolling_avg, label='RL mit Relocation (Gleitender Mittelwert)', color='darkred', marker='o', linestyle='-', markersize=5)
+    plt.plot(x, rlre_rolling_avg, label='RL mit Relocation (Gleitender Mittelwert)', color='darkred', marker='o', linestyle='-', markersize=5)
 
+    plt.ylim([0, 130])
     plt.xlabel('Datum')
-    plt.ylabel('Zeitersparnis (Stunden)')
-    plt.title('Zeitersparnis pro Auto pro Stunde ( RL  vs  RL mit Relocation)')
-    plt.xticks(x, dates[window_size-1:], rotation=45)
+    plt.ylabel('Zeitersparnis (Minuten)')
+    plt.title('Zeitersparnis pro Auto pro Stunde (RL vs RL mit Relocation)')
+    plt.xticks(x, dates, rotation=45)
     plt.legend()
     plt.tight_layout()
     plt.savefig("store/plots/compare_time_savings_rl_rlre.png")
