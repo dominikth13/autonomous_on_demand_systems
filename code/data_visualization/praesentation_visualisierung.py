@@ -489,7 +489,7 @@ def average_trip_distances_per_day_for_combination_routes():
 ## fig 1.
 def Zeitersparnis_Anzahl_der_Autos():
     base_path = "store/for_hire/rl_relocation/drivers"   # manuell eingegeben werden 
-    driver_counts = [10, 100, 1000, 2000, 5000]
+    driver_counts = [10, 100, 1000]
     time_savings_avg = {}
 
     for count in driver_counts:
