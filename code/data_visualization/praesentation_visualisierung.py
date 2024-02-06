@@ -1,3 +1,4 @@
+from statistics import mean
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -14,18 +15,21 @@ from datetime import datetime
 from scipy.stats import linregress
 from scipy import stats
 
+
 def calculate_moving_average(values, window_size):
     """Berechnet den gleitenden Mittelwert mit einer spezifischen Fenstergröße."""
     # Erweiterung der Werte am Anfang, um den gleitenden Mittelwert vom ersten Punkt an zu beginnen
-    extended_values = np.pad(values, (window_size-1, 0), mode='edge')
-    moving_average = np.convolve(extended_values, np.ones(window_size)/window_size, mode='valid')
+    extended_values = np.pad(values, (window_size - 1, 0), mode="edge")
+    moving_average = np.convolve(
+        extended_values, np.ones(window_size) / window_size, mode="valid"
+    )
     return moving_average
 
 
 def calculate_linear_regression(values, window_size):
     """
     Führt eine lineare Regression über den gesamten Datensatz durch.
-    Der window_size-Parameter bleibt ungenutzt, da die lineare Regression 
+    Der window_size-Parameter bleibt ungenutzt, da die lineare Regression
     typischerweise über den gesamten Datensatz angewendet wird.
     """
     # Erstellen eines Arrays mit Indizes als x-Werte für die lineare Regression
@@ -71,21 +75,31 @@ def average_number_of_drivers_per_day():
     ax1.set_title("Durchschnittlich besetzte Fahrer pro Tag")
     ax1.set_xticklabels(dates, rotation=45)
     ax1.set_ylim(0, max(average_occupied_drivers) + 100)
-#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-#gleitender Mittelwert: calculate_moving_average
-#lineare Regression: calculate_linear_regression
-    moving_average = calculate_linear_regression(average_occupied_drivers, window_size = 3)
-    ax1.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    # Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    # gleitender Mittelwert: calculate_moving_average
+    # lineare Regression: calculate_linear_regression
+    moving_average = calculate_linear_regression(
+        average_occupied_drivers, window_size=3
+    )
+    ax1.plot(
+        dates,
+        moving_average,
+        color="red",
+        marker=".",
+        linestyle="-",
+        linewidth=2,
+        label="Gleitender Mittelwert",
+    )
     ax1.legend()
     plt.savefig("store/plots/average_number_of_drivers_per_day.png")
     plt.show()
-    
 
-#average_number_of_drivers_per_day()
+
+# average_number_of_drivers_per_day()
 
 
 def number_of_routes_per_day():
-    
+
     tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
     tripdata_files = [
         f
@@ -98,7 +112,7 @@ def number_of_routes_per_day():
     dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
 
     for date in dates:
-    # Tripdata-Daten
+        # Tripdata-Daten
         tripdata_file_name = f"tripdata{date}.csv"
         tripdata_file_path = os.path.join(tripdata_path, tripdata_file_name)
         if os.path.exists(tripdata_file_path):
@@ -114,16 +128,26 @@ def number_of_routes_per_day():
     ax2.set_ylabel("Anzahl der Routen")
     ax2.set_title("Anzahl der Routen pro Tag")
     ax2.set_xticklabels(dates, rotation=45)
-#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-#gleitender Mittelwert: calculate_moving_average
-#lineare Regression: calculate_linear_regression
-    moving_average = calculate_linear_regression(routes_per_day, window_size = 3)
-    ax2.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    # Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    # gleitender Mittelwert: calculate_moving_average
+    # lineare Regression: calculate_linear_regression
+    moving_average = calculate_linear_regression(routes_per_day, window_size=3)
+    ax2.plot(
+        dates,
+        moving_average,
+        color="red",
+        marker=".",
+        linestyle="-",
+        linewidth=2,
+        label="Gleitender Mittelwert",
+    )
     ax2.legend()
     plt.savefig("store/plots/number_of_routes_per_day.png")
     plt.show()
 
-#number_of_routes_per_day()
+
+# number_of_routes_per_day()
+
 
 def total_time_reduction_per_car_in_minutes():
     tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
@@ -149,7 +173,7 @@ def total_time_reduction_per_car_in_minutes():
             total_time_reduction.append(float("nan"))
 
     for total_time in total_time_reduction:
-    # Teile die Gesamtzeitersparnis durch 100 (für die Anzahl der Autos) und dann durch 60 (für Minuten)
+        # Teile die Gesamtzeitersparnis durch 100 (für die Anzahl der Autos) und dann durch 60 (für Minuten)
         if not pd.isna(total_time):
             time_per_car_in_minutes = (total_time / 1000) / 60 / 24
         else:
@@ -162,19 +186,30 @@ def total_time_reduction_per_car_in_minutes():
     ax3.set_ylabel("Zeitersparnis pro Auto (Minuten)")
     ax3.set_title("Summierte Zeitersparnis pro Stunde pro Auto (Minuten)")
     ax3.set_xticklabels(dates, rotation=45)
-    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-#gleitender Mittelwert: calculate_moving_average
-#lineare Regression: calculate_linear_regression
-    moving_average = calculate_linear_regression(total_time_reduction_per_car_in_minutes, window_size = 3)
-    ax3.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    # Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    # gleitender Mittelwert: calculate_moving_average
+    # lineare Regression: calculate_linear_regression
+    moving_average = calculate_linear_regression(
+        total_time_reduction_per_car_in_minutes, window_size=3
+    )
+    ax3.plot(
+        dates,
+        moving_average,
+        color="red",
+        marker=".",
+        linestyle="-",
+        linewidth=2,
+        label="Gleitender Mittelwert",
+    )
     ax3.legend()
     plt.savefig("store/plots/total_time_reduction_per_car_in_minutes.png")
     plt.show()
 
 
-#total_time_reduction_per_car_in_minutes()
+# total_time_reduction_per_car_in_minutes()
 
-def average_time_reduction_per_day(): 
+
+def average_time_reduction_per_day():
     print("v4")
     orders_path = "code/data/for_hire"
     tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
@@ -223,7 +258,6 @@ def average_time_reduction_per_day():
             time_per_car_in_minutes = float("nan")
         total_time_reduction_per_car_in_minutes.append(time_per_car_in_minutes)
 
-
     fig, ax4 = plt.subplots(1, 1, figsize=(15, 12))
     # Vierter Plot: Hier fügen Sie Ihren Code für den vierten Plot ein
     ax4.bar(dates, average_time_reduction_per_day, color="orange")
@@ -231,17 +265,29 @@ def average_time_reduction_per_day():
     ax4.set_ylabel("Durchschnittliche Zeitersparnis pro Order pro Tag")
     ax4.set_title("Durchschnittliche Zeitersparnis pro Order pro Tag")
     ax4.set_xticklabels(dates, rotation=45)
-#Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-#gleitender Mittelwert: calculate_moving_average
-#lineare Regression: calculate_linear_regression
-    moving_average = calculate_moving_average(average_time_reduction_per_day, window_size=5)
+    # Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    # gleitender Mittelwert: calculate_moving_average
+    # lineare Regression: calculate_linear_regression
+    moving_average = calculate_moving_average(
+        average_time_reduction_per_day, window_size=5
+    )
 
-# Anpassen der 'dates', um den ersten Wert zu ignorieren
-    ax4.plot(dates, moving_average, color="red", marker=".", linestyle='-', linewidth=2, label='Gleitender Mittelwert')
+    # Anpassen der 'dates', um den ersten Wert zu ignorieren
+    ax4.plot(
+        dates,
+        moving_average,
+        color="red",
+        marker=".",
+        linestyle="-",
+        linewidth=2,
+        label="Gleitender Mittelwert",
+    )
     plt.savefig("store/plots/average_time_reduction_per_day.png")
     plt.show()
 
-#average_time_reduction_per_day()
+
+# average_time_reduction_per_day()
+
 
 def average_trip_distances_per_day_for_direct_routes():
     print("v5")
@@ -280,6 +326,7 @@ def average_trip_distances_per_day_for_direct_routes():
             return geodesic(zone_centers[zone1_id], zone_centers[zone2_id]).kilometers
         else:
             raise Exception(f"{zone1_id} or {zone2_id} not found")
+
     tripdata_files = [
         f
         for f in os.listdir(tripdata_path)
@@ -323,7 +370,6 @@ def average_trip_distances_per_day_for_direct_routes():
                 ].mean()
             )
 
-
         else:
             routes_per_day.append(float("nan"))
             total_time_reduction.append(float("nan"))
@@ -353,7 +399,8 @@ def average_trip_distances_per_day_for_direct_routes():
     plt.savefig("store/plots/average_trip_distances_per_day_for_direct_routes.png")
     plt.show()
 
-#average_trip_distances_per_day_for_direct_routes()
+
+# average_trip_distances_per_day_for_direct_routes()
 
 
 def average_trip_distances_per_day_for_combination_routes():
@@ -394,6 +441,7 @@ def average_trip_distances_per_day_for_combination_routes():
             return geodesic(zone_centers[zone1_id], zone_centers[zone2_id]).kilometers
         else:
             raise Exception(f"{zone1_id} or {zone2_id} not found")
+
     tripdata_files = [
         f
         for f in os.listdir(tripdata_path)
@@ -455,7 +503,7 @@ def average_trip_distances_per_day_for_combination_routes():
             total_time_reduction.append(float("nan"))
 
     fig, ax6 = plt.subplots(1, 1, figsize=(15, 12))
-        # Combined plot
+    # Combined plot
     ax6.bar(
         dates,
         average_combi_route_length["driver_to_pickup_distance_km"],
@@ -483,12 +531,13 @@ def average_trip_distances_per_day_for_combination_routes():
     plt.savefig("store/plots/average_trip_distances_per_day_for_combination_routes.png")
     plt.show()
 
-#average_trip_distances_per_day_for_combination_routes()
+
+# average_trip_distances_per_day_for_combination_routes()
 
 
 ## fig 1.
 def Zeitersparnis_Anzahl_der_Autos():
-    base_path = "store/for_hire/rl_relocation/drivers"   # manuell eingegeben werden 
+    base_path = "store/for_hire/rl_relocation/drivers"  # manuell eingegeben werden
     driver_counts = [10, 100, 1000]
     time_savings_avg = {}
 
@@ -499,41 +548,54 @@ def Zeitersparnis_Anzahl_der_Autos():
         for file_name in os.listdir(path):
             if file_name.startswith("tripdata") and file_name.endswith(".csv"):
                 df = pd.read_csv(os.path.join(path, file_name))
-                total_time_reduction += df['time_reduction'].sum()
+                total_time_reduction += df["time_reduction"].sum()
                 file_count += 1
-        
+
         if file_count > 0:
-            avg_time_savings_per_hour_per_car = (total_time_reduction / 60) / (24 * file_count) 
+            avg_time_savings_per_hour_per_car = (total_time_reduction / 60) / (
+                24 * file_count
+            )
             time_savings_avg[count] = avg_time_savings_per_hour_per_car / int(count)
 
     # Plotting
     plt.figure(figsize=(10, 6))
     bar_width = 0.4  # You can adjust the width as needed
     positions = range(len(time_savings_avg))
-    
-    plt.bar(positions, time_savings_avg.values(), color='skyblue', width=bar_width)
-    plt.xlabel('Anzahl der Autos')
-    plt.ylabel('Zeitersparnis pro Stunde pro Auto (Minuten)')
-    plt.title('Zeitersparnis pro Stunde pro Autos（for_hire/rl_relocation）')
-    
+
+    plt.bar(positions, time_savings_avg.values(), color="skyblue", width=bar_width)
+    plt.xlabel("Anzahl der Autos")
+    plt.ylabel("Zeitersparnis pro Stunde pro Auto (Minuten)")
+    plt.title("Zeitersparnis pro Stunde pro Autos（for_hire/rl_relocation）")
+
     plt.xticks(positions, labels=[str(k) for k in time_savings_avg.keys()])
-    
-    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-    #gleitender Mittelwert: calculate_moving_average
-    #lineare Regression: calculate_linear_regression
-    values = list(time_savings_avg.values())  # Umwandlung der Werte in eine Liste für die lineare Regression
-    regression_values = calculate_moving_average(values, window_size= 1)
-    plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
+
+    # Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    # gleitender Mittelwert: calculate_moving_average
+    # lineare Regression: calculate_linear_regression
+    values = list(
+        time_savings_avg.values()
+    )  # Umwandlung der Werte in eine Liste für die lineare Regression
+    regression_values = calculate_moving_average(values, window_size=1)
+    plt.plot(
+        positions,
+        regression_values,
+        color="red",
+        marker="o",
+        linestyle="-",
+        linewidth=2,
+        label="Lineare Regression",
+    )
     plt.savefig("store/plots/Zeitersparnis_Anzahl_der_Autos.png")
     plt.show()
 
-#Zeitersparnis_Anzahl_der_Autos()
+
+# Zeitersparnis_Anzahl_der_Autos()
 
 
 ## fig 2.
 def Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos():
-    base_path = "store/for_hire/rl_relocation/drivers"   # manuell eingegeben werden 
-    driver_counts = [10, 100, 1000, 2000, 5000]  
+    base_path = "store/for_hire/rl_relocation/drivers"  # manuell eingegeben werden
+    driver_counts = [10, 100, 1000, 2000, 5000]
     quota_sums = {}
     file_counts = {}
 
@@ -543,39 +605,50 @@ def Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos():
             if file_name.startswith("ordersdata") and file_name.endswith(".csv"):
                 file_path = os.path.join(path, file_name)
                 df = pd.read_csv(file_path)
-                quota_sum = df['quota_of_unserved_orders'].sum()
-                
-                
+                quota_sum = df["quota_of_unserved_orders"].sum()
+
                 if count not in quota_sums:
                     quota_sums[count] = 0
                     file_counts[count] = 0
-                
+
                 quota_sums[count] += quota_sum
                 file_counts[count] += len(df)
 
-
-    avg_quota_per_driver = {count: quota_sums[count] / file_counts[count] for count in driver_counts}
+    avg_quota_per_driver = {
+        count: quota_sums[count] / file_counts[count] for count in driver_counts
+    }
     plt.figure(figsize=(10, 6))
     positions = range(len(avg_quota_per_driver))
-    plt.bar(positions, avg_quota_per_driver.values(), color='skyblue')
-    plt.xlabel('Anzahl der Autos')
-    plt.ylabel('Ablehnungsqoute')
-    plt.title('Ablehnungsqoute in unterschiedlicher Anzahl der Autos（for_hire/rl_relocation）')
+    plt.bar(positions, avg_quota_per_driver.values(), color="skyblue")
+    plt.xlabel("Anzahl der Autos")
+    plt.ylabel("Ablehnungsqoute")
+    plt.title(
+        "Ablehnungsqoute in unterschiedlicher Anzahl der Autos（for_hire/rl_relocation）"
+    )
     plt.xticks(positions, labels=[str(k) for k in avg_quota_per_driver.keys()])
-    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-    #gleitender Mittelwert: calculate_moving_average
-    #lineare Regression: calculate_linear_regression
-    values = list(avg_quota_per_driver.values()) 
-    regression_values = calculate_moving_average(values, window_size= 1)
-    plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
+    # Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    # gleitender Mittelwert: calculate_moving_average
+    # lineare Regression: calculate_linear_regression
+    values = list(avg_quota_per_driver.values())
+    regression_values = calculate_moving_average(values, window_size=1)
+    plt.plot(
+        positions,
+        regression_values,
+        color="red",
+        marker="o",
+        linestyle="-",
+        linewidth=2,
+        label="Lineare Regression",
+    )
     plt.savefig("store/plots/Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos.png")
     plt.show()
 
-#Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos()
+
+# Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos()
 
 
 ## fig 3.
-## Achtung: die CSV-Datei werden direkt im Ordner „store/for_hire/rl“ oder „store/for_hire/drl“ gespeichert 
+## Achtung: die CSV-Datei werden direkt im Ordner „store/for_hire/rl“ oder „store/for_hire/drl“ gespeichert
 #            und nicht im Ordner „store/for_hire/rl/drivers/10“ gespeichert.
 ## Das bedeutet, dass der Ordner „store/for_hire/rl“ viele CSV-Dateien (für fig. 3) und Treiberordner "driver" (für fig. 1 oder fig. 2) enthält.
 def calculate_percentage(combi_route_counts, total_counts):
@@ -586,22 +659,24 @@ def calculate_percentage(combi_route_counts, total_counts):
         combi_route_percentages[method] = percentage
     return combi_route_percentages
 
+
 def process_directory(data_path, combi_route_counts, total_counts):
     pattern = re.compile(r"tripdata\d{4}-\d{2}-\d{2}\.csv$")
-    
+
     for entry in os.listdir(data_path):
         if pattern.match(entry):  # Überprüft, ob der Dateiname dem Muster entspricht
             entry_path = os.path.join(data_path, entry)
             df = pd.read_csv(entry_path)
             # Überprüfe, ob 'combi_route' in den Spaltennamen des DataFrame vorhanden ist, um KeyError zu vermeiden
-            if 'combi_route' in df.columns:
-                combi_true_count = df[df['combi_route'] == True].shape[0]
-                modeling_method = os.path.basename(data_path)  
+            if "combi_route" in df.columns:
+                combi_true_count = df[df["combi_route"] == True].shape[0]
+                modeling_method = os.path.basename(data_path)
                 combi_route_counts[modeling_method] += combi_true_count
                 total_counts[modeling_method] += df.shape[0]
 
+
 def Anzahl_der_Combirouten_in_Prozent():
-    data_path = "store/for_hire"   # manuell eingegeben werden 
+    data_path = "store/for_hire"  # manuell eingegeben werden
     combi_route_counts = {}
     total_counts = {}
 
@@ -612,42 +687,55 @@ def Anzahl_der_Combirouten_in_Prozent():
             total_counts[method_dir] = 0
             process_directory(method_path, combi_route_counts, total_counts)
 
-
     combi_route_percentages = calculate_percentage(combi_route_counts, total_counts)
 
     method_names = {
-        'baseline': 'Baseline',
-        'rl': 'RL',
-        'rl_relocation': 'RL mit relocation',
-        'drl': 'DRL'
+        "baseline": "Baseline",
+        "rl": "RL",
+        "rl_relocation": "RL mit relocation",
+        "drl": "DRL",
     }
 
-    labels = [method_names.get(method, method) for method in combi_route_percentages.keys()]
+    labels = [
+        method_names.get(method, method) for method in combi_route_percentages.keys()
+    ]
     percentages = list(combi_route_percentages.values())
 
     plt.figure(figsize=(10, 6))
-    plt.bar(labels, percentages, color='skyblue')
-    plt.xlabel('Modellierungsmethode')
-    plt.ylabel('Prozentualer Anteil der Combirouten (%)')
-    plt.title('Anzahl der Combirouten in Prozent')
+    plt.bar(labels, percentages, color="skyblue")
+    plt.xlabel("Modellierungsmethode")
+    plt.ylabel("Prozentualer Anteil der Combirouten (%)")
+    plt.title("Anzahl der Combirouten in Prozent")
     plt.xticks(rotation=45)
-    #Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
-    #gleitender Mittelwert: calculate_moving_average
-    #lineare Regression: calculate_linear_regression
-    values = list(combi_route_percentages.values())  # Umwandlung der Werte in eine Liste für die lineare Regression
-    regression_values = calculate_linear_regression(values, window_size= 1)
+    # Darstellung kann angepasst werden. Es muss bei moving_average nur ausgewählt werdne, was gewünscht ist.
+    # gleitender Mittelwert: calculate_moving_average
+    # lineare Regression: calculate_linear_regression
+    values = list(
+        combi_route_percentages.values()
+    )  # Umwandlung der Werte in eine Liste für die lineare Regression
+    regression_values = calculate_linear_regression(values, window_size=1)
     positions = range(len(labels))
-    plt.plot(positions, regression_values, color="red", marker="o", linestyle='-', linewidth=2, label='Lineare Regression')
+    plt.plot(
+        positions,
+        regression_values,
+        color="red",
+        marker="o",
+        linestyle="-",
+        linewidth=2,
+        label="Lineare Regression",
+    )
     plt.savefig("store/plots/Anzahl_der_Combirouten_in_Prozent.png")
     plt.show()
+
 
 ##Anzahl_der_Combirouten_in_Prozent()
 
 
-
 ## fig 4.
-def process_directory_for_route_distribution(data_path, combi_route_counts, direct_route_counts, file_days):
-    pattern = r'^tripdata\d{4}-\d{2}-\d{2}'  # RegEx für Dateien, die mit 'tripdata' beginnen und ein Datum enthalten
+def process_directory_for_route_distribution(
+    data_path, combi_route_counts, direct_route_counts, file_days
+):
+    pattern = r"^tripdata\d{4}-\d{2}-\d{2}"  # RegEx für Dateien, die mit 'tripdata' beginnen und ein Datum enthalten
     for method_dir in os.listdir(data_path):
         method_path = os.path.join(data_path, method_dir)
         if os.path.isdir(method_path):
@@ -658,9 +746,11 @@ def process_directory_for_route_distribution(data_path, combi_route_counts, dire
             for file_name in os.listdir(method_path):
                 if file_name.endswith(".csv") and re.match(pattern, file_name):
                     df = pd.read_csv(os.path.join(method_path, file_name))
-                    if 'combi_route' in df.columns:  # Sicherstellen, dass die Spalte 'combi_route' existiert
-                        combi_true_count = df[df['combi_route'] == True].shape[0]
-                        combi_false_count = df[df['combi_route'] == False].shape[0]
+                    if (
+                        "combi_route" in df.columns
+                    ):  # Sicherstellen, dass die Spalte 'combi_route' existiert
+                        combi_true_count = df[df["combi_route"] == True].shape[0]
+                        combi_false_count = df[df["combi_route"] == False].shape[0]
 
                         combi_route_counts[method_dir] += combi_true_count
                         direct_route_counts[method_dir] += combi_false_count
@@ -668,23 +758,40 @@ def process_directory_for_route_distribution(data_path, combi_route_counts, dire
 
 
 def Routen_Aufteilung_pro_Stunde():
-    data_path = "store/for_hire"   # Manuell eingegebener Pfad
+    data_path = "store/for_hire"  # Manuell eingegebener Pfad
 
     combi_route_counts = {}
     direct_route_counts = {}
     file_days = {}
 
-    process_directory_for_route_distribution(data_path, combi_route_counts, direct_route_counts, file_days)
+    process_directory_for_route_distribution(
+        data_path, combi_route_counts, direct_route_counts, file_days
+    )
     hours_per_day = 24
-    combi_avg_per_hour = {method: (combi_route_counts[method] / (file_days[method] * hours_per_day)) 
-                          if file_days[method] > 0 else 0
-                          for method in combi_route_counts}
-    direct_avg_per_hour = {method: (direct_route_counts[method] / (file_days[method] * hours_per_day)) 
-                           if file_days[method] > 0 else 0
-                           for method in direct_route_counts}
+    combi_avg_per_hour = {
+        method: (
+            (combi_route_counts[method] / (file_days[method] * hours_per_day))
+            if file_days[method] > 0
+            else 0
+        )
+        for method in combi_route_counts
+    }
+    direct_avg_per_hour = {
+        method: (
+            (direct_route_counts[method] / (file_days[method] * hours_per_day))
+            if file_days[method] > 0
+            else 0
+        )
+        for method in direct_route_counts
+    }
 
-    labels = ['Baseline', 'RL', 'RL mit relocation', 'DRL']
-    mapping = {'baseline': 'Baseline', 'rl': 'RL', 'rl_relocation': 'RL mit relocation', 'drl': 'DRL'}
+    labels = ["Baseline", "RL", "RL mit relocation", "DRL"]
+    mapping = {
+        "baseline": "Baseline",
+        "rl": "RL",
+        "rl_relocation": "RL mit relocation",
+        "drl": "DRL",
+    }
     combi_data = [combi_avg_per_hour.get(method, 0) for method in mapping]
     direct_data = [direct_avg_per_hour.get(method, 0) for method in mapping]
 
@@ -692,12 +799,12 @@ def Routen_Aufteilung_pro_Stunde():
     width = 0.35
 
     fig, ax = plt.subplots()
-    rects1 = ax.bar(x - width/2, combi_data, width, label='Combirouten')
-    rects2 = ax.bar(x + width/2, direct_data, width, label='Direktrouten')
+    rects1 = ax.bar(x - width / 2, combi_data, width, label="Combirouten")
+    rects2 = ax.bar(x + width / 2, direct_data, width, label="Direktrouten")
 
-    ax.set_xlabel('Modellierungsmethode')
-    ax.set_ylabel('Anzahl der Routen pro Stunde')
-    ax.set_title('Aufteilung der Routen in Combi und Direktroute pro Stunde')
+    ax.set_xlabel("Modellierungsmethode")
+    ax.set_ylabel("Anzahl der Routen pro Stunde")
+    ax.set_title("Aufteilung der Routen in Combi und Direktroute pro Stunde")
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.legend()
@@ -705,14 +812,14 @@ def Routen_Aufteilung_pro_Stunde():
     plt.savefig("store/plots/Routen_Aufteilung_pro_Stunde.png")
     plt.show()
 
-#Routen_Aufteilung_pro_Stunde()
 
+# Routen_Aufteilung_pro_Stunde()
 
 
 ## fig 5.
 def Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl():
-    base_path = "store/for_hire/rl_relocation/drivers" # Manuell eingegebener Pfad
-    driver_counts = [10, 100, 1000, 2000, 5000]  
+    base_path = "store/for_hire/rl_relocation/drivers"  # Manuell eingegebener Pfad
+    driver_counts = [10, 100, 1000, 2000, 5000]
     combi_counts = {}
     file_days = {}
 
@@ -721,44 +828,52 @@ def Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl():
         if os.path.isdir(path):
             combi_counts[count] = 0
             file_days[count] = 0
-            
-            
+
             for file_name in os.listdir(path):
                 if file_name.startswith("tripdata") and file_name.endswith(".csv"):
                     file_path = os.path.join(path, file_name)
-                    
-                    
+
                     df = pd.read_csv(file_path)
-                    combi_true_count = (df['combi_route'] == True).sum()
-                    
-                    
+                    combi_true_count = (df["combi_route"] == True).sum()
+
                     combi_counts[count] += combi_true_count
                     file_days[count] += 1
 
-    
     hours_per_day = 24
-    combi_avg_per_hour = {count: (combi_counts[count] / (file_days[count] * hours_per_day * int(count))) 
-                          for count in combi_counts}
+    combi_avg_per_hour = {
+        count: (combi_counts[count] / (file_days[count] * hours_per_day * int(count)))
+        for count in combi_counts
+    }
 
     plt.figure(figsize=(10, 6))
-    plt.bar([str(count) for count in driver_counts], [combi_avg_per_hour.get(count, 0) for count in driver_counts], color='skyblue')
-    plt.xlabel('Anzahl der Autos')
-    plt.ylabel('Anzahl der Combirouten pro Stunde')
-    plt.title('Anzahl der Combirouten pro Stunde in unterschiedlicher Anzahl von Autos')
+    plt.bar(
+        [str(count) for count in driver_counts],
+        [combi_avg_per_hour.get(count, 0) for count in driver_counts],
+        color="skyblue",
+    )
+    plt.xlabel("Anzahl der Autos")
+    plt.ylabel("Anzahl der Combirouten pro Stunde")
+    plt.title("Anzahl der Combirouten pro Stunde in unterschiedlicher Anzahl von Autos")
     plt.xticks([str(count) for count in driver_counts])
-    plt.savefig("store/plots/Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl.png")
+    plt.savefig(
+        "store/plots/Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl.png"
+    )
     plt.show()
 
-#Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl()
+
+# Combirouten_pro_Stunde_in_unterschiedlicher_Autoanzahl()
 
 
 ## fig 6.
 def durchschnittliche_Zeit_Anzahl_der_Autos():
-    base_path = "store/for_hire/rl_relocation/drivers" # Manuell eingegebener Pfad
+    base_path = "store/for_hire/rl_relocation/drivers"  # Manuell eingegebener Pfad
     driver_counts = [10, 100, 1000, 2000, 5000]
-    status_speed_kmh = {'occupied': 1, 'idling': 1, 'relocation': 1}  
+    status_speed_kmh = {"occupied": 1, "idling": 1, "relocation": 1}
 
-    status_time_proportion = {driver: {'occupied': [], 'idling': [], 'relocation': []} for driver in driver_counts}
+    status_time_proportion = {
+        driver: {"occupied": [], "idling": [], "relocation": []}
+        for driver in driver_counts
+    }
 
     for count in driver_counts:
         drivers_path = os.path.join(base_path, str(count))
@@ -766,29 +881,49 @@ def durchschnittliche_Zeit_Anzahl_der_Autos():
             if file_name.startswith("driverdata"):
                 file_path = os.path.join(drivers_path, file_name)
                 df = pd.read_csv(file_path)
-                total_records = len(df) 
+                total_records = len(df)
                 for status in status_time_proportion[count]:
-                
-                    status_records = df[df['status'] == status].shape[0]
-                    status_proportion = status_records / total_records if total_records > 0 else 0
+
+                    status_records = df[df["status"] == status].shape[0]
+                    status_proportion = (
+                        status_records / total_records if total_records > 0 else 0
+                    )
                     status_time_proportion[count][status].append(status_proportion)
 
-    avg_status_proportion = {driver: {status: np.mean(proportions) for status, proportions in statuses.items()} for driver, statuses in status_time_proportion.items()}
-  
-    avg_distance_data = {driver: {status: avg_status_proportion[driver][status] * status_speed_kmh[status] for status in status_speed_kmh} for driver in driver_counts}
+    avg_status_proportion = {
+        driver: {
+            status: np.mean(proportions) for status, proportions in statuses.items()
+        }
+        for driver, statuses in status_time_proportion.items()
+    }
 
-    
+    avg_distance_data = {
+        driver: {
+            status: avg_status_proportion[driver][status] * status_speed_kmh[status]
+            for status in status_speed_kmh
+        }
+        for driver in driver_counts
+    }
+
     fig, ax = plt.subplots()
     width = 0.25
     ind = np.arange(len(driver_counts))
 
-    for i, (status, color) in enumerate(zip(['occupied', 'idling', 'relocation'], ['skyblue', 'orange', 'green'])):
+    for i, (status, color) in enumerate(
+        zip(["occupied", "idling", "relocation"], ["skyblue", "orange", "green"])
+    ):
         avg_distances = [avg_distance_data[driver][status] for driver in driver_counts]
-        ax.bar(ind + i * width, avg_distances, width, label=status.capitalize(), color=color)
+        ax.bar(
+            ind + i * width,
+            avg_distances,
+            width,
+            label=status.capitalize(),
+            color=color,
+        )
 
-    ax.set_xlabel('Anzahl der Autos')
-    ax.set_ylabel('Durchschnittlich Zeit in dem jeweiligen Status')
-    ax.set_title('Durchschnittliche Zeit in dem jeweiligen Status')
+    ax.set_xlabel("Anzahl der Autos")
+    ax.set_ylabel("Durchschnittliche Zeit in dem jeweiligen Status")
+    ax.set_title("Durchschnittliche Zeit in dem jeweiligen Status")
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(driver_counts)
     ax.legend()
@@ -797,47 +932,272 @@ def durchschnittliche_Zeit_Anzahl_der_Autos():
     plt.savefig("store/plots/durchschnittliche_Zeit_Anzahl_der_Autos.png")
     plt.show()
 
-#durchschnittliche_Zeit_Anzahl_der_Autos()
 
+# durchschnittliche_Zeit_Anzahl_der_Autos()
+
+
+def average_trip_distances_per_day_amount_of_cars():
+    base_path = "store/for_hire/rl_relocation/drivers"  # Manuell eingegebener Pfad
+    driver_counts = ["10", "100", "1000", "2000", "5000"]
+    average_route_length = {
+        count: {"driver_to_pickup_distance_km": [], "pickup_to_dropoff_distance_km": []}
+        for count in driver_counts
+    }
+    average_combi_route_length = {
+        count: {
+            "driver_to_pickup_distance_km": [],
+            "pickup_to_dropoff_distance_km": [],
+            "dropoff_to_destination_distance_km": [],
+            "driver_to_dropoff_distance_km": [],
+        }
+        for count in driver_counts
+    }
+    average_route_length_list = []
+    average_combi_route_length_list = []
+
+    taxi_zones_file_path = "code/data/taxi_zones.csv"
+    taxi_zones = pd.read_csv(taxi_zones_file_path)
+    # Convert polygon strings to shapely polygon objects
+    taxi_zones["polygon"] = taxi_zones["the_geom"].apply(loads)
+    # Calculate the latitude and longitude of the center for each zone
+    taxi_zones["center"] = taxi_zones["polygon"].apply(
+        lambda p: (p.centroid.y, p.centroid.x)
+    )
+    # Create a dictionary to map zone IDs to their center latitude and longitude
+    zone_centers = dict(zip(taxi_zones["LocationID"], taxi_zones["center"]))
+
+    # Define a function to calculate the distance between two zones in kilometers
+    def calculate_distance_km(zone1_id, zone2_id):
+        if zone1_id in zone_centers and zone2_id in zone_centers:
+            # Use geodesic from geopy to calculate the distance
+            return geodesic(zone_centers[zone1_id], zone_centers[zone2_id]).kilometers
+        else:
+            raise Exception(f"{zone1_id} or {zone2_id} not found")
+
+    for count in driver_counts:
+        tripdata_path = os.path.join(base_path, str(count))
+        tripdata_files = [
+            f for f in os.listdir(tripdata_path) if f.endswith(".csv") and f.startswith("tripdata")
+        ]
+        dates = [re.search(r"(\d{4}-\d{2}-\d{2})", f).group(1) for f in tripdata_files]
+        dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+        # Use last 7 days
+        for date in dates[-7:]:
+            # Tripdata-Daten
+            tripdata_file_name = f"tripdata{date}.csv"
+            tripdata_file_path = os.path.join(tripdata_path, tripdata_file_name)
+            if os.path.exists(tripdata_file_path):
+                tripdata = pd.read_csv(tripdata_file_path)
+                # Calculate distances for each trip in the dataset
+                tripdata["driver_to_pickup_distance_km"] = tripdata.apply(
+                    lambda x: calculate_distance_km(
+                        x["driver_start_zone_id"], x["passenger_pickup_zone_id"]
+                    ),
+                    axis=1,
+                )
+                tripdata["pickup_to_dropoff_distance_km"] = tripdata.apply(
+                    lambda x: calculate_distance_km(
+                        x["passenger_pickup_zone_id"], x["passenger_dropoff_zone_id"]
+                    ),
+                    axis=1,
+                )
+                tripdata["dropoff_to_destination_distance_km"] = tripdata.apply(
+                    lambda x: calculate_distance_km(
+                        x["passenger_dropoff_zone_id"], x["destination_id"]
+                    ),
+                    axis=1,
+                )
+                average_route_length[count]["driver_to_pickup_distance_km"].append(
+                    tripdata[tripdata["combi_route"]][
+                        "driver_to_pickup_distance_km"
+                    ].mean()
+                )
+                average_route_length[count]["pickup_to_dropoff_distance_km"].append(
+                    tripdata[tripdata["combi_route"]][
+                        "pickup_to_dropoff_distance_km"
+                    ].mean()
+                )
+                average_combi_route_length[count][
+                    "driver_to_pickup_distance_km"
+                ].append(
+                    tripdata[tripdata["combi_route"]][
+                        "driver_to_pickup_distance_km"
+                    ].mean()
+                )
+
+                average_combi_route_length[count][
+                    "pickup_to_dropoff_distance_km"
+                ].append(
+                    tripdata[tripdata["combi_route"]][
+                        "pickup_to_dropoff_distance_km"
+                    ].mean()
+                )
+
+                average_combi_route_length[count][
+                    "dropoff_to_destination_distance_km"
+                ].append(
+                    tripdata[tripdata["combi_route"]][
+                        "dropoff_to_destination_distance_km"
+                    ].mean()
+                )
+
+        average_route_length_list.append(
+            [
+                count,
+                mean(average_route_length[count]["driver_to_pickup_distance_km"]),
+                mean(average_route_length[count]["pickup_to_dropoff_distance_km"]),
+            ]
+        )
+        average_combi_route_length_list.append(
+            [
+                count,
+                mean(average_combi_route_length[count]["driver_to_pickup_distance_km"]),
+                mean(
+                    average_combi_route_length[count]["pickup_to_dropoff_distance_km"]
+                ),
+                mean(
+                    average_combi_route_length[count][
+                        "dropoff_to_destination_distance_km"
+                    ]
+                ),
+                mean(average_combi_route_length[count]["driver_to_pickup_distance_km"])
+                + mean(
+                    average_combi_route_length[count]["pickup_to_dropoff_distance_km"]
+                ),
+            ]
+        )
+    max_y = 0
+    for entry in average_combi_route_length_list:
+        if max_y < entry[1] + entry[2] + entry[3]:
+            max_y = entry[1] + entry[2] + entry[3]
+    max_y = int(max_y) + 1
+
+    average_route_length_df = pd.DataFrame(
+        average_route_length_list,
+        columns=[
+            "driver_count",
+            "driver_to_pickup_distance_km",
+            "pickup_to_dropoff_distance_km",
+        ],
+    )
+    average_combi_route_length_df = pd.DataFrame(
+        average_combi_route_length_list,
+        columns=[
+            "driver_count",
+            "driver_to_pickup_distance_km",
+            "pickup_to_dropoff_distance_km",
+            "dropoff_to_destination_distance_km",
+            "driver_to_dropoff_distance_km",
+        ],
+    )
+    fig, axs = plt.subplots(1, 2, figsize=(30, 12))
+    ax5, ax6 = axs.flatten()
+    # Direct plot
+    ax5.bar(
+        driver_counts,
+        average_route_length_df["driver_to_pickup_distance_km"],
+        color="#90EE90",
+        label="Fahrerposition bis Abholpunkt",
+    )
+    ax5.bar(
+        driver_counts,
+        average_route_length_df["pickup_to_dropoff_distance_km"],
+        color="green",
+        label="Abholpunkt bis Ziel",
+        bottom=average_route_length_df["driver_to_pickup_distance_km"],
+    )
+    ax5.set_ylim(0, max_y)
+    ax5.set_xlabel("Anzahl der Autos")
+    ax5.set_ylabel("Durchschnittliche Tripdistanzen pro Tag in km")
+    ax5.set_title("Durchschnittliche Tripdistanzen pro Tag für Direktrouten")
+    ax5.legend()
+    # Combined plot
+    ax6.bar(
+        driver_counts,
+        average_combi_route_length_df["driver_to_pickup_distance_km"],
+        color="#90EE90",
+        label="Fahrerposition bis Abholpunkt",
+    )
+    ax6.bar(
+        driver_counts,
+        average_combi_route_length_df["pickup_to_dropoff_distance_km"],
+        color="green",
+        label="Abholpunkt bis Station",
+        bottom=average_combi_route_length_df["driver_to_pickup_distance_km"],
+    )
+    ax6.bar(
+        driver_counts,
+        average_combi_route_length_df["dropoff_to_destination_distance_km"],
+        color="#006400",
+        label="Station bis Ziel",
+        bottom=average_combi_route_length_df["driver_to_dropoff_distance_km"],
+    )
+    ax6.set_ylim(0, max_y)
+    ax6.set_xlabel("Anzahl der Autos")
+    ax6.set_ylabel("Durchschnittliche Tripdistanzen pro Tag in km")
+    ax6.set_title("Durchschnittliche Tripdistanzen pro Tag für Kombinationsrouten")
+    ax6.legend()
+    plt.savefig("store/plots/average_trip_distances_per_day_for_combination_routes.png")
+    plt.show()
+average_trip_distances_per_day_amount_of_cars()
 
 ## fig 7.
 def durchschnittlich_gefahrene_Distan_modeling_method():
-    base_path = "store/for_hire"   # Manuell eingegebener Pfad
-    methods = ['baseline', 'rl', 'rl_relocation', 'drl']
-    status_speed = {'occupied': 1, 'idling': 1, 'relocation': 1}  
+    base_path = "store/for_hire"  # Manuell eingegebener Pfad
+    methods = ["baseline", "rl", "rl_relocation", "drl"]
+    status_speed = {"occupied": 1, "idling": 1, "relocation": 1}
 
-
-    status_proportions = {method: {'occupied': [], 'idling': [], 'relocation': []} for method in methods}
-    total_counts = {method: [] for method in methods}  
-
+    status_proportions = {
+        method: {"occupied": [], "idling": [], "relocation": []} for method in methods
+    }
+    total_counts = {method: [] for method in methods}
 
     for method in methods:
         method_path = os.path.join(base_path, method)
         for file_name in os.listdir(method_path):
-            if file_name.startswith("driverdata"):  
+            if file_name.startswith("driverdata"):
                 file_path = os.path.join(method_path, file_name)
                 df = pd.read_csv(file_path)
                 total_count = len(df)
                 for status in status_speed:
-                    status_count = df[df['status'] == status].shape[0]
-                    status_proportions[method][status].append(status_count / total_count if total_count else 0)
+                    status_count = df[df["status"] == status].shape[0]
+                    status_proportions[method][status].append(
+                        status_count / total_count if total_count else 0
+                    )
 
-    avg_proportions = {method: {status: np.mean(proportions) for status, proportions in status_data.items()} 
-                       for method, status_data in status_proportions.items()}
+    avg_proportions = {
+        method: {
+            status: np.mean(proportions) for status, proportions in status_data.items()
+        }
+        for method, status_data in status_proportions.items()
+    }
 
-    avg_distance_data = {method: {status: avg_proportions[method][status] * status_speed[status] * 3.6 for status in status_speed}
-                         for method in methods}
+    avg_distance_data = {
+        method: {
+            status: avg_proportions[method][status] * status_speed[status] * 3.6
+            for status in status_speed
+        }
+        for method in methods
+    }
 
     fig, ax = plt.subplots(figsize=(10, 6))
     width = 0.2
     ind = np.arange(len(methods))
-    for i, (status, color) in enumerate(zip(['occupied', 'idling', 'relocation'], ['skyblue', 'orange', 'green'])):
+    for i, (status, color) in enumerate(
+        zip(["occupied", "idling", "relocation"], ["skyblue", "orange", "green"])
+    ):
         avg_distances = [avg_distance_data[method][status] for method in methods]
-        ax.bar(ind + i * width, avg_distances, width, label=status.capitalize(), color=color)
+        ax.bar(
+            ind + i * width,
+            avg_distances,
+            width,
+            label=status.capitalize(),
+            color=color,
+        )
 
-    ax.set_xlabel('Modellierungsmethode')
-    ax.set_ylabel('Durchschnittlich gefahrene Distanz pro Stunde (km)')
-    ax.set_title('Durchschnittlich gefahrene Distanz nach Methode und Status')
+    ax.set_xlabel("Modellierungsmethode")
+    ax.set_ylabel("Durchschnittlich gefahrene Distanz pro Stunde (km)")
+    ax.set_title("Durchschnittlich gefahrene Distanz nach Methode und Status")
     ax.set_xticks(ind + width)
     ax.set_xticklabels(methods)
     ax.legend()
@@ -846,15 +1206,19 @@ def durchschnittlich_gefahrene_Distan_modeling_method():
     plt.savefig("store/plots/durchschnittlich_gefahrene_Distan_modeling_method.png")
     plt.show()
 
-#durchschnittlich_gefahrene_Distan_modeling_method()
+
+# durchschnittlich_gefahrene_Distan_modeling_method()
+
 
 ## fig. 8
 ## fig. 8-1
 def calculate_moving_average(values, window_size):
     """Berechnet den gleitenden Mittelwert mit einer spezifischen Fenstergröße."""
     # Erweiterung der Werte am Anfang, um den gleitenden Mittelwert vom ersten Punkt an zu beginnen
-    extended_values = np.pad(values, (window_size-1, 0), mode='edge')
-    moving_average = np.convolve(extended_values, np.ones(window_size)/window_size, mode='valid')
+    extended_values = np.pad(values, (window_size - 1, 0), mode="edge")
+    moving_average = np.convolve(
+        extended_values, np.ones(window_size) / window_size, mode="valid"
+    )
     return moving_average
 
 
@@ -867,12 +1231,10 @@ def custom_rolling_avg(values, window_size):
         avg[i] = np.mean(values[start:end])
     return avg
 
+
 def compare_time_savings_rl_bl():
     anzahl_autos = 2000
-    base_paths = {
-        "baseline": "store/for_hire/baseline",
-        "rl": "store/for_hire/rl"
-    }
+    base_paths = {"baseline": "store/for_hire/baseline", "rl": "store/for_hire/rl"}
     time_savings = {"baseline": {}, "rl": {}}
 
     for model, base_path in base_paths.items():
@@ -881,12 +1243,16 @@ def compare_time_savings_rl_bl():
             if match:
                 date = match.group(1)
                 df = pd.read_csv(os.path.join(base_path, file_name))
-                if 'time_reduction' in df.columns:
-                    total_time_reduction_seconds = df['time_reduction'].sum()
-                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 60 / 24) / anzahl_autos
+                if "time_reduction" in df.columns:
+                    total_time_reduction_seconds = df["time_reduction"].sum()
+                    avg_time_savings_per_hour_per_car = (
+                        total_time_reduction_seconds / 60 / 24
+                    ) / anzahl_autos
                     time_savings[model][date] = avg_time_savings_per_hour_per_car
 
-    dates = sorted(set(time_savings["baseline"].keys()) | set(time_savings["rl"].keys()))
+    dates = sorted(
+        set(time_savings["baseline"].keys()) | set(time_savings["rl"].keys())
+    )
     baseline_savings = [time_savings["baseline"].get(date, 0) for date in dates]
     rl_savings = [time_savings["rl"].get(date, 0) for date in dates]
 
@@ -899,37 +1265,53 @@ def compare_time_savings_rl_bl():
     plt.figure(figsize=(10, 6))
     x = np.arange(len(dates))  # Direkte Verwendung der vollen Länge von 'dates'
 
-    color_baseline = 'blue'
-    color_rl = 'orange'
+    color_baseline = "blue"
+    color_rl = "orange"
 
-    plt.bar(x + 0.2, rl_savings, width=0.4, label='RL', color=color_rl)
-    plt.bar(x - 0.2, baseline_savings, width=0.4, label='Baseline', color=color_baseline)
+    plt.bar(x + 0.2, rl_savings, width=0.4, label="RL", color=color_rl)
+    plt.bar(
+        x - 0.2, baseline_savings, width=0.4, label="Baseline", color=color_baseline
+    )
 
-    plt.plot(x, rl_rolling_avg, label='RL (Gleitender Mittelwert)', color='orangered', marker='o', linestyle='-', markersize=5)
-    plt.plot(x, baseline_rolling_avg, label='Baseline (Gleitender Mittelwert)', color='darkblue', marker='o', linestyle='-', markersize=5)
+    plt.plot(
+        x,
+        rl_rolling_avg,
+        label="RL (Gleitender Mittelwert)",
+        color="orangered",
+        marker="o",
+        linestyle="-",
+        markersize=5,
+    )
+    plt.plot(
+        x,
+        baseline_rolling_avg,
+        label="Baseline (Gleitender Mittelwert)",
+        color="darkblue",
+        marker="o",
+        linestyle="-",
+        markersize=5,
+    )
 
     plt.ylim([0, 130])
-    plt.xlabel('Datum')
-    plt.ylabel('Zeitersparnis (Minuten)')
-    plt.title('Zeitersparnis pro Auto pro Stunde (RL vs Baseline)')
+    plt.xlabel("Datum")
+    plt.ylabel("Zeitersparnis (Minuten)")
+    plt.title("Zeitersparnis pro Auto pro Stunde (RL vs Baseline)")
     plt.xticks(x, dates, rotation=45)
     plt.legend()
     plt.tight_layout()
     plt.savefig("store/plots/compare_time_savings_rl_bl.png")
     plt.show()
 
-compare_time_savings_rl_bl()
 
+# compare_time_savings_rl_bl()
 
 
 ## fig. 8-2
 
+
 def compare_time_savings_rl_drl():
-    anzahl_autos = 2000    # you can change to the current number of cars
-    base_paths = {
-        "drl": "store/for_hire/drl",
-        "rl": "store/for_hire/rl"
-    }
+    anzahl_autos = 2000  # you can change to the current number of cars
+    base_paths = {"drl": "store/for_hire/drl", "rl": "store/for_hire/rl"}
     time_savings = {"drl": {}, "rl": {}}
 
     for model, base_path in base_paths.items():
@@ -939,9 +1321,11 @@ def compare_time_savings_rl_drl():
                 date = match.group(1)
                 df = pd.read_csv(os.path.join(base_path, file_name))
 
-                if 'time_reduction' in df.columns:
-                    total_time_reduction_seconds = df['time_reduction'].sum()
-                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 60 /24) / anzahl_autos
+                if "time_reduction" in df.columns:
+                    total_time_reduction_seconds = df["time_reduction"].sum()
+                    avg_time_savings_per_hour_per_car = (
+                        total_time_reduction_seconds / 60 / 24
+                    ) / anzahl_autos
                     time_savings[model][date] = avg_time_savings_per_hour_per_car
 
     dates = sorted(set(time_savings["drl"].keys()) | set(time_savings["rl"].keys()))
@@ -951,34 +1335,51 @@ def compare_time_savings_rl_drl():
     window_size = 5
 
     # Berechnung des gleitenden Mittelwerts unter Verwendung von 'mode='same'', um gleiche Länge zu gewährleisten
-    #drl_rolling_avg = np.convolve(drl_savings, np.ones(window_size)/window_size, mode='same')
-    #rl_rolling_avg = np.convolve(rl_savings, np.ones(window_size)/window_size, mode='same')
+    # drl_rolling_avg = np.convolve(drl_savings, np.ones(window_size)/window_size, mode='same')
+    # rl_rolling_avg = np.convolve(rl_savings, np.ones(window_size)/window_size, mode='same')
     # Verwenden der angepassten Funktion für den gleitenden Mittelwert
     drl_rolling_avg = custom_rolling_avg(np.array(drl_savings), window_size)
     rl_rolling_avg = custom_rolling_avg(np.array(rl_savings), window_size)
     plt.figure(figsize=(10, 6))
     x = np.arange(len(dates))  # Verwendung der vollen Länge von 'dates'
 
-    color_drl = 'green'
-    color_rl = 'orange'
+    color_drl = "green"
+    color_rl = "orange"
 
-    plt.bar(x + 0.2, rl_savings, width=0.4, label='RL', color=color_rl)
-    plt.bar(x - 0.2, drl_savings, width=0.4, label='DRL', color=color_drl)
+    plt.bar(x + 0.2, rl_savings, width=0.4, label="RL", color=color_rl)
+    plt.bar(x - 0.2, drl_savings, width=0.4, label="DRL", color=color_drl)
 
-    plt.plot(x, rl_rolling_avg, label='RL (Gleitender Mittelwert)', color='orangered', marker='o', linestyle='-', markersize=5)
-    plt.plot(x, drl_rolling_avg, label='DRL (Gleitender Mittelwert)', color='darkgreen', marker='o', linestyle='-', markersize=5)
+    plt.plot(
+        x,
+        rl_rolling_avg,
+        label="RL (Gleitender Mittelwert)",
+        color="orangered",
+        marker="o",
+        linestyle="-",
+        markersize=5,
+    )
+    plt.plot(
+        x,
+        drl_rolling_avg,
+        label="DRL (Gleitender Mittelwert)",
+        color="darkgreen",
+        marker="o",
+        linestyle="-",
+        markersize=5,
+    )
 
     plt.ylim([0, 130])
-    plt.xlabel('Datum')
-    plt.ylabel('Zeitersparnis (Minuten)')
-    plt.title('Zeitersparnis pro Auto pro Stunde (RL vs DRL)')
+    plt.xlabel("Datum")
+    plt.ylabel("Zeitersparnis (Minuten)")
+    plt.title("Zeitersparnis pro Auto pro Stunde (RL vs DRL)")
     plt.xticks(x, dates, rotation=45)
     plt.legend()
     plt.tight_layout()
     plt.savefig("store/plots/compare_time_savings_rl_drl.png")
     plt.show()
 
-compare_time_savings_rl_drl()
+
+# compare_time_savings_rl_drl()
 
 
 ## fig. 8-3
@@ -986,7 +1387,7 @@ def compare_time_savings_rl_rlre():
     anzahl_autos = 2000  # you can change to the current number of cars
     base_paths = {
         "rl_relocation": "store/for_hire/rl_relocation",
-        "rl": "store/for_hire/rl"
+        "rl": "store/for_hire/rl",
     }
     time_savings = {"rl_relocation": {}, "rl": {}}
 
@@ -997,12 +1398,16 @@ def compare_time_savings_rl_rlre():
                 date = match.group(1)
                 df = pd.read_csv(os.path.join(base_path, file_name))
 
-                if 'time_reduction' in df.columns:
-                    total_time_reduction_seconds = df['time_reduction'].sum()
-                    avg_time_savings_per_hour_per_car = (total_time_reduction_seconds / 60 /24) / anzahl_autos
+                if "time_reduction" in df.columns:
+                    total_time_reduction_seconds = df["time_reduction"].sum()
+                    avg_time_savings_per_hour_per_car = (
+                        total_time_reduction_seconds / 60 / 24
+                    ) / anzahl_autos
                     time_savings[model][date] = avg_time_savings_per_hour_per_car
 
-    dates = sorted(set(time_savings["rl_relocation"].keys()) | set(time_savings["rl"].keys()))
+    dates = sorted(
+        set(time_savings["rl_relocation"].keys()) | set(time_savings["rl"].keys())
+    )
     rlre_savings = [time_savings["rl_relocation"].get(date, 0) for date in dates]
     rl_savings = [time_savings["rl"].get(date, 0) for date in dates]
 
@@ -1012,24 +1417,42 @@ def compare_time_savings_rl_rlre():
     plt.figure(figsize=(10, 6))
     x = np.arange(len(dates))  # Use full length of 'dates'
 
-    color_rlre = 'red'
-    color_rl = 'orange'
+    color_rlre = "red"
+    color_rl = "orange"
 
-    plt.bar(x + 0.2, rl_savings, width=0.4, label='RL', color=color_rl)
-    plt.bar(x - 0.2, rlre_savings, width=0.4, label='RL mit Relocation', color=color_rlre)
+    plt.bar(x + 0.2, rl_savings, width=0.4, label="RL", color=color_rl)
+    plt.bar(
+        x - 0.2, rlre_savings, width=0.4, label="RL mit Relocation", color=color_rlre
+    )
 
-    plt.plot(x, rl_rolling_avg, label='RL (Gleitender Mittelwert)', color='orangered', marker='o', linestyle='-', markersize=5)
-    plt.plot(x, rlre_rolling_avg, label='RL mit Relocation (Gleitender Mittelwert)', color='darkred', marker='o', linestyle='-', markersize=5)
+    plt.plot(
+        x,
+        rl_rolling_avg,
+        label="RL (Gleitender Mittelwert)",
+        color="orangered",
+        marker="o",
+        linestyle="-",
+        markersize=5,
+    )
+    plt.plot(
+        x,
+        rlre_rolling_avg,
+        label="RL mit Relocation (Gleitender Mittelwert)",
+        color="darkred",
+        marker="o",
+        linestyle="-",
+        markersize=5,
+    )
 
     plt.ylim([0, 130])
-    plt.xlabel('Datum')
-    plt.ylabel('Zeitersparnis (Minuten)')
-    plt.title('Zeitersparnis pro Auto pro Stunde (RL vs RL mit Relocation)')
+    plt.xlabel("Datum")
+    plt.ylabel("Zeitersparnis (Minuten)")
+    plt.title("Zeitersparnis pro Auto pro Stunde (RL vs RL mit Relocation)")
     plt.xticks(x, dates, rotation=45)
     plt.legend()
     plt.tight_layout()
     plt.savefig("store/plots/compare_time_savings_rl_rlre.png")
     plt.show()
 
-compare_time_savings_rl_rlre()
 
+# compare_time_savings_rl_rlre()
