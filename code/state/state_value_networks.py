@@ -1,5 +1,6 @@
 from __future__ import annotations
 import math
+import os
 from action.driver_action_pair import DriverActionPair
 import torch
 import torch.optim as optim
@@ -101,12 +102,17 @@ class StateValueNetworks:
         self.optimizer.step()
 
     def import_weights(self) -> None:
-        self.main_net.load_state_dict(
-            torch.load("code/training_data/main_net_state_dict.pth")
-        )
-        self.target_net.load_state_dict(
-            torch.load("code/training_data/target_net_state_dict.pth")
-        )
+        if os.path.exists("code/training_data/main_net_state_dict.pth"):
+            self.main_net.load_state_dict(
+                torch.load("code/training_data/main_net_state_dict.pth")
+            )
+
+        if os.path.exists("code/training_data/target_net_state_dict.pth"):
+            self.target_net.load_state_dict(
+                torch.load("code/training_data/target_net_state_dict.pth")
+            )
+        else:
+            self.target_net.load_state_dict(self.main_net.state_dict())
 
     def export_weights(self) -> None:
         torch.save(
@@ -115,6 +121,57 @@ class StateValueNetworks:
         torch.save(
             self.target_net.state_dict(), "code/training_data/target_net_state_dict.pth"
         )
+    
+    def export_offline_policy_weights(self, previous_total_minutes: int) -> None:
+        daystr = ""
+        wd = ProgramParams.SIMULATION_DATE.weekday()
+        if wd < 5:
+            daystr = "wd"
+        elif wd == 5:
+            daystr = "sat"
+        else:
+            daystr = "sun"
+        # Export current trained values first
+        torch.save(
+        self.main_net.state_dict(), f"code/training_data/ope_{daystr}_{previous_total_minutes}.pth"
+        )
+        torch.save(
+            self.target_net.state_dict(), f"code/training_data/ope_target_{daystr}_{previous_total_minutes}.pth"
+        )
+    # Used for training only
+    def import_offline_policy_weights(self, current_total_minutes: int) -> None:
+        daystr = ""
+        wd = ProgramParams.SIMULATION_DATE.weekday()
+        if wd < 5:
+            daystr = "wd"
+        elif wd == 5:
+            daystr = "sat"
+        else:
+            daystr = "sun"
+
+        if current_total_minutes > 0:
+            previous_total_minutes_ind = ProgramParams.TIME_SERIES_BREAKPOINTS().index(current_total_minutes) - 1
+            previous_total_minutes = ProgramParams.TIME_SERIES_BREAKPOINTS()[previous_total_minutes_ind]
+            self.export_offline_policy_weights(previous_total_minutes)
+
+        # Load state dict if exists
+        if os.path.exists(f"code/training_data/ope_{daystr}_{current_total_minutes}.pth"):
+            self.main_net.load_state_dict(
+                torch.load(f"code/training_data/ope_{daystr}_{current_total_minutes}.pth")
+            )
+        if os.path.exists(f"code/training_data/ope_target_{daystr}_{current_total_minutes}.pth"):
+            self.target_net.load_state_dict(
+                torch.load(
+                    f"code/training_data/ope_target_{daystr}_{current_total_minutes}.pth"
+                )
+            )
+        else:
+            self.target_net.load_state_dict(self.main_net.state_dict())
+
+        self.optimizer = optim.Adam(
+            self.main_net.parameters(), lr=3 * math.exp(-4)
+        )
+        self.main_net.train()
 
     def load_offline_policy_weights(self, current_total_minutes: int) -> None:
         daystr = ""
@@ -128,14 +185,20 @@ class StateValueNetworks:
 
         ope_net = NeuroNet()
         ope_target_net = NeuroNet()
-        ope_net.load_state_dict(
-            torch.load(f"code/training_data/ope_{daystr}_{current_total_minutes}.pth")
-        )
-        ope_target_net.load_state_dict(
-            torch.load(
-                f"code/training_data/ope_target_{daystr}_{current_total_minutes}.pth"
+
+        # Load state dict if exists
+        if os.path.exists(f"code/training_data/ope_{daystr}_{current_total_minutes}.pth"):
+            ope_net.load_state_dict(
+                torch.load(f"code/training_data/ope_{daystr}_{current_total_minutes}.pth")
             )
-        )
+        if os.path.exists(f"code/training_data/ope_target_{daystr}_{current_total_minutes}.pth"):
+            ope_target_net.load_state_dict(
+                torch.load(
+                    f"code/training_data/ope_target_{daystr}_{current_total_minutes}.pth"
+                )
+            )
+        else:
+            ope_target_net.load_state_dict(ope_net.state_dict())
 
         ope_state = ope_net.state_dict()
         ope_target_state = ope_target_net.state_dict()

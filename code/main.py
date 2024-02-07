@@ -163,23 +163,23 @@ def start_drl():
     Drivers.get_drivers()
 
     StateValueNetworks.get_instance().import_weights()
-    entries = []
+    # entries = []
 
-    for minutes in ProgramParams.TIME_SERIES_BREAKPOINTS():
-        StateValueNetworks.get_instance().load_offline_policy_weights(minutes)
-        timet = Time.of_total_minutes(minutes)
-        for zone in Grid.get_instance().zones_dict.values():
-            mains = StateValueNetworks.get_instance().get_main_state_value(zone, timet)
-            targets = StateValueNetworks.get_instance().get_target_state_value(zone, timet)
-            entries.append((zone.id, zone.central_location.lat, zone.central_location.lon, timet, mains, targets))
+    # for minutes in ProgramParams.TIME_SERIES_BREAKPOINTS():
+    #     StateValueNetworks.get_instance().load_offline_policy_weights(minutes)
+    #     timet = Time.of_total_minutes(minutes)
+    #     for zone in Grid.get_instance().zones_dict.values():
+    #         mains = StateValueNetworks.get_instance().get_main_state_value(zone, timet)
+    #         targets = StateValueNetworks.get_instance().get_target_state_value(zone, timet)
+    #         entries.append((zone.id, zone.central_location.lat, zone.central_location.lon, timet, mains, targets))
 
-    csv_file_path = "code/data_output/state_values_over_time.csv"
-    with open(csv_file_path, mode="w") as file:
-        writer = csv.writer(file)
-        writer.writerow(["zone_id", "lat", "lon", "total_minutes", "main_sv", "target_sv"])
-        for w in entries:
-            writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5]])
-    
+    # csv_file_path = "code/data_output/state_values_over_time.csv"
+    # with open(csv_file_path, mode="w") as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(["zone_id", "lat", "lon", "total_minutes", "main_sv", "target_sv"])
+    #     for w in entries:
+    #         writer.writerow([w[0], w[1], w[2], w[3], w[4], w[5]])
+
     # 2. Run DQ-Learning algorithm to train state value network
     for current_total_minutes in range(
         TimeSeries.get_instance().start_time.to_total_minutes(),
@@ -226,19 +226,6 @@ def start_drl():
             LOGGER.debug("Relocate long time idle drivers")
             State.get_state().relocate()
 
-      #  if current_total_minutes % 60 == 0:
-      #      visualize_drivers(f"drivers_{current_total_minutes}.png")
-       #     LOGGER.debug("Save current driver positions")
-       #     for driver in Drivers.get_drivers():
-       #         status = (
-       #             "idling"
-       #             if not driver.is_occupied()
-      #              else ("relocation" if driver.job.is_relocation else "occupied")
-       #         )
-       #         DataCollector.append_driver_data(
-       #             current_time, driver.id, status, driver.current_position
-       #         )
-
         for driver in Drivers.get_drivers():
             status = (
                 "idling"
@@ -251,19 +238,6 @@ def start_drl():
             DataCollector.append_zone_id(
                 current_time, Grid.get_instance().find_cell(driver.current_position).id
             )
-        
-        if current_total_minutes % 60 == 0:
-            #visualize_drivers(f"drivers_{current_total_minutes}.png")
-            LOGGER.debug("Save current driver positions")
-            for driver in Drivers.get_drivers():
-                status = (
-                    "idling"
-                    if not driver.is_occupied()
-                    else ("relocation" if driver.job.is_relocation else "occupied")
-                )
-                DataCollector.append_driver_data(
-                    current_time, driver.id, status, driver.current_position
-                )
 
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
@@ -413,12 +387,28 @@ while True:
         while True:
             ProgramParams.EXECUTION_MODE = Mode.DEEP_NEURAL_NETWORKS
             user_input = input(
-                "Which script do you want to start? (Offline Policy Evaluation -> 1, Start DRL -> 2) "
+                "Which script do you want to start? (Offline Policy Evaluation -> 1, Online Training -> 2, Start DRL -> 3) "
             )
             if user_input == "1":
-                train_ope()
+                initialize_driver_positions()
+                # Train the ope networks with online data
+                for i in range(14):
+                    train_ope()
+                    Order.reset()
+                    State.reset()
+                    ProgramParams.SIMULATION_DATE += timedelta(1)
                 break
             elif user_input == "2":
+                initialize_driver_positions()
+                # Train the algorithm On-Policy
+                for i in range(7):
+                    start_drl()
+                    Order.reset()
+                    State.reset()
+                    ProgramParams.SIMULATION_DATE += timedelta(1)
+                break
+                break
+            elif user_input == "3":
                 start_drl()
                 break
             else:

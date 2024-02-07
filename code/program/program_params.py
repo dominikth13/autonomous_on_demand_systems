@@ -14,12 +14,12 @@ class DataSet(Enum):
 
 class ProgramParams:
 
-    SIMULATION_DATE = datetime(2015, 7, 6)
+    SIMULATION_DATE = datetime(2023, 7, 10)
 
-    DATA_SET = DataSet.YELLOW_CAB
+    DATA_SET = DataSet.FOR_HIRE
 
     # If algorithm should do relocation
-    FEATURE_RELOCATION_ENABLED = True
+    FEATURE_RELOCATION_ENABLED = False
 
     FEATURE_ADD_IDLING_COST_TO_TARGET = True
 
@@ -47,7 +47,7 @@ class ProgramParams:
     ORDER_EXPIRY_DURATION = 120
 
     # How much direct trips should be discounted in the optimization
-    DIRECT_TRIP_DISCOUNT_FACTOR = 1
+    DIRECT_TRIP_DISCOUNT_FACTOR = 0.5
 
     ######################################################################################################
     ############### Deep Reinforcement Learning ###############
