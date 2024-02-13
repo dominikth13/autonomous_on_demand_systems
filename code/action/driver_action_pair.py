@@ -18,7 +18,7 @@ class DriverActionPair:
         if self.action.is_idling():
             return 0
         return (
-            self.driver.current_position.distance_to(self.action.route.destination)
+            self.driver.current_position.distance_to(self.action.route.origin)
             // ProgramParams.VEHICLE_SPEED
         )
 

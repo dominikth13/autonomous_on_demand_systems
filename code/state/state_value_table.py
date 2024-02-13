@@ -110,15 +110,18 @@ class StateValueTable:
                     )
 
     def import_state_value_table_from_csv(self):
-        csv_file_path = "code/training_data/state_value_table.csv"
-        with open(csv_file_path, mode="r") as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                start_time = Time.of_total_seconds(int(float(row["start_time"])))
-                interval = TimeSeries.get_instance().find_interval(start_time)
-                zone = Grid.get_instance().zones_dict[int(float(row["zone_id"]))]
-                state_value = float(row["state_value"])
-                self.value_grid[interval][zone] = state_value
+        try:
+            csv_file_path = "code/training_data/state_value_table.csv"
+            with open(csv_file_path, mode="r") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    start_time = Time.of_total_seconds(int(float(row["start_time"])))
+                    interval = TimeSeries.get_instance().find_interval(start_time)
+                    zone = Grid.get_instance().zones_dict[int(float(row["zone_id"]))]
+                    state_value = float(row["state_value"])
+                    self.value_grid[interval][zone] = state_value
+        except:
+            pass
 
     def raze_state_value_table(self):
         with open("code/training_data/state_value_table.csv", "w") as file:
