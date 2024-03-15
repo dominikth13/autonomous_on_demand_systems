@@ -407,7 +407,6 @@ while True:
                     State.reset()
                     ProgramParams.SIMULATION_DATE += timedelta(1)
                 break
-                break
             elif user_input == "3":
                 start_drl()
                 break
@@ -467,7 +466,7 @@ while True:
                 "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2, Visualize trip data -> 3, Visualize 'evaluation prorgam params' -> 4) "
             )
             if user_input == "1":
-                visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
+                visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_drl_13.png")
                 break
             elif user_input == "2":
                 visualize_orders(f"orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")

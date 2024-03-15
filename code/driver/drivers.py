@@ -11,12 +11,14 @@ class Drivers:
     def get_drivers() -> list[Driver]:
         if Drivers._drivers == None:
             Drivers._drivers = []
-            csv_file_path = "code/data/drivers.csv"
+            csv_file_path = "store/for_hire/drl/driverdata2023-07-13.csv"
             with open(csv_file_path, mode="r") as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    location = Location(float(row["lat"]), float(row["lon"]))
-                    Drivers._drivers.append(Driver(location))
+                    # Überprüfen, ob die Uhrzeit in Sekunden 0 ist
+                    if int(row["total_seconds"]) < 1200:
+                        location = Location(float(row["lat"]), float(row["lon"]))
+                        Drivers._drivers.append(Driver(location))
 
         return Drivers._drivers
 
