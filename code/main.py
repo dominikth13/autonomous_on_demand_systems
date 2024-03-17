@@ -364,7 +364,7 @@ while True:
                 StateValueTable.get_state_value_table().raze_state_value_table()
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(1):
+                for i in range(14):
                     start_q_learning()
                     Order.reset()
                     State.reset()
@@ -373,7 +373,7 @@ while True:
                 Drivers.raze_drivers()
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(1):
+                for i in range(7):
                     start_q_learning()
                     Order.reset()
                     State.reset()
@@ -493,7 +493,7 @@ while True:
     elif user_input == "6":
         while True:
             user_input = input(
-                "Which script do you want to start? (Analyse trip data -> 1) "
+                "Which script do you want to start? (Analyse trip data (data_analysis.py need to be adapted[date and folder structure]) -> 1) "
             )
             if user_input == "1":
                 analyse_trip_data()

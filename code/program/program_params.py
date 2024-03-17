@@ -14,9 +14,9 @@ class DataSet(Enum):
 
 class ProgramParams:
 
-    SIMULATION_DATE = datetime(2015, 7, 10)
+    SIMULATION_DATE = datetime(2023, 7, 10)
 
-    DATA_SET = DataSet.YELLOW_CAB
+    DATA_SET = DataSet.FOR_HIRE
 
     # If algorithm should do relocation: "True"
     FEATURE_RELOCATION_ENABLED = False
@@ -25,7 +25,7 @@ class ProgramParams:
 
     IDLING_COST = 5
 
-    AMOUNT_OF_DRIVERS = 1
+    AMOUNT_OF_DRIVERS = 100
 
     LEARNING_RATE = 0.01  # im Paper Feng et al. 2022 ist es 0.005
 
@@ -41,7 +41,7 @@ class ProgramParams:
 
     # Pick-up distance threshold (how far away driver consider new orders) in meter
     # Equal to 5 minutes
-    PICK_UP_DISTANCE_THRESHOLD = 1900  # im Paper 950 Meter
+    PICK_UP_DISTANCE_THRESHOLD = 1900  # bei Feng et al. 950 Meter
 
     # Duration how long orders can be matched with drivers in seconds
     ORDER_EXPIRY_DURATION = 120
