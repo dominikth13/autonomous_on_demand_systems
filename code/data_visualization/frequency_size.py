@@ -7,16 +7,11 @@ from shapely.geometry import MultiPoint
 from geopandas import GeoSeries, GeoDataFrame
 
 
-
-
-
 file_path = 'code/data_output/cell_id.csv'
 file_path1 = 'code/data/grid_cells.csv'
 # Import the CSV file into a DataFrame
 df_cell_id = pd.read_csv(file_path)
 df_grid_cells = pd.read_csv(file_path1)
-
-
 
 
 cell_id_list = df_cell_id['cell_id'].to_list()
@@ -27,11 +22,7 @@ for p in df_grid_cells['zone_id']:
         zone_dictionary[p] = {'counter': 0, 'lat':df_grid_cells.at[index, 'zone_center_lat'] , 'lon': df_grid_cells.at[index, 'zone_center_lon']}
 
 
-    
-    
 print(zone_dictionary)
-
-
 
 for n in cell_id_list:
     zone = df_grid_cells.at[n, 'zone_id']
@@ -54,11 +45,8 @@ dfo = pd.DataFrame.from_dict(zone_dictionary, orient='index')
 print(dfo.head())
 
 
-
 print(df_cell_id.head())
 print(df_grid_cells.head())
-
-
 
 
 #sns.heatmap(dfo['counter'], cmap='coolwarm')
@@ -93,26 +81,7 @@ fig, ax = plt.subplots(figsize=(8, 6))
     # Zeichnen der Zonengrenzen
 zone_polygons_gdf.boundary.plot(ax=ax, color='blue', alpha=0.5, label='Zonengrenzen')
 
-
-
 plt.scatter(dfo['lon'], dfo['lat'], s=dfo['counter'], color='black', zorder=2)
-# Binning the longitude and latitude to create discrete zones
-# You can adjust the bin sizes as per your requirement
-#df['longitude_bin'] = pd.cut(df['longitude'], bins=np.linspace(min(df['longitude']), max(df['longitude']), 39))
-#df['latitude_bin'] = pd.cut(df['latitude'], bins=np.linspace(min(df['latitude']), max(df['latitude']), 36))
-
-# Aggregating the frequencies by these bins
-# This will give us the absolute frequency for each bin
-#frequency_table = df.groupby(['latitude_bin', 'longitude_bin']).frequency.sum().reset_index()
-
-# Pivot the aggregated frequency data
-#heatmap_data = frequency_table.pivot(index='latitude_bin', columns='longitude_bin', values='frequency').fillna(0)
-
-
-
-# Create the heatmap using seaborn
-#plt.figure(figsize=(12, 6))
-#sns.heatmap(heatmap_data, cmap='viridis', annot=True)
 
 # Adding labels and title
 plt.title('Heatmap of Absolute Frequencies by Longitude and Latitude')

@@ -15,7 +15,6 @@ from datetime import datetime
 
 def visualize_trip_data():
     
-    print("HI")
     tripdata_path = "code/data_output"
     orders_path = "code/data/yellow_cab"  # Pfad zu den orders-Dateien
 

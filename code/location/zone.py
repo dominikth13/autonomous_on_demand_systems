@@ -5,7 +5,7 @@ from location.location import Location
 from logger import LOGGER
 import shapely
 
-# csv.field_size_limit(sys.maxsize)
+
 if sys.maxsize > 2**32:
     csv.field_size_limit(2**31 - 1)  # für 64-Bit-Systeme
 else:

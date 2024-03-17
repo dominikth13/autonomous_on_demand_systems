@@ -34,3 +34,6 @@ class Drivers:
                         driver.current_position.lon,
                     ]
                 )
+
+    def raze_drivers():
+        Drivers._drivers = None 

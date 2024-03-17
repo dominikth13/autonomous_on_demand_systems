@@ -18,7 +18,7 @@ class ProgramParams:
 
     DATA_SET = DataSet.FOR_HIRE
 
-    # If algorithm should do relocation
+    # If algorithm should do relocation: "True"
     FEATURE_RELOCATION_ENABLED = False
 
     FEATURE_ADD_IDLING_COST_TO_TARGET = True
@@ -41,7 +41,7 @@ class ProgramParams:
 
     # Pick-up distance threshold (how far away driver consider new orders) in meter
     # Equal to 5 minutes
-    PICK_UP_DISTANCE_THRESHOLD = 1900  # im Paper 950 Meter
+    PICK_UP_DISTANCE_THRESHOLD = 1900  # bei Feng et al. 950 Meter
 
     # Duration how long orders can be matched with drivers in seconds
     ORDER_EXPIRY_DURATION = 120
@@ -60,16 +60,17 @@ class ProgramParams:
     OMEGA = 0.2
 
     ######################################################################################################
-    ############### Variable, aber wollen wir kaum verändern ###############
+    ############### Variable ###############
 
+    #"True" do not work
     FEATURE_ORDERS_AS_WIN = False
 
     # Time the driver need to idle until he can relocate
-    MAX_IDLING_TIME = 150
+    MAX_IDLING_TIME = 120
 
     EXECUTION_MODE = None
 
-    # Minimal trip time for routes to be eligible for combined routes in seconds
+
     L1 = 0
 
     # Maximum difference between route without vehicles time and route with vehicles time in seconds
@@ -91,7 +92,7 @@ class ProgramParams:
     ##########################################################################################################
     ############### Inilization of the static_data ###############
     # Hierfür muss die Datei graph_für_OEPNV_Netz.py geändert werden
-    # zusätzlich zu den Parametern, wird WALKING_SPEED für graph_für_OEPNV_Netz.py verwendet
+    # zusätzlich zu den Parametern, wird WALKING_SPEED (Zeile 146) für graph_für_OEPNV_Netz.py verwendet
     STATION_DURATION = 80  # Fahrzeit für eine Station
     TRANSFER_SAME_STATION = 300  # Setzen Sie hier den Wert für Umsteige_selbe_Station
     MAX_WALKING_DURATION = 600
