@@ -1,14 +1,11 @@
-import csv
-
-
 from datetime import timedelta
-import random
 import time
 from algorithm.algorithm import (
     generate_driver_action_pairs,
     generate_routes,
     solve_optimization_problem,
 )
+
 from data_analysis.data_analysis import analyse_trip_data
 from data_output.data_collector import DataCollector
 from data_visualization.Visualisierung_tripdata import visualize_trip_data
@@ -337,9 +334,7 @@ def start_baseline_performance():
             DataCollector.append_zone_id(
                 current_time, Grid.get_instance().find_cell(driver.current_position).id
             )
-        
-        # if current_total_minutes % 60 == 0:
-        #     break
+    
       
         # Update the expiry durations of still open orders
         State.get_state().update_order_expiry_duration()
@@ -363,14 +358,22 @@ while True:
         ProgramParams.EXECUTION_MODE = Mode.TABULAR
         while True:
             user_input = input(
-                "Which script do you want to start? (Online Training -> 1, Start Q-Learning -> 2) "
+                "Which script do you want to start? (Online Training and Testing -> 1, Start Q-Learning (one day)-> 2) "
             )
             if user_input == "1":
                 StateValueTable.get_state_value_table().raze_state_value_table()
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(21):
-                    
+                for i in range(1):
+                    start_q_learning()
+                    Order.reset()
+                    State.reset()
+                    ProgramParams.SIMULATION_DATE += timedelta(1)
+                # Testing
+                Drivers.raze_drivers()
+                initialize_driver_positions()
+                # Train the algorithm On-Policy
+                for i in range(1):
                     start_q_learning()
                     Order.reset()
                     State.reset()
@@ -387,7 +390,7 @@ while True:
         while True:
             ProgramParams.EXECUTION_MODE = Mode.DEEP_NEURAL_NETWORKS
             user_input = input(
-                "Which script do you want to start? (Offline Policy Evaluation -> 1, Online Training -> 2, Start DRL -> 3) "
+                "Which script do you want to start? (Offline Policy Evaluation -> 1, Online Training -> 2, Start DRL (one day) -> 3) "
             )
             if user_input == "1":
                 initialize_driver_positions()
@@ -401,6 +404,7 @@ while True:
             elif user_input == "2":
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
+                # You have to set the date in program_params on the Date you want (old date + train duration)
                 for i in range(7):
                     start_drl()
                     Order.reset()
@@ -418,16 +422,25 @@ while True:
         while True:
             ProgramParams.EXECUTION_MODE = Mode.BASELINE_PERFORMANCE
             user_input = input(
-                "Which script do you want to start? (Run Baseline Performance for 7 days -> 1, Run Baseline Performance -> 2) "
+                "Which script do you want to start? (Run Baseline Performance -> 1, Run Baseline Performance (one day) -> 2) "
             )
             if user_input == "1":
                 initialize_driver_positions()
                 # Train the algorithm On-Policy
-                for i in range(21):
+                for i in range(14):
                     start_baseline_performance()
                     Order.reset()
                     State.reset()
                     ProgramParams.SIMULATION_DATE += timedelta(1)
+                #Testing
+                Drivers.raze_drivers()
+                initialize_driver_positions()
+                # Train the algorithm On-Policy
+                for i in range(7):
+                    start_baseline_performance()
+                    Order.reset()
+                    State.reset()
+                    ProgramParams.SIMULATION_DATE += timedelta(1)           
                 break
             if user_input == "2":
                 start_baseline_performance()
@@ -463,18 +476,15 @@ while True:
     elif user_input == "5":
         while True:
             user_input = input(
-                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2, Visualize trip data -> 3, Visualize 'evaluation prorgam params' -> 4) "
+                "Which script do you want to start? (Visualize driver positions -> 1, Visualize order positions -> 2, Visualize trip data -> 3) "
             )
             if user_input == "1":
-                visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_drl_13.png")
+                visualize_drivers(f"drivers_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.png")
                 break
             elif user_input == "2":
-                visualize_orders(f"orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}_eod.png")
+                visualize_orders(f"orders_{ProgramParams.SIMULATION_DATE.strftime('%Y-%m-%d')}.png")
                 break
             elif user_input == "3":
-                visualize_trip_data()
-                break
-            elif user_input == "4":
                 visualize_trip_data()
                 break
             else:

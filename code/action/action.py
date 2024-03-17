@@ -1,8 +1,6 @@
 from utils import IdProvider
 
-
 ID_PROVIDER = IdProvider()
-
 
 class Action:
     from route import Route

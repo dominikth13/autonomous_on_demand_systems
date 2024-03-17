@@ -15,7 +15,8 @@ from datetime import datetime
 from scipy.stats import linregress
 from scipy import stats
 
-
+# Some graphics do not work
+# The graphics for the paper are from row 1492
 def calculate_moving_average(values, window_size):
     """Berechnet den gleitenden Mittelwert mit einer spezifischen Fenstergröße."""
     # Erweiterung der Werte am Anfang, um den gleitenden Mittelwert vom ersten Punkt an zu beginnen
@@ -404,7 +405,6 @@ def average_trip_distances_per_day_for_direct_routes():
 
 
 def average_trip_distances_per_day_for_combination_routes():
-    print("v6")
 
     orders_path = "code/data/for_hire"
     tripdata_path = "store/for_hire/rl_relocation/drivers/1000"
@@ -647,10 +647,7 @@ def Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos():
 #Ablehnungsqoute_in_unterschiedlicher_Anzahl_der_Autos()
 
 
-## fig 3.
-## Achtung: die CSV-Datei werden direkt im Ordner „store/for_hire/rl“ oder „store/for_hire/drl“ gespeichert
-#            und nicht im Ordner „store/for_hire/rl/drivers/10“ gespeichert.
-## Das bedeutet, dass der Ordner „store/for_hire/rl“ viele CSV-Dateien (für fig. 3) und Treiberordner "driver" (für fig. 1 oder fig. 2) enthält.
+
 def calculate_percentage(combi_route_counts, total_counts):
     combi_route_percentages = {}
     for method, count in combi_route_counts.items():
@@ -1333,12 +1330,6 @@ def compare_time_savings_rlre_drl():
 
     window_size = 5
 
-    # Berechnung des gleitenden Mittelwerts unter Verwendung von 'mode='same'', um gleiche Länge zu gewährleisten
-    # drl_rolling_avg = np.convolve(drl_savings, np.ones(window_size)/window_size, mode='same')
-    # rl_rolling_avg = np.convolve(rl_savings, np.ones(window_size)/window_size, mode='same')
-    # Verwenden der angepassten Funktion für den gleitenden Mittelwert
-    drl_rolling_avg = custom_rolling_avg(np.array(drl_savings), window_size)
-    rl_rolling_avg = custom_rolling_avg(np.array(rl_savings), window_size)
     plt.figure(figsize=(10, 6))
     x = np.arange(len(dates))  # Verwendung der vollen Länge von 'dates'
 
@@ -1498,7 +1489,7 @@ def compare_time_savings_rl_bl_rl_relocation():
 
 #compare_time_savings_rl_bl_rl_relocation()
 
-
+# visualisation for the paper
 def compare_time_savings_rl_bl_rl_relocation100ge2():
     # Initialisierung mit kleinerer Anzahl Autos und Pfaden
     anzahl_autos = 100
@@ -1562,7 +1553,7 @@ def compare_time_savings_rl_bl_rl_relocation100ge2():
 compare_time_savings_rl_bl_rl_relocation100ge2()
 
 
-
+# visualisation for the paper
 def compare_time_savings_rl_bl_rl_relocation2000ge2():
     # Initialisierung mit kleinerer Anzahl Autos und Pfaden
     anzahl_autos = 2000
@@ -1618,5 +1609,5 @@ def compare_time_savings_rl_bl_rl_relocation2000ge2():
     plt.savefig("store/plots/compare_time_savings_rl_bl_relocation_2000_paper12.png")
     plt.show()
 
-# Führen Sie diese Funktion aus, nachdem Sie alle notwendigen Bibliotheken importiert und den Pfad entsprechend Ihrem Dateisystem angepasst haben.
+
 compare_time_savings_rl_bl_rl_relocation2000ge2()

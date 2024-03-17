@@ -26,7 +26,6 @@ class TemporalDifferenceLoss(nn.Module):
                 - start_state_value
             ) ** 2
         
-        # TODO find out what this Lipschitz constant is
         return loss + math.exp(-4) * TemporalDifferenceLoss.lipschitz_regularizer(main_net, trajectories_and_state_values)
     
     def lipschitz_regularizer(model, trajectories_and_state_values):

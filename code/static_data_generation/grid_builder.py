@@ -5,6 +5,7 @@ from location.location import Location
 from location.zone import Zone
 from logger import LOGGER
 
+# erstellt ein Grid aus 100*100Meter "Kacheln" für ganz NewYork, außer Staten Island
 def to_zone(location: Location):
 
     from copy import deepcopy

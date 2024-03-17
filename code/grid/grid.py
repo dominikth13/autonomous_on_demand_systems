@@ -26,7 +26,7 @@ class Grid:
 
         LOGGER.debug("Starting to create grid cells")
         cells_by_lat_long = {}
-        # TODO sort cells based on lat and long
+        #sort cells based on lat and long
         csv_file_path = "code/data/grid_cells.csv"
         with open(csv_file_path, mode="r") as file:
             reader = csv.DictReader(file)

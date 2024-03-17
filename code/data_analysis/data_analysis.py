@@ -6,7 +6,7 @@ from logger import LOGGER
 
 from program.program_params import ProgramParams
 
-
+# A small data analysis. The data must be in the /store folder 
 def analyse_trip_data():
     grid = Grid.get_instance()
     start_date = datetime(2015, 7, 6)

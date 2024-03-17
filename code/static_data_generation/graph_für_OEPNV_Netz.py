@@ -3,7 +3,7 @@ import csv
 import math
 from program.program_params import Mode, ProgramParams
 # This file generates the fastest connection public transit network only
-
+# This is a Dijkstra algorithm. For a faster solution use the Floyd-Warshall algorithm to solve the all-pair shortest path problem (see code/model_builder)
 Edge = namedtuple('Edge', 'start, end, cost')
 
 def create_edge(start, end, cost):
@@ -164,6 +164,3 @@ if __name__ == "__main__":
     shortest_paths = calculate_shortest_paths(graph, nodes)
     print("Speichern beginnt")
     save_paths_to_csv(shortest_paths, 'training_data\shortest_paths.csv')
-    #print(graph.dijkstra(1, 50)) # Start und Zielknoten müssen angepasst werden
-    
-            

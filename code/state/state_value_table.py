@@ -24,7 +24,6 @@ class StateValueTable:
         return StateValueTable._state_value_table
 
     def __init__(self, grid: Grid, time_series: TimeSeries) -> None:
-        # TODO fix
         self.value_grid = {
             interval: {zone: 0 for zone in grid.zones_dict.values()}
             for interval in time_series.intervals
@@ -74,7 +73,7 @@ class StateValueTable:
         new_state_value = self.value_grid[
             current_interval
         ][current_zone] + ProgramParams.LEARNING_RATE * (
-            reward
+            reward/(ProgramParams.AMOUNT_OF_DRIVERS/100)
             + ProgramParams.DISCOUNT_FACTOR(current_interval.start.distance_to(next_interval.start))
             * self.value_grid[next_interval][next_zone]
             - self.value_grid[current_interval][current_zone]

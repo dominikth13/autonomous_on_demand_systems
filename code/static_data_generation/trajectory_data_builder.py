@@ -96,15 +96,6 @@ def generate_trajectories() -> None:
                     )
                 )
 
-    # data = pd.DataFrame(
-    #     columns=[
-    #         "Reward",
-    #         "Target Time",
-    #         "Target Position",
-    #         "Current Time",
-    #         "Current Position",
-    #     ]
-    # )
 
     wd_str = {0: "mon", 1: "tue", 2: "wed", 3: "thu", 4: "fri", 5: "sat", 6: "sun"}
     calendar_week = ProgramParams.SIMULATION_DATE.isocalendar()[1]

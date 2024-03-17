@@ -8,7 +8,11 @@ from public_transport.station import Station
 from driver.driver import Driver
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 from logger import LOGGER
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import floyd_warshall
 
+import numpy as np
+from ortools.graph.python import min_cost_flow
 import networkx as nx
 
 from state.state import State
@@ -92,70 +96,66 @@ def solve_as_bipartite_matching_problem(
 
     return result_pairs
 
-# Not used anymore because of runtime inefficiencies
-def solve_as_min_cost_flow_problem(
-    driver_action_pairs: list[DriverActionPair],
-) -> list[DriverActionPair]:
-    start_time = time.time()
-    graph = nx.DiGraph(name="min-cost-flow-problem")
+# # Not used anymore because of runtime inefficiencies
+# def solve_as_min_cost_flow_problem(
+#     driver_action_pairs: list[DriverActionPair],
+# ) -> list[DriverActionPair]:
+#     start_time = time.time()
+#     graph = nx.DiGraph(name="min-cost-flow-problem")
 
-    driver_nodes = set()
-    route_action_nodes = set()
-    idling_action_node = None
-    order_nodes = set()
-    t_node = "T-Node"
+#     driver_nodes = set()
+#     route_action_nodes = set()
+#     idling_action_node = None
+#     order_nodes = set()
+#     t_node = "T-Node"
 
-    for pair in driver_action_pairs:
-        is_idling = pair.action.is_idling()
-        driver = pair.driver
-        action = pair.action
-        order = pair.action.route.order if not is_idling else None
+#     for pair in driver_action_pairs:
+#         is_idling = pair.action.is_idling()
+#         driver = pair.driver
+#         action = pair.action
+#         order = pair.action.route.order if not is_idling else None
 
-        # Check whether nodes are already in the graph
-        if driver not in driver_nodes:
-            driver_nodes.add(driver)
-            graph.add_node(driver, demand=-1)
-        # if is_idling:
-        #     if action not in idling_action_nodes:
-        #         idling_action_nodes.add(action)
-        #         graph.add_node(action)
-        # else:
-        #     if action not in route_action_nodes:
-        #         route_action_nodes.add(action)
-        #         graph.add_node(action)
-        #     if order not in order_nodes:
-        #         order_nodes.add(order)
+#         # Check whether nodes are already in the graph
+#         if driver not in driver_nodes:
+#             driver_nodes.add(driver)
+#             graph.add_node(driver, demand=-1)
+#         # if is_idling:
+#         #     if action not in idling_action_nodes:
+#         #         idling_action_nodes.add(action)
+#         #         graph.add_node(action)
+#         # else:
+#         #     if action not in route_action_nodes:
+#         #         route_action_nodes.add(action)
+#         #         graph.add_node(action)
+#         #     if order not in order_nodes:
+#         #         order_nodes.add(order)
 
-        # Add edge with negative weight and capacity 1
-        graph.add_edge(pair.driver, pair.action, weight=pair.weight * (-1), capacity=1)
-        driver_nodes.add(pair.driver)
-        if is_idling and idling_action_node == None:
-            idling_action_node = pair.action
+#         # Add edge with negative weight and capacity 1
+#         graph.add_edge(pair.driver, pair.action, weight=pair.weight * (-1), capacity=1)
+#         driver_nodes.add(pair.driver)
+#         if is_idling and idling_action_node == None:
+#             idling_action_node = pair.action
 
-        if not is_idling and not pair.action in route_action_nodes:
-            # Add edge from route to order to limit on one route per order
-            graph.add_edge(pair.action, pair.action.route.order, weight=0, capacity=1)
-            route_action_nodes.add(pair.action)
-            order_nodes.add(pair.action.route.order)
+#         if not is_idling and not pair.action in route_action_nodes:
+#             # Add edge from route to order to limit on one route per order
+#             graph.add_edge(pair.action, pair.action.route.order, weight=0, capacity=1)
+#             route_action_nodes.add(pair.action)
+#             order_nodes.add(pair.action.route.order)
 
-    graph.add_node(t_node, demand=len(driver_nodes))
+#     graph.add_node(t_node, demand=len(driver_nodes))
 
-    # Add edges between order/idling nodes and T-Node
-    graph.add_edge(idling_action_node, t_node, weight=0, capacity=len(driver_nodes))
-    for order in order_nodes:
-        graph.add_edge(order, t_node, weight=0, capacity=1)
+#     # Add edges between order/idling nodes and T-Node
+#     graph.add_edge(idling_action_node, t_node, weight=0, capacity=len(driver_nodes))
+#     for order in order_nodes:
+#         graph.add_edge(order, t_node, weight=0, capacity=1)
 
-    medium_time = time.time()
-    path = nx.min_cost_flow(graph)
-    end_time = time.time()
+#     medium_time = time.time()
+#     path = nx.min_cost_flow(graph)
+#     end_time = time.time()
 
-    LOGGER.debug(
-        f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds"
-    )
-
-
-import numpy as np
-from ortools.graph.python import min_cost_flow
+#     LOGGER.debug(
+#         f"The calculation took {end_time - medium_time} seconds, while preparation took {medium_time - start_time} seconds"
+#     )
 
 # Solve the bipartite matching problem as a min-cost-flow problem to use the efficient C++ solver
 def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[tuple[Driver, Action]]:
@@ -237,10 +237,6 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
         end_nodes[pair_to_index[pair]] = action_to_index[pair.action]
         capacities[pair_to_index[pair]] = 1
         weights[pair_to_index[pair]] = pair.weight*(-1)
-        # if pair.weight >= 0:
-        #     weights[pair_to_index[pair]] = math.log(1 + abs(pair.weight)) * (-1)
-        # else:
-        #     weights[pair_to_index[pair]] = math.log( 1 + abs(pair.weight))
     
     for tup in route_order_to_index:
         start_nodes[route_order_to_index[tup]] = action_to_index[tup[0]]
@@ -289,6 +285,7 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
     LOGGER.debug(
         f"The calculation took {round((end_time - medium_time)*1000,4)} ms, while preparation took {round((medium_time - start_time)*1000,4)} ms")
     ########################################################################################
+    # a lot of logger informations here
     LOGGER.debug(f"Minimum cost: {smcf.optimal_cost()}")
     # LOGGER.debug("")
     # LOGGER.debug(" Arc    Flow / Capacity Cost")
@@ -298,7 +295,7 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
 
     # for arc, flow, cost in zip(all_arcs, solution_flows, costs):
     #     LOGGER.debug(f"{smcf.tail(arc):1} -> {smcf.head(arc)}  {flow:3}  / {smcf.capacity(arc):3}       {cost}")
-    ########################################################################################
+
 
     solution_flows = smcf.flows(all_arcs)
     
@@ -310,9 +307,7 @@ def or_tools_min_cost_flow(driver_action_pairs: list[DriverActionPair]) -> list[
     hours = hours if hours > 0.1 else 0.1
     LOGGER.debug(f"Sum of timesafe per car, per hour, in minutes: {ProgramStats.SUM_OF_TIMESAFE / len(driver_list) / hours / 60}")
     return matches
-
-from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import floyd_warshall
+    ########################################################################################
 
 # Use the Floyd-Warshall algorithm to solve the all-pair shortest path problem
 # Input undirected edges as tuples [station1, weight, station2]

@@ -60,7 +60,6 @@ def visualize_orders(output_file_name: str):
 
     grid_cells_df = pd.read_csv(grid_cells_path)
     subway_data_df = pd.read_csv(subway_data_path)
-    #drivers_data_df = pd.DataFrame(list(map(lambda x: {"lat": x.current_position.lat, "lon": x.current_position.lon}, Drivers.get_drivers())))
 
     # Daten der Bestellungen abrufen
     orders_by_time = Order.get_orders_by_time()
@@ -94,9 +93,6 @@ def visualize_orders(output_file_name: str):
 
     # Stationen einzeichnen
     plt.scatter(subway_data_df['LONG'], subway_data_df['LAT'], c='red', label='Stationen', alpha=0.8)
-
-    # Fahrer einzeichnen
-    #plt.scatter(drivers_data_df['lon'], drivers_data_df['lat'], c='green', label='Fahrer', alpha=0.8)
 
     # Bestellungen einzeichnen
     plt.scatter(orders_data_df['lon'], orders_data_df['lat'], c='blue', label='Bestellungen', alpha=0.15, s = 5)
